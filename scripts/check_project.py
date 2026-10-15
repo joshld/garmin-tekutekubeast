@@ -56,11 +56,25 @@ if "State" in source:
     check('"baseGrowth"' in source["State"], "Missing separate passive growth")
 
 check((ROOT / "monkey.jungle").is_file(), "Missing monkey.jungle")
+for module in ["BeastStore", "BeastArt", "BeastGameView", "FeedbackManager", "TekuTekuBeastGlanceView"]:
+    check((SRC / (module + ".mc")).is_file(), "Missing v0.4 module: " + module)
+glance = (SRC / "TekuTekuBeastGlanceView.mc").read_text(encoding="utf-8")
+check("(:glance)" in glance, "Missing glance scope")
+check("Storage.setValue" not in glance and "Timer.Timer" not in glance,
+      "Glance must remain read-only without an animation timer")
+check("function getGlanceView()" in source.get("App", ""), "Missing native Glance entry")
 drawables_path = ROOT / "resources/drawables/drawables.xml"
 drawables = ET.parse(drawables_path).getroot()
 for bitmap in drawables.iter("bitmap"):
     bitmap_path = drawables_path.parent / bitmap.get("filename", "")
     check(bitmap_path.is_file(), "Missing bitmap: " + str(bitmap_path))
+    if bitmap.get("id", "").startswith("V4") and bitmap_path.is_file():
+        header = bitmap_path.read_bytes()[:24]
+        expected_size = 40 if bitmap.get("id").endswith("Small") else 96
+        check(struct.unpack(">II", header[16:24]) == (expected_size, expected_size),
+              "Wrong sprite size: " + bitmap.get("id"))
+        if bitmap.get("id").endswith("Small"):
+            check(bitmap.get("scope") == "glance", "Glance sprite has wrong resource scope")
     if bitmap.get("id") == "LauncherIcon" and bitmap_path.is_file():
         header = bitmap_path.read_bytes()[:24]
         check(header[:8] == b"\x89PNG\r\n\x1a\n" and len(header) == 24,

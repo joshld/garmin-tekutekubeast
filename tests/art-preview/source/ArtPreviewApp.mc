@@ -4,188 +4,100 @@ using Toybox.Graphics;
 using Toybox.System;
 using Toybox.Lang;
 
-// A separate application ID and an entirely in-memory model protect real saves.
+// This is an internal QA harness, NOT the on-watch Developer Mode application.
 class ArtPreviewState extends TekuTekuBeastState {
-    var previewStage;
-    var previewFamily;
-    var stress;
-    function initialize() {
-        TekuTekuBeastState.initialize();
-        previewStage = 0;
-        previewFamily = 0;
-        stress = 0;
+    var previewStage=0;var previewFamily=0;var stress=0;
+    function initialize(){
+        TekuTekuBeastState.initialize();store.memory={};skipWatch=true;start();
+        dev=true;virtualNow=realNow();anchor=realNow();
     }
-    function start() {}
-    function syncToday() {}
-    function syncHistory() {}
-    function stage() { return previewStage; }
-    function xp() {
-        if (stress == 1) { return 2000000000; }
-        if (stress == 2) { return 999999999; }
-        if (previewStage == 0) { return 0; }
-        if (previewStage == 1) { return 2500; }
-        if (previewStage == 2) { return 25000; }
-        if (previewStage == 3) { return 80000; }
-        if (previewStage == 4) { return 170000; }
-        return 325000;
-    }
-    function ageDays() { return stress > 0 ? 9999 : previewStage * 5; }
-    function family() { return previewStage < 3 ? 0 : previewFamily; }
-    function getTodaySteps() { return stress == 1 ? 1000000 : (stress == 2 ? 123456 : 12345); }
-    function friendship() { return stress > 0 ? 100 : 60; }
-    function snacks() { return stress > 0 ? 12 : 3; }
-    function patsToday() { return stress > 0 ? 3 : 1; }
-    function pat() { return true; }
-    function feed() { return true; }
-    function nextPreview() {
-        if (stress == 1) { stress = 2; previewFamily = 4; return; }
-        if (stress == 2) { stress = 0; previewStage = 0; previewFamily = 0; return; }
-        // First three stages, followed by all twelve existing family-stage paths.
-        if (previewStage < 2) { previewStage++; return; }
-        if (previewStage == 2) { previewStage = 3; previewFamily = 1; return; }
-        previewStage++;
-        if (previewStage > 5) {
-            previewStage = 3;
-            previewFamily++;
-            if (previewFamily > 4) { previewStage = 5; previewFamily = 1; stress = 1; }
-        }
-    }
+    function syncToday(){}function syncHistory(){}
+    function stage(){return previewStage;}
+    function family(){return previewStage<3?0:previewFamily;}
+    function getTodaySteps(){return stress==0?12345:1000000;}
 }
-
+class AuditGame extends BeastGameView {
+    var owner;
+    function initialize(b,k,a){BeastGameView.initialize(b,k);owner=a;}
+    function label(dc,top,value,font){var box=BeastGameView.label(dc,top,value,font);owner.capture(box,value);return box;}
+}
 class ArtLayoutAuditView extends TekuTekuBeastView {
-    var auditBoxes as Lang.Array<Lang.Array>;
-    var auditFailures as Lang.Array<Lang.String>;
-    var audited;
-    var showSummary;
-    var scenes;
+    var boxes=[];var failures=[];var scenes=[];var cursor=0;var audited=false;var showSummary=true;
+    var exitWhenDone=false;var exitScheduled=false;
 
-    function initialize() {
-        TekuTekuBeastView.initialize();
-        auditBoxes = [];
-        auditFailures = [];
-        audited = false;
-        showSummary = true;
-        scenes = 0;
+    // Generate one scene per callback: bounded RAM and no constructor watchdog.
+    var menuNames=["Actions","Feed","Settings","Developer","Discard DEV?","Dev Tools","Clock speed","Advance time","Force stage","Force family","Adjust needs","Set value","Animations","Balance settings","Play","Collection","Archive / new egg","Toys / accessories","Museum","Reset scenario"];
+    var animationNames=["wander","hop","eat","sleep","clean","evolve","blink","look"];
+    var messages=["HAPPY BEAST!","PATS: 3/3","ALL CLEAN!","ALL CLEAN","RESTING","FULL / NONE","REAL BEAST","TEST ITEMS","POOP TEST","CLEAN TEST","REST TEST","EVOLVE TEST","TEST RESET","TIME +","STAGE SET","FAMILY TEST","CUE TEST","RARE FORM!","BE A LEGEND","TRY TRAIL","NEW JOURNEY","BEAST KEPT","BOND: 70","NEED CHARM"];
+    var menuCounts=[];var menuTotal=0;var sceneCount=0;
+    function finishExit() as Void {System.exit();}
+    function initialize(){
+        TekuTekuBeastView.initialize();beast=new ArtPreviewState();
+        for(var i=0;i<menuNames.size();i++){openMenu(menuNames[i]);menuCounts.add(rows.size());menuTotal+=rows.size();}
+        menu=null;sceneCount=165+menuTotal+3+12+messages.size()+12;
     }
-
-    function label(dc, y, value, font) {
-        var box = TekuTekuBeastView.label(dc, y, value, font) as Lang.Array;
-        auditBoxes.add(box);
-        if (!audited && box[4] != value) {
-            auditFailures.add("Truncated text: " + value);
+    function sceneAt(index){
+        if(index<165){
+            var specimen=index/11;var part=index%11;
+            return [specimen<3?specimen:3+(specimen-3)/4,specimen<3?0:1+(specimen-3)%4,
+                part<3?part:0,null,0,part<3?"idle":animationNames[part-3],0];
         }
-        return box;
+        index-=165;
+        for(var i=0;i<menuCounts.size();i++){
+            if(index<menuCounts[i]){return [1,0,0,menuNames[i],index,"idle",0];}index-=menuCounts[i];
+        }
+        if(index<3){return [5,4,index,null,0,"idle",1];}index-=3;
+        if(index<12){return [1,0,index/4,"GAME",index%4,"idle",0];}index-=12;
+        if(index<messages.size()){return [1,0,0,null,0,"idle",0,messages[index]];}
+        index-=messages.size();return [5,1+index/3,index%3,null,0,"idle",0,null,1];
     }
-
-    function onShow() {
-        TekuTekuBeastView.onShow();
-        refresher.stop();
-        refresher.start(method(:refresh), 200, true);
-    }
-
-    function checkScene(dc) {
-        scenes++;
-        var radius = dc.getWidth() / 2 - 8;
-        var cx = dc.getWidth() / 2;
-        var cy = dc.getHeight() / 2;
-        for (var i = 0; i < auditBoxes.size(); i++) {
-            var box = auditBoxes[i];
-            if (box[4] == "") { auditFailures.add("Empty label in scene " + scenes); }
-            for (var corner = 0; corner < 4; corner++) {
-                var x = box[0] + (corner % 2 == 0 ? 0 : box[2]);
-                var y = box[1] + (corner < 2 ? 0 : box[3]);
-                if ((x-cx)*(x-cx) + (y-cy)*(y-cy) > radius*radius) {
-                    auditFailures.add("Outside circle: " + box[4]);
-                }
-            }
-            for (var j = 0; j < i; j++) {
-                var other = auditBoxes[j];
-                if (box[0] < other[0]+other[2] && box[0]+box[2] > other[0]
-                    && box[1] < other[1]+other[3] && box[1]+box[3] > other[1]) {
-                    auditFailures.add("Overlapping rows: " + box[4]);
-                }
-            }
+    function onShow(){loadSprite();refresher=new Toybox.Timer.Timer();refresher.start(method(:refresh),100,true);}
+    function refresh() as Void {WatchUi.requestUpdate();}
+    function capture(box,value){boxes.add(box);if(!box[4].equals(value)){failures.add("Truncated: "+value);}}
+    function label(dc,top,value,font){var box=TekuTekuBeastView.label(dc,top,value,font);capture(box,value);return box;}
+    function checkScene(dc){
+        var r=dc.getWidth()/2-8;var cx=dc.getWidth()/2;var cy=dc.getHeight()/2;
+        for(var i=0;i<boxes.size();i++){
+            var b=boxes[i];
+            for(var c=0;c<4;c++){var x=b[0]+(c%2==0?0:b[2]);var top=b[1]+(c<2?0:b[3]);
+                if((x-cx)*(x-cx)+(top-cy)*(top-cy)>r*r){failures.add("Circle: "+b[4]);}}
+            for(var j=0;j<i;j++){var a=boxes[j];
+                if(b[0]<a[0]+a[2] && b[0]+b[2]>a[0] && b[1]<a[1]+a[3] && b[1]+b[3]>a[1]){failures.add("Overlap: "+b[4]+" / "+a[4]);}}
         }
     }
-
-    function runAudit(dc) {
-        // One scene per update avoids Garmin's per-callback watchdog.
-        var model = beast as ArtPreviewState;
-        if (scenes < 51) {
-            page = scenes % 3;
-            loadSprite();
-            notice = null;
-            auditBoxes = [];
-            TekuTekuBeastView.onUpdate(dc);
-            checkScene(dc);
-            if (page == 2) { model.nextPreview(); }
-        } else if (scenes < 55) {
-            var notices = ["HAPPY BEAST!", "PATS: 3/3", "BOND +5", "NO SNACKS YET"] as Lang.Array<Lang.String>;
-            var n = scenes - 51;
-            page = n < 2 ? 0 : 1;
-            notice = notices[n];
-            auditBoxes = [];
-            TekuTekuBeastView.onUpdate(dc);
-            checkScene(dc);
+    function runAudit(dc){
+        var scene=sceneAt(cursor);var model=beast as ArtPreviewState;
+        model.previewStage=scene[0];model.previewFamily=scene[1];model.stress=scene[6];
+        model.data["rare"]=scene.size()>8?scene[8]:0;
+        model.data["xp"]=scene[6]==1?2000000000l:325000l;
+        model.data["fullness"]=100;model.data["friendship"]=100;model.data["snacks"]=12;
+        page=scene[2];animation=scene[5];animationTicks=12;tick=scene[5].equals("wander")?0:2;notice=scene.size()>7?scene[7]:null;
+        if(scene[3]!=null && scene[3].equals("GAME")){
+            var game=new AuditGame(beast,page,self);game.phase=scene[4];game.sequence=[0,1,2,0,1];game.result="WELL PLAYED!";
+            boxes=[];game.onUpdate(dc);
+        }else{
+            if(scene[3]!=null){openMenu(scene[3]);selection=scene[4];}else{menu=null;}
+            loadSprite();boxes=[];TekuTekuBeastView.onUpdate(dc);
         }
-        if (scenes < 55) { return; }
-        notice = null;
-        page = 0;
-        loadSprite();
-        audited = true;
-        refresher.stop();
-        refresher.start(method(:refresh), 1000, true);
-        System.println("LAYOUT_AUDIT: " + scenes + " scenes; " + auditFailures.size() + " failures");
-        for (var error = 0; error < auditFailures.size(); error++) {
-            System.println(auditFailures[error]);
+        checkScene(dc);cursor++;
+        if(cursor>=sceneCount){
+            audited=true;refresher.stop();System.println("LAYOUT_AUDIT: "+cursor+" scenes; "+failures.size()+" failures");
+            for(var i=0;i<failures.size();i++){System.println(failures[i]);}WatchUi.requestUpdate();
         }
-        System.println("FONT_HEIGHTS: " + dc.getFontHeight(Graphics.FONT_XTINY) + ", "
-            + dc.getFontHeight(Graphics.FONT_SMALL) + ", " + dc.getFontHeight(Graphics.FONT_LARGE));
     }
-
-    function onUpdate(dc) {
-        if (!audited) {
-            runAudit(dc);
-            if (!audited) { return; }
-        }
-        if (showSummary) {
-            auditBoxes = [];
-            dc.setColor(BG, BG);
-            dc.clear();
-            label(dc, 56, "ROUND LAYOUT AUDIT", Graphics.FONT_XTINY);
-            label(dc, 100, auditFailures.size() == 0 ? "PASS" : "FAIL", Graphics.FONT_LARGE);
-            label(dc, 157, scenes.toString() + " SCENES CHECKED", Graphics.FONT_XTINY);
-            label(dc, 187, auditFailures.size().toString() + " OVERLAPS / CLIPS", Graphics.FONT_XTINY);
-            label(dc, 220, "SELECT: PREVIEW", Graphics.FONT_XTINY);
-        } else {
-            auditBoxes = [];
-            TekuTekuBeastView.onUpdate(dc);
-        }
+    function onUpdate(dc){
+        if(!audited){runAudit(dc);return;}
+        if(!showSummary){TekuTekuBeastView.onUpdate(dc);return;}
+        dc.setColor(BG,BG);dc.clear();boxes=[];
+        label(dc,y(dc,0.18),"ROUND LAYOUT AUDIT",Graphics.FONT_XTINY);
+        label(dc,y(dc,0.35),failures.size()==0?"PASS":"FAIL",Graphics.FONT_LARGE);
+        label(dc,y(dc,0.58),cursor+" SCENES",Graphics.FONT_XTINY);
+        label(dc,y(dc,0.72),failures.size()+" OVERLAPS / CLIPS",Graphics.FONT_XTINY);
+        if(exitWhenDone && !exitScheduled){exitScheduled=true;refresher.start(method(:finishExit),1000,false);}
     }
 }
-
-class ArtPreviewInput extends TekuTekuBeastInput {
-    function initialize(view) { TekuTekuBeastInput.initialize(view); }
-    function onSelect() {
-        var preview = view as ArtLayoutAuditView;
-        if (!preview.audited) { return true; }
-        if (preview.showSummary) {
-            preview.showSummary = false;
-        } else {
-            (view.beast as ArtPreviewState).nextPreview();
-        }
-        view.loadSprite();
-        WatchUi.requestUpdate();
-        return true;
-    }
-}
-
 (:background)
 class ArtPreviewApp extends Application.AppBase {
-    function initialize() { AppBase.initialize(); }
-    function getInitialView() {
-        var view = new ArtLayoutAuditView();
-        view.beast = new ArtPreviewState();
-        return [view, new ArtPreviewInput(view)];
-    }
+    function initialize(){AppBase.initialize();}
+    function getInitialView(){var view=new ArtLayoutAuditView();return [view,new TekuTekuBeastInput(view)];}
 }

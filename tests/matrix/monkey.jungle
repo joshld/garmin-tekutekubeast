@@ -1,0 +1,7 @@
+project.manifest = manifest.xml
+base.sourcePath = ../../source;../art-preview/source;source
+base.resourcePath = ../../resources;../art-preview/resources
+fr265.resourcePath = ../../resources-native144;../art-preview/resources
+fr965.resourcePath = ../../resources-native192;../art-preview/resources
+venu3.resourcePath = ../../resources-native192;../art-preview/resources
+vivoactive5.resourcePath = ../../resources-native144;../art-preview/resources

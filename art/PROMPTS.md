@@ -1,5 +1,8 @@
 # First artwork pass
 
+Historical v0.2 prompts. Selected v0.4 artwork covers 15 normal species and six
+poses: see [v0.4 prompts](V0_4_PROMPTS.md) and [asset notes](README.md).
+
 Generated with the built-in image-generation tool using the supplied overall game concept as a visual reference. The original PNGs are preserved in `art/source`; they are not loaded by the watch. `scripts/prepare_art.py` performs only deterministic size, alpha and palette conversion for the resources.
 
 The first implementation covers shared Egg, Pip and Nimble. Later family species, expression frames and rare forms are not finished. These common stages do not determine the saved family.

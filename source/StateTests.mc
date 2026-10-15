@@ -69,3 +69,66 @@ function navigationAndDevTest(logger){
     v.openMenu("Settings");v.selectAction();v.selectAction();Test.assert(!v.beast.dev);Test.assertEqual(v.beast.ageDays(),0);
     Test.assertEqual(v.beast.xp(),0l);return true;
 }
+(:test)
+function miniGamesTest(logger){
+    var s=TestSupport.fixture();var star=new BeastGameView(s,0);star.selectAction();
+    for(var i=0;i<5;i++){star.elapsed=i*16+4;star.selectAction();}
+    Test.assertEqual(star.phase,3);Test.assertEqual(star.hits,5);Test.assertEqual(s.number("games"),1);
+    var memory=new BeastGameView(s,1);memory.selectAction();memory.phase=2;
+    for(var i=0;i<memory.sequence.size();i++){memory.memoryInput(memory.sequence[i]);}
+    Test.assertEqual(memory.phase,3);Test.assertEqual(s.number("games"),2);Test.assertEqual(s.xp(),0l);
+    var scan=new BeastGameView(s,1);scan.scanning=true;scan.sequence=[0,1,2];scan.phase=2;
+    for(var i=0;i<3;i++){scan.tick=i*4;scan.selectAction();}Test.assertEqual(scan.phase,3);
+    // The scan-mode game used the third rewarded slot. Further play is practice.
+    var quit=new BeastGameView(s,0);quit.selectAction();Test.assertEqual(s.number("games"),3);
+    // Automatic timeout completes exactly five attempts and no duplicate award.
+    var timeout=new BeastGameView(s,0);timeout.selectAction();
+    for(var i=0;i<80;i++){timeout.refresh();}
+    Test.assertEqual(timeout.phase,3);Test.assertEqual(s.number("games"),3);
+    timeout.refresh();Test.assertEqual(s.number("games"),3);return true;
+}
+(:test)
+function activeBalanceAndArchiveTest(logger){
+    var s=TestSupport.fixture();
+    for(var i=0;i<21;i++){s.testNow+=86400;s.tick();s.observe(s.today(),10000);}
+    s.tick();Test.assertEqual(s.stage(),5);Test.assertEqual(s.xp(),210000l);
+    var steps=s.xp();Test.assert(s.newEgg());Test.assertEqual(s.stage(),0);Test.assertEqual(s.xp(),steps);Test.assertEqual(s.growth(),0l);
+    Test.assert(s.store.read("v4.archive")!=null);Test.assert(s.number("collection")>0);
+    s.testNow+=86400;s.tick();Test.assertEqual(s.stage(),1);return true;
+}
+(:test)
+function devInventoryAndItemsTest(logger){
+    var s=TestSupport.fixture();var d=s.enableDev();d.data["items"][5]=1;Test.assert(d.useItem(5));Test.assertEqual(d.number("equipped"),5);
+    d.newEgg();d.commit();Test.assertEqual(s.store.read("v4")["items"][5],0);Test.assert(s.store.read("v4.dev.archive")==null);return true;
+}
+(:test)
+function earlySaveAgeTest(logger){
+    var s=new TekuTekuBeastState();s.testNow=1792108800l;s.skipWatch=true;
+    var birthday=s.dateKey(new Toybox.Time.Moment((s.testNow-30*86400).toNumber()));
+    s.store.memory={"birth"=>birthday,"xp"=>300000,"family"=>2,"friendship"=>75,"snacks"=>4};s.start();
+    Test.assertEqual(s.ageDays(),30);Test.assertEqual(s.stage(),5);Test.assertEqual(s.family(),2);
+    Test.assertEqual(s.friendship(),75);Test.assertEqual(s.xp(),300000l);return true;
+}
+(:test)
+function freshEggScenarioTest(logger){
+    var s=TestSupport.fixture();s.testNow+=86400;s.tick();s.observe(s.today(),3000);s.commit();
+    var v=new TekuTekuBeastView();v.live=s;v.beast=s.enableDev();v.openMenu("Reset scenario");v.selection=1;v.selectAction();
+    Test.assert(v.beast.dev);Test.assertEqual(v.beast.stage(),0);Test.assertEqual(v.beast.growth(),0l);Test.assertEqual(v.beast.xp(),3000l);
+    v.beast.careReward(300,0);v.beast.jump(7*3600);Test.assertEqual(v.beast.stage(),0);
+    v.beast.jump(3600);Test.assertEqual(v.beast.stage(),1);Test.assertEqual(s.store.read("v4")["stageFloor"],1);return true;
+}
+(:test)
+function nonStepActivityAndCollectionTest(logger){
+    var s=TestSupport.fixture();var day=s.today();s.activityRewards(day,0,0,0);s.activityRewards(day,0,50,2500);
+    Test.assertEqual(s.xp(),0l);Test.assertEqual(s.number("activityBonus"),5000l);Test.assertEqual(s.number("adventure"),5);
+    s.activityRewards(day,0,50,2500);Test.assertEqual(s.number("activityBonus"),5000l);
+    for(var i=0;i<8;i++){s.data["adventure"]++;s.explore(0);}Test.assertEqual(s.number("discoveryMask"),255);
+    s.data["fullness"]=50;s.useItem(0);Test.assertEqual(s.number("discoveryMask"),255);Test.assertEqual(s.xp(),0l);return true;
+}
+(:test)
+function foregroundEvolutionTest(logger){
+    var s=TestSupport.fixture();s.testNow+=86400;s.syncToday();Test.assertEqual(s.number("evolutionPending"),1);
+    var view=new TekuTekuBeastView();view.beast=s;view.consumeEvolution();
+    Test.assertEqual(s.number("evolutionPending"),0);Test.assert(view.animation.equals("evolve"));
+    s.tick();Test.assertEqual(s.number("evolutionPending"),0);Test.assertEqual(s.xp(),0l);return true;
+}

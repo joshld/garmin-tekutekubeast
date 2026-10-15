@@ -1,0 +1,111 @@
+<resources>
+    <bitmap id="LauncherIcon" filename="../../resources/drawables/beast-launcher.png" dithering="none" />
+    <bitmap id="Egg" filename="../../resources/drawables/egg.png" dithering="none" />
+    <bitmap id="Pip" filename="../../resources/drawables/pip.png" dithering="none" />
+    <bitmap id="Nimble" filename="../../resources/drawables/nimble.png" dithering="none" />
+    <bitmap id="V4Egg0" filename="v04/V4Egg0.png" dithering="none" />
+    <bitmap id="V4Egg1" filename="v04/V4Egg1.png" dithering="none" />
+    <bitmap id="V4Egg2" filename="v04/V4Egg2.png" dithering="none" />
+    <bitmap id="V4Egg3" filename="v04/V4Egg3.png" dithering="none" />
+    <bitmap id="V4Egg4" filename="v04/V4Egg4.png" dithering="none" />
+    <bitmap id="V4Egg5" filename="v04/V4Egg5.png" dithering="none" />
+    <bitmap id="V4EggSmall" filename="../../resources/drawables/v04/V4EggSmall.png" dithering="none" scope="glance" />
+    <bitmap id="V4Pip0" filename="v04/V4Pip0.png" dithering="none" />
+    <bitmap id="V4PipSmall" filename="../../resources/drawables/v04/V4PipSmall.png" dithering="none" scope="glance" />
+    <bitmap id="V4Pip1" filename="v04/V4Pip1.png" dithering="none" />
+    <bitmap id="V4Pip2" filename="v04/V4Pip2.png" dithering="none" />
+    <bitmap id="V4Pip3" filename="v04/V4Pip3.png" dithering="none" />
+    <bitmap id="V4Pip4" filename="v04/V4Pip4.png" dithering="none" />
+    <bitmap id="V4Pip5" filename="v04/V4Pip5.png" dithering="none" />
+    <bitmap id="V4Nimble0" filename="v04/V4Nimble0.png" dithering="none" />
+    <bitmap id="V4NimbleSmall" filename="../../resources/drawables/v04/V4NimbleSmall.png" dithering="none" scope="glance" />
+    <bitmap id="V4Nimble1" filename="v04/V4Nimble1.png" dithering="none" />
+    <bitmap id="V4Nimble2" filename="v04/V4Nimble2.png" dithering="none" />
+    <bitmap id="V4Nimble3" filename="v04/V4Nimble3.png" dithering="none" />
+    <bitmap id="V4Nimble4" filename="v04/V4Nimble4.png" dithering="none" />
+    <bitmap id="V4Nimble5" filename="v04/V4Nimble5.png" dithering="none" />
+    <bitmap id="V4Grove30" filename="v04/V4Grove30.png" dithering="none" />
+    <bitmap id="V4Grove3Small" filename="../../resources/drawables/v04/V4Grove3Small.png" dithering="none" scope="glance" />
+    <bitmap id="V4Grove31" filename="v04/V4Grove31.png" dithering="none" />
+    <bitmap id="V4Grove32" filename="v04/V4Grove32.png" dithering="none" />
+    <bitmap id="V4Grove33" filename="v04/V4Grove33.png" dithering="none" />
+    <bitmap id="V4Grove34" filename="v04/V4Grove34.png" dithering="none" />
+    <bitmap id="V4Grove35" filename="v04/V4Grove35.png" dithering="none" />
+    <bitmap id="V4Grove40" filename="v04/V4Grove40.png" dithering="none" />
+    <bitmap id="V4Grove4Small" filename="../../resources/drawables/v04/V4Grove4Small.png" dithering="none" scope="glance" />
+    <bitmap id="V4Grove41" filename="v04/V4Grove41.png" dithering="none" />
+    <bitmap id="V4Grove42" filename="v04/V4Grove42.png" dithering="none" />
+    <bitmap id="V4Grove43" filename="v04/V4Grove43.png" dithering="none" />
+    <bitmap id="V4Grove44" filename="v04/V4Grove44.png" dithering="none" />
+    <bitmap id="V4Grove45" filename="v04/V4Grove45.png" dithering="none" />
+    <bitmap id="V4Grove50" filename="v04/V4Grove50.png" dithering="none" />
+    <bitmap id="V4Grove5Small" filename="../../resources/drawables/v04/V4Grove5Small.png" dithering="none" scope="glance" />
+    <bitmap id="V4Grove51" filename="v04/V4Grove51.png" dithering="none" />
+    <bitmap id="V4Grove52" filename="v04/V4Grove52.png" dithering="none" />
+    <bitmap id="V4Grove53" filename="v04/V4Grove53.png" dithering="none" />
+    <bitmap id="V4Grove54" filename="v04/V4Grove54.png" dithering="none" />
+    <bitmap id="V4Grove55" filename="v04/V4Grove55.png" dithering="none" />
+    <bitmap id="V4Ember30" filename="v04/V4Ember30.png" dithering="none" />
+    <bitmap id="V4Ember3Small" filename="../../resources/drawables/v04/V4Ember3Small.png" dithering="none" scope="glance" />
+    <bitmap id="V4Ember31" filename="v04/V4Ember31.png" dithering="none" />
+    <bitmap id="V4Ember32" filename="v04/V4Ember32.png" dithering="none" />
+    <bitmap id="V4Ember33" filename="v04/V4Ember33.png" dithering="none" />
+    <bitmap id="V4Ember34" filename="v04/V4Ember34.png" dithering="none" />
+    <bitmap id="V4Ember35" filename="v04/V4Ember35.png" dithering="none" />
+    <bitmap id="V4Ember40" filename="v04/V4Ember40.png" dithering="none" />
+    <bitmap id="V4Ember4Small" filename="../../resources/drawables/v04/V4Ember4Small.png" dithering="none" scope="glance" />
+    <bitmap id="V4Ember41" filename="v04/V4Ember41.png" dithering="none" />
+    <bitmap id="V4Ember42" filename="v04/V4Ember42.png" dithering="none" />
+    <bitmap id="V4Ember43" filename="v04/V4Ember43.png" dithering="none" />
+    <bitmap id="V4Ember44" filename="v04/V4Ember44.png" dithering="none" />
+    <bitmap id="V4Ember45" filename="v04/V4Ember45.png" dithering="none" />
+    <bitmap id="V4Ember50" filename="v04/V4Ember50.png" dithering="none" />
+    <bitmap id="V4Ember5Small" filename="../../resources/drawables/v04/V4Ember5Small.png" dithering="none" scope="glance" />
+    <bitmap id="V4Ember51" filename="v04/V4Ember51.png" dithering="none" />
+    <bitmap id="V4Ember52" filename="v04/V4Ember52.png" dithering="none" />
+    <bitmap id="V4Ember53" filename="v04/V4Ember53.png" dithering="none" />
+    <bitmap id="V4Ember54" filename="v04/V4Ember54.png" dithering="none" />
+    <bitmap id="V4Ember55" filename="v04/V4Ember55.png" dithering="none" />
+    <bitmap id="V4Tide30" filename="v04/V4Tide30.png" dithering="none" />
+    <bitmap id="V4Tide3Small" filename="../../resources/drawables/v04/V4Tide3Small.png" dithering="none" scope="glance" />
+    <bitmap id="V4Tide31" filename="v04/V4Tide31.png" dithering="none" />
+    <bitmap id="V4Tide32" filename="v04/V4Tide32.png" dithering="none" />
+    <bitmap id="V4Tide33" filename="v04/V4Tide33.png" dithering="none" />
+    <bitmap id="V4Tide34" filename="v04/V4Tide34.png" dithering="none" />
+    <bitmap id="V4Tide35" filename="v04/V4Tide35.png" dithering="none" />
+    <bitmap id="V4Tide40" filename="v04/V4Tide40.png" dithering="none" />
+    <bitmap id="V4Tide4Small" filename="../../resources/drawables/v04/V4Tide4Small.png" dithering="none" scope="glance" />
+    <bitmap id="V4Tide41" filename="v04/V4Tide41.png" dithering="none" />
+    <bitmap id="V4Tide42" filename="v04/V4Tide42.png" dithering="none" />
+    <bitmap id="V4Tide43" filename="v04/V4Tide43.png" dithering="none" />
+    <bitmap id="V4Tide44" filename="v04/V4Tide44.png" dithering="none" />
+    <bitmap id="V4Tide45" filename="v04/V4Tide45.png" dithering="none" />
+    <bitmap id="V4Tide50" filename="v04/V4Tide50.png" dithering="none" />
+    <bitmap id="V4Tide5Small" filename="../../resources/drawables/v04/V4Tide5Small.png" dithering="none" scope="glance" />
+    <bitmap id="V4Tide51" filename="v04/V4Tide51.png" dithering="none" />
+    <bitmap id="V4Tide52" filename="v04/V4Tide52.png" dithering="none" />
+    <bitmap id="V4Tide53" filename="v04/V4Tide53.png" dithering="none" />
+    <bitmap id="V4Tide54" filename="v04/V4Tide54.png" dithering="none" />
+    <bitmap id="V4Tide55" filename="v04/V4Tide55.png" dithering="none" />
+    <bitmap id="V4Wisp30" filename="v04/V4Wisp30.png" dithering="none" />
+    <bitmap id="V4Wisp3Small" filename="../../resources/drawables/v04/V4Wisp3Small.png" dithering="none" scope="glance" />
+    <bitmap id="V4Wisp31" filename="v04/V4Wisp31.png" dithering="none" />
+    <bitmap id="V4Wisp32" filename="v04/V4Wisp32.png" dithering="none" />
+    <bitmap id="V4Wisp33" filename="v04/V4Wisp33.png" dithering="none" />
+    <bitmap id="V4Wisp34" filename="v04/V4Wisp34.png" dithering="none" />
+    <bitmap id="V4Wisp35" filename="v04/V4Wisp35.png" dithering="none" />
+    <bitmap id="V4Wisp40" filename="v04/V4Wisp40.png" dithering="none" />
+    <bitmap id="V4Wisp4Small" filename="../../resources/drawables/v04/V4Wisp4Small.png" dithering="none" scope="glance" />
+    <bitmap id="V4Wisp41" filename="v04/V4Wisp41.png" dithering="none" />
+    <bitmap id="V4Wisp42" filename="v04/V4Wisp42.png" dithering="none" />
+    <bitmap id="V4Wisp43" filename="v04/V4Wisp43.png" dithering="none" />
+    <bitmap id="V4Wisp44" filename="v04/V4Wisp44.png" dithering="none" />
+    <bitmap id="V4Wisp45" filename="v04/V4Wisp45.png" dithering="none" />
+    <bitmap id="V4Wisp50" filename="v04/V4Wisp50.png" dithering="none" />
+    <bitmap id="V4Wisp5Small" filename="../../resources/drawables/v04/V4Wisp5Small.png" dithering="none" scope="glance" />
+    <bitmap id="V4Wisp51" filename="v04/V4Wisp51.png" dithering="none" />
+    <bitmap id="V4Wisp52" filename="v04/V4Wisp52.png" dithering="none" />
+    <bitmap id="V4Wisp53" filename="v04/V4Wisp53.png" dithering="none" />
+    <bitmap id="V4Wisp54" filename="v04/V4Wisp54.png" dithering="none" />
+    <bitmap id="V4Wisp55" filename="v04/V4Wisp55.png" dithering="none" />
+</resources>

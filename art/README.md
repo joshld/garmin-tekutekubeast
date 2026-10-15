@@ -1,26 +1,40 @@
 # TekuTekuBeast artwork
 
-The supplied concept moodboard is the visual reference: expressive pixel-art beasts with distinct silhouettes, a restrained green watch interface, compact care icons, and readable information inside the circular screen. The family chart guides future silhouettes and colors, not changes to the current game rules.
+v0.4 uses the supplied colourful pixel-art family concept as its reference:
+leafy Grove deer, Ember dragons, blue/pink-gilled Tide spirits and violet Wisp
+fox spirits. The geometric higher-stage drawings have been removed.
 
-## Implemented first pass
+## Assets
 
-- Mystery Egg, Pip hatchling, and Nimble juvenile have original bitmap sprites.
-- Each compiled sprite is 112x112, using a 56x56 logical canvas scaled 2x with nearest-neighbor sampling. Transparency is binary; colors use exact ARGB2222 device RGB values.
-- The view loads only its current stage bitmap, outside the draw callback.
-- A foreground-only 1 Hz timer adds a two-pixel idle bob. Step sync still runs once per 20 seconds; the timer stops when the view hides. This is not yet a set of separate blink/happy/sleep animation frames.
-- Text fits the width of an eight-pixel-inset circle at its actual vertical position, using the device's native font metrics. Pet keeps one bottom text row; evolution details live on Your Beast. SELECT gives brief care-action feedback; UP/DOWN changes pages.
-- The launcher is a 40x40 version of Pip.
+All 15 normal species have six poses: idle, walking, eating, curled sleep,
+blink and looking back. Egg uses repeated egg frames. Rare forms currently
+use the family's Legendary sprite with an earned golden-crown overlay; they
+do not yet have entirely separate illustrated anatomy.
 
-## Still to do
+- `source/v04/*-expressive.png`: selected original generated atlases.
+- `source/v04/*.png`: retained first-pass originals.
+- [V0_4_PROMPTS.md](V0_4_PROMPTS.md): complete prompts and reference roles.
+- `../resources/drawables/v04`: 96px native sprites and 40px glance sprites.
+- `../resources-native144` / `../resources-native192`: pre-sized AMOLED assets.
 
-Adult, Champion, and Legendary family sprites still use the earlier primitive rendering. Distinct Grove, Ember, Tide, and Wisp silhouettes, expressions, and sleep poses are the next art pass. Rare forms and collections remain roadmap features.
+Generated with the built-in image tool. `scripts/prepare_v04_art.py` only crops,
+thresholds alpha, snaps colours to supported 0/85/170/255 RGB levels and resizes
+with nearest-neighbour. Source artwork is not loaded by the watch. Native-size
+variants avoid an SDK restriction on affine-transforming palette bitmaps.
 
-## Rebuilding the bitmaps
+Only the current creature's six frames are cached. Foreground animation adds
+wandering, hops, family-specific motion, blink/look, chewing, cleaning puffs,
+sleep and evolution feedback. No animation timer survives view hiding or app
+inactivity. Motion OFF/LOW/NORMAL is available in Settings.
 
-Install Pillow in your Python environment, then run `python scripts/prepare_art.py`. The committed PNGs are ready to compile and do not require Pillow during ordinary Monkey C builds. Source images and generation prompts are retained for iteration.
+## Verification
 
-## Safe visual preview
+The internal `tests/art-preview` / `tests/matrix` harness renders one scene per
+callback and checks native-font bounds, overlap and truncation across species,
+poses, menus, game phases, large counters and feedback. It uses an isolated QA
+application ID and an in-memory model; it is not the on-watch Developer Mode.
+Developer Mode is inside the production app and uses its normal screens.
 
-Build `tests/art-preview/monkey.jungle` for `enduro4`. Its separate application ID and in-memory model cannot change the real game's progress. It first checks 55 scenes using real device font metrics: all three pages across 15 normal stage/family combinations and two large-counter cases, then four feedback messages. Text-box corners must be within the eight-pixel-inset circle, text rows must not overlap, and current labels must not be truncated. After the summary, SELECT enters preview and cycles the cases; UP/DOWN changes pages. This checks text geometry and is supplemented by visual simulator checks; physical-watch verification is still needed. Do not upload the preview executable to the store.
-
-The production manifest, storage schema and step-credit model are unchanged by this artwork pass. Physical-watch display, battery and usability checks are still needed.
+See [validation](../docs/V0_4_VALIDATION.md) and the device matrix for actual
+results. Simulator screenshots and generated assets are not physical-watch
+photographs. Battery, display appearance and sound still need hardware checks.

@@ -1,6 +1,7 @@
 using Toybox.ActivityMonitor;
 using Toybox.Time;
 using Toybox.Time.Gregorian;
+using Toybox.Lang;
 
 (:background)
 class TekuTekuBeastState {
@@ -19,16 +20,31 @@ class TekuTekuBeastState {
     function number(key){return data.hasKey(key)?data[key]:0;}
     function start(){
         if(data!=null){return;}
-        data=store.copy(store.read("v4"));if(data!=null){return;}
+        data=store.copy(store.read("v4"));if(data!=null){
+            if(!data.hasKey("equipped")){data["equipped"]=-1;}
+            if(!data.hasKey("activityBonus")){data["activityBonus"]=0l;}
+            if(!data.hasKey("activityUnitGrowth")){data["activityUnitGrowth"]=1000;}
+            if(!data.hasKey("discoveryMask")){data["discoveryMask"]=0;for(var i=0;i<8;i++){if(data["items"][i]>0){data["discoveryMask"]|=1<<i;}}}
+            return;
+        }
         var exists=store.read("birth")!=null;
-        var epoch=store.read("birthEpoch");if(epoch==null){epoch=now();}
+        var epoch=store.read("birthEpoch");
+        if(epoch==null){
+            epoch=now();
+            if(exists){
+                // Very early saves have a local birth date but no epoch. Recover
+                // calendar age instead of making an older beast newborn again.
+                try{var days=(calendarMoment(today())-calendarMoment(legacy("birth")))/86400;epoch-=max(0l,days)*86400;}
+                catch(e instanceof Lang.Exception){}
+            }
+        }
         data={"version"=>4,"birth"=>exists?legacy("birth"):today(),"birthEpoch"=>epoch.toLong(),
             "birthBaseline"=>exists?legacy("birthBaseline"):(skipWatch?0:getTodaySteps()),
             "xp"=>exists?legacy("xp").toLong():0l,"snacks"=>exists?legacy("snacks"):0,
             "snackRemainder"=>exists?legacy("snackRemainder"):0,"friendship"=>exists?legacy("friendship"):0,
             "patDay"=>exists?legacy("patDay"):0,"pats"=>exists?legacy("pats"):0,"family"=>exists?legacy("family"):0,
-            "baseGrowth"=>0l,"careGrowth"=>0l,"growthRemainder"=>0l,"petXpBaseline"=>0l,
-            "lastGrowth"=>now(),"lastCare"=>now(),"stageFloor"=>0,
+            "baseGrowth"=>0l,"careGrowth"=>0l,"activityBonus"=>0l,"activityUnitGrowth"=>1000,"discoveryMask"=>0,"growthRemainder"=>0l,"petXpBaseline"=>0l,
+            "lastGrowth"=>now(),"lastCare"=>now(),"stageFloor"=>0,"evolutionPending"=>0,
             "fullness"=>75,"happiness"=>65,"energy"=>80,"cleanliness"=>100,
             "poop"=>0,"poopDue"=>0l,"lastPoop"=>0l,"sleepUntil"=>0l,
             "day"=>today(),"meals"=>2,"games"=>0,"careToday"=>0,"rested"=>0,
@@ -37,16 +53,22 @@ class TekuTekuBeastState {
             "passiveRate"=>12000,"careCap"=>300,"hatchHours"=>24,"hatchMinimum"=>8,"legendDays"=>21,
             "forcedStage"=>-1,"forcedFamily"=>0,"personality"=>[0,0,0,0],
             "collection"=>0,"rareCollection"=>0,"charms"=>0,"rare"=>0,"petSerial"=>0,
-            "items"=>[0,0,0,0,0,0,0,0],"days"=>[],"counts"=>[]};
+            "items"=>[0,0,0,0,0,0,0,0],"equipped"=>-1,"days"=>[],"counts"=>[]};
         for(var i=0;i<32;i++){data["days"].add(exists?legacy("day"+i):0);data["counts"].add(exists?legacy("count"+i):0);}
         // Capture existing stages before changing the hatch rule. No retroactive
         // passive XP, no reset of legacy keys, and a retained migration snapshot.
-        if(exists){data["stageFloor"]=oldStage(xp(),ageDays());}
+        if(exists){data["stageFloor"]=oldStage(xp(),ageDays());if(number("family")>0){data["stageFloor"]=max(3,number("stageFloor"));}}
         store.write("v4.migration",store.copy(data));commit();
     }
-    function commit(){if(!dev){store.write("v4",store.copy(data));}}
+    function calendarMoment(key){
+        return Gregorian.moment({:year=>(key/10000).toNumber(),:month=>((key/100)%100).toNumber(),:day=>key%100,:hour=>0,:minute=>0,:second=>0}).value().toLong();
+    }
+    function commit(){if(!dev){
+        data["cachedName"]=speciesName();data["cachedMood"]=mood();data["cachedProgress"]=progress();
+        var s=stage();data["cachedSprite"]=s<3?s:3+(family()-1)*3+s-3;
+        store.write("v4",store.copy(data));}}
     function xp(){return number("xp");} // genuine lifetime watch steps ONLY
-    function growth(){return number("baseGrowth")+number("careGrowth")+max(0l,xp()-number("petXpBaseline"));}
+    function growth(){return number("baseGrowth")+number("careGrowth")+number("activityBonus")+max(0l,xp()-number("petXpBaseline"));}
     function ageDays(){return (max(0l,now()-number("birthEpoch"))/86400).toNumber();}
     function oldStage(x,a){
         if(x>=300000 && a>=21){return 5;}if(x>=150000 && a>=14){return 4;}
@@ -57,12 +79,17 @@ class TekuTekuBeastState {
         var s=oldStage(growth(),ageDays());
         if(s==1 && number("stageFloor")==0){
             var h=max(0l,now()-number("birthEpoch"))/3600.0;
-            var bonus=min(16,(xp()-number("petXpBaseline")+number("careGrowth"))/1000.0);
-            s=h>=max(number("hatchMinimum"),number("hatchHours")-bonus)?1:0;
+            s=h>=hatchDurationHours()?1:0;
         }
         if(s==0 && now()-number("birthEpoch")>=number("hatchHours")*3600){s=1;}
+        if(growth()>=300000 && ageDays()>=number("legendDays")){s=5;}
         if(s==5 && ageDays()<number("legendDays")){s=4;}
         return max(number("stageFloor"),s);
+    }
+    function hatchDurationHours(){
+        // Full optional care can accelerate incubation equally to activity.
+        var bonus=min(16,max(number("activityBonus"),max(0l,xp()-number("petXpBaseline")))/1000.0+number("careGrowth")/(max(1,number("careCap"))/16.0));
+        return max(number("hatchMinimum"),number("hatchHours")-bonus);
     }
     function mastery(){return stage()<5?0:1+max(0l,(growth()-300000)/25000);}
     function masteryProgress(){return max(0l,growth()-300000)%25000;}
@@ -70,8 +97,8 @@ class TekuTekuBeastState {
     function nextAge(){return [1,2,7,14,number("legendDays"),0][stage()];}
     function progress(){
         if(stage()==5){return masteryProgress()/25000.0;}
-        if(stage()==0){return min(1.0,max(0l,now()-number("birthEpoch"))/(number("hatchHours")*3600.0));}
-        var previous=[0,12000,20000,70000,150000][stage()];
+        if(stage()==0){return min(1.0,max(0l,now()-number("birthEpoch"))/(hatchDurationHours()*3600.0));}
+        var previous=[0,2000,20000,70000,150000][stage()];
         return min(1.0,max(0l,growth()-previous)/(nextSteps()-previous).toFloat());
     }
     function tick(){
@@ -81,7 +108,7 @@ class TekuTekuBeastState {
         var day=today();
         // Persisted high-water local day prevents rollback reward refills.
         if(day>number("day")){data["day"]=day;data["meals"]=2;data["games"]=0;data["careToday"]=0;
-            data["rested"]=0;data["activityMilestone"]=0;data["minutesBase"]=-1;data["pushBase"]=-1;}
+            data["rested"]=0;data["activityMilestone"]=0;data["minutesBase"]=0;data["pushBase"]=0;}
         var care=max(0l,t-number("lastCare"));
         if(care>=3600){
             var h=min(24,care/3600).toNumber();var old=(number("lastCare")/3600).toNumber();
@@ -92,7 +119,8 @@ class TekuTekuBeastState {
         }
         if(number("poopDue")>0 && t>=number("poopDue") && number("poop")<2 && t-number("lastPoop")>=14400){
             data["poop"]++;data["cleanliness"]=max(0,number("cleanliness")-15);data["poopDue"]=0l;data["lastPoop"]=t;}
-        var s=stage();data["stageFloor"]=max(number("stageFloor"),s);
+        var prior=number("stageFloor");var s=stage();data["stageFloor"]=max(prior,s);
+        if(s>prior && !(dev && number("forcedStage")>=0)){data["evolutionPending"]=1;}
         if(s>=3){family();}if(s==5){var flag=1<<(family()-1);
             if((number("collection")&flag)==0){data["collection"]|=flag;data["charms"]++;}}
     }
@@ -125,7 +153,7 @@ class TekuTekuBeastState {
         if(minutes!=null){if(number("minutesBase")<0){data["minutesBase"]=minutes;}n=max(n,max(0,minutes-number("minutesBase"))/10);}
         if(pushes!=null){if(number("pushBase")<0){data["pushBase"]=pushes;}n=max(n,max(0,pushes-number("pushBase"))/500);}
         // Same physical effort measured by several APIs only earns once.
-        n=min(5,n);if(n>number("activityMilestone")){data["adventure"]+=n-number("activityMilestone");data["activityMilestone"]=n;}
+        n=min(5,n);if(n>number("activityMilestone")){var delta=n-number("activityMilestone");data["adventure"]+=delta;data["activityBonus"]=number("activityBonus")+delta*number("activityUnitGrowth");data["activityMilestone"]=n;}
     }
     function family(){
         if(dev && number("forcedFamily")>0){return number("forcedFamily");}if(stage()<3){return 0;}
@@ -178,19 +206,26 @@ class TekuTekuBeastState {
     }
     function explore(choice){
         tick();if(number("adventure")<1){return "EARN ENERGY";}data["adventure"]--;data["encounters"]++;
-        var item=(number("encounters")+choice)%8;data["items"][item]++;data["personality"][choice%4]++;
+        var item=(number("encounters")+choice)%8;data["items"][item]++;data["discoveryMask"]=number("discoveryMask")|(1<<item);data["personality"][choice%4]++;
         if(item==0){data["snacks"]=min(12,snacks()+1);}commit();return ["BERRY","KITE","RIBBON","SHELL","LANTERN","CROWN","CRYSTAL","COMPASS"][item];
     }
     function rareEvolve(){
         if(stage()!=5 || friendship()<70 || number("charms")<1 || number("rare")!=0){return false;}
         data["charms"]--;data["rare"]=1;data["rareCollection"]|=1<<(family()-1);commit();return true;
     }
+    function useItem(item){
+        tick();if(data["items"][item]<1){return false;}
+        if(item==0){if(number("fullness")>=95){return false;}data["items"][item]--;data["fullness"]=clamp(number("fullness")+10);if(number("poopDue")==0){data["poopDue"]=now()+10800;}}
+        else if(item==1 || item==3 || item==6){data["happiness"]=clamp(number("happiness")+10);careReward(25,item==1?1:3);}
+        else{data["equipped"]=number("equipped")==item?-1:item;}
+        commit();return true;
+    }
     function newEgg(){
         if(stage()!=5){return false;}
         // DEV archives are never persisted, including this explicit operation.
         if(!dev){store.write("v4.archive",store.copy(data));}
-        data["petSerial"]++;data["birthEpoch"]=now();data["baseGrowth"]=0l;data["careGrowth"]=0l;
-        data["petXpBaseline"]=xp();data["stageFloor"]=0;data["family"]=0;data["rare"]=0;
+        data["petSerial"]++;data["birthEpoch"]=now();data["baseGrowth"]=0l;data["careGrowth"]=0l;data["activityBonus"]=0l;
+        data["petXpBaseline"]=xp();data["stageFloor"]=0;data["evolutionPending"]=0;data["family"]=0;data["rare"]=0;
         data["personality"]=[0,0,0,0];data["lastGrowth"]=now();data["growthRemainder"]=0l;commit();return true;
     }
     function mood(){
