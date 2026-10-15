@@ -15,6 +15,8 @@ TekuTekuBeast is a *native Garmin Connect IQ watch app*, coded in Monkey C. It r
 - Unlimited post-Legendary Mastery levels: one extra level per 25,000 steps after 300,000.
 - Three app screens: Pet / Care / Stats. UP/DOWN navigates; SELECT pats or feeds.
 
+**New v0.4 proposal (not yet implemented):** [Care, games, poop, animation and sound specification](docs/GAMEPLAY_V0_4.md) · [Prioritised Codex implementation plan](docs/CODEX_V0_4_TASKS.md). These proposed features are not part of the current build.
+
 See [evolution design](docs/EVOLUTION_DESIGN.md) for stage numbers, complete species trees, rare forms, Star Charms, retirement and collection roadmap.
 
 ## Build target and setup
