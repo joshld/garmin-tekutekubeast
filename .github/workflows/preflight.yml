@@ -1,0 +1,22 @@
+name: Structural preflight (not SDK compilation)
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate project layout and watch step integration
+        run: python3 scripts/check_project.py
+      - name: Validate build script syntax
+        run: bash -n scripts/build.sh
