@@ -2,6 +2,7 @@ using Toybox.Graphics;
 using Toybox.Timer;
 using Toybox.WatchUi;
 using Toybox.Lang;
+using Toybox.Math;
 
 class TekuTekuBeastView extends WatchUi.View {
     var beast;
@@ -64,10 +65,10 @@ class TekuTekuBeastView extends WatchUi.View {
 
     function selectAction() {
         if (page == 0) {
-            notice = beast.pat() ? "HAPPY BEAST!" : "PATS: 3 / 3 TODAY";
+            notice = beast.pat() ? "HAPPY BEAST!" : "PATS: 3/3";
         }
         if (page == 1) {
-            notice = beast.feed() ? "YUM! +5 FRIENDSHIP" : "WALK TO EARN SNACKS";
+            notice = beast.feed() ? "BOND +5" : "NO SNACKS YET";
         }
         noticeTicks = 4;
         WatchUi.requestUpdate();
@@ -80,14 +81,55 @@ class TekuTekuBeastView extends WatchUi.View {
         WatchUi.requestUpdate();
     }
 
+    function safeTextWidth(dc, y, font) {
+        // Fit the whole font box, not just its baseline, inside an inset circle.
+        var radius = dc.getWidth() / 2 - 8;
+        var centerY = dc.getHeight() / 2;
+        var top = y - centerY;
+        if (top < 0) { top = -top; }
+        var bottom = y + dc.getFontHeight(font) - centerY;
+        if (bottom < 0) { bottom = -bottom; }
+        var distance = top > bottom ? top : bottom;
+        if (distance >= radius) { return 0; }
+        return (2 * Math.sqrt(radius * radius - distance * distance)).toNumber() - 4;
+    }
+
     function label(dc, y, value, font) {
-        // Long species labels use the smaller built-in face, inside the circle.
-        if (dc.getTextWidthInPixels(value, font) > 218) {
+        var available = safeTextWidth(dc, y, font);
+        if (dc.getTextWidthInPixels(value, font) > available && font == Graphics.FONT_LARGE) {
+            font = Graphics.FONT_SMALL;
+            available = safeTextWidth(dc, y, font);
+        }
+        if (dc.getTextWidthInPixels(value, font) > available && font != Graphics.FONT_XTINY) {
             font = Graphics.FONT_XTINY;
+            available = safeTextWidth(dc, y, font);
+        }
+        // Last resort for future longer translations/species, never crop glyphs.
+        var shown = value;
+        while (shown.length() > 0 && dc.getTextWidthInPixels(shown, font) > available) {
+            var keep = shown.length() - 1;
+            if (shown.length() >= 3 && shown.substring(shown.length() - 3, shown.length()) == "...") {
+                keep = shown.length() - 4;
+            }
+            shown = keep > 0 ? value.substring(0, keep) + "..." : "";
         }
         dc.setColor(INK, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(dc.getWidth() / 2, y, font, value,
+        dc.drawText(dc.getWidth() / 2, y, font, shown,
             Graphics.TEXT_JUSTIFY_CENTER);
+        var width = dc.getTextWidthInPixels(shown, font);
+        // The isolated visual test checks these exact native-font bounds.
+        return [dc.getWidth() / 2 - width / 2, y, width, dc.getFontHeight(font), shown];
+    }
+
+    function todayLabel() {
+        var steps = beast.getTodaySteps();
+        if (steps >= 1000000) {
+            return "TODAY " + (steps / 1000000.0).format("%.1f") + "M";
+        }
+        if (steps >= 100000) {
+            return "TODAY " + (steps / 1000).toString() + "K";
+        }
+        return "TODAY " + steps.toString();
     }
 
     function familyColor(f) {
@@ -111,7 +153,7 @@ class TekuTekuBeastView extends WatchUi.View {
     function creature(dc) {
         if (sprite != null) {
             var lift = tick % 4 == 1 ? 2 : 0;
-            dc.drawBitmap(84, 91 - lift, sprite);
+            dc.drawBitmap(84, 104 - lift, sprite);
             return;
         }
         // Adult/family artwork is a separate pass; keep all existing saves usable.
@@ -133,18 +175,18 @@ class TekuTekuBeastView extends WatchUi.View {
         var heart = [54, 127, 127, 62, 28, 8];
         for (var i = 0; i < 3; i++) {
             var color = beast.friendship() > i * 34 ? INK : LIGHT;
-            pixelIcon(dc, 89 + i * 20, 78, heart, color, 2);
+            pixelIcon(dc, 89 + i * 20, 90, heart, color, 2);
         }
         var snack = [8, 28, 62, 127, 65, 127];
-        pixelIcon(dc, 160, 78, snack, INK, 2);
-        dc.drawText(180, 73, Graphics.FONT_XTINY,
+        pixelIcon(dc, 160, 90, snack, INK, 2);
+        dc.drawText(180, 80, Graphics.FONT_XTINY,
             beast.snacks().toString(), Graphics.TEXT_JUSTIFY_LEFT);
     }
 
     function pageDots(dc) {
         for (var i = 0; i < 3; i++) {
             dc.setColor(i == page ? INK : LIGHT, Graphics.COLOR_TRANSPARENT);
-            dc.fillCircle(126 + i * 14, 265, 3);
+            dc.fillCircle(126 + i * 14, 258, 3);
         }
     }
 
@@ -152,8 +194,8 @@ class TekuTekuBeastView extends WatchUi.View {
     function legacyCreature(dc) {
         var stage = beast.stage();
         var cx = dc.getWidth() / 2;
-        var cy = 147;
-        var size = 25 + stage * 4;
+        var cy = 163;
+        var size = 23 + stage * 4;
         var color = familyColor(beast.family());
         dc.setColor(INK, Graphics.COLOR_TRANSPARENT);
         if (stage == 0) {
@@ -215,14 +257,13 @@ class TekuTekuBeastView extends WatchUi.View {
     }
 
     function drawPet(dc) {
-        label(dc, 23, "TEKUTEKU BEAST", Graphics.FONT_XTINY);
-        label(dc, 44, beast.speciesName(), Graphics.FONT_SMALL);
+        label(dc, 30, "TEKUTEKU BEAST", Graphics.FONT_XTINY);
+        label(dc, 54, beast.speciesName(), Graphics.FONT_SMALL);
         statusIcons(dc);
         creature(dc);
         dc.setColor(LIGHT, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(88, 202, 104, 2);
+        dc.fillRectangle(88, 214, 104, 2);
 
-        var remaining = beast.nextSteps() - beast.xp();
         var progress = 0;
         var maximum = beast.nextSteps();
         if (beast.stage() == 5) {
@@ -241,66 +282,58 @@ class TekuTekuBeastView extends WatchUi.View {
         if (progress > maximum) { progress = maximum; }
         var width = ((progress * 146) / maximum).toNumber();
         dc.setColor(LIGHT, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(66, 210, 148, 8);
+        dc.fillRectangle(66, 217, 148, 8);
         dc.setColor(INK, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(67, 211, width, 6);
+        dc.fillRectangle(67, 218, width, 6);
 
-        if (beast.stage() == 5) {
-            label(dc, 220, "MASTERY LV " + beast.mastery().toString(),
-                Graphics.FONT_XTINY);
-        } else if (remaining <= 0 && beast.ageDays() < beast.nextAge()) {
-            var left = beast.nextAge() - beast.ageDays();
-            label(dc, 220, "READY IN " + left.toString() + " DAYS",
-                Graphics.FONT_XTINY);
-        } else {
-            var leftSteps = remaining > 0 ? remaining : 0;
-            label(dc, 220, leftSteps.toString() + " TO NEXT",
-                Graphics.FONT_XTINY);
-        }
-        var footer = notice != null ? notice : "TODAY " + beast.getTodaySteps().toString();
-        label(dc, 237, footer,
+        // Keep one bottom text row. Exact evolution details live on Your Beast.
+        var footer = notice != null ? notice : todayLabel();
+        label(dc, 228, footer,
             Graphics.FONT_XTINY);
         pageDots(dc);
     }
 
     function drawCare(dc) {
-        label(dc, 28, "CARE", Graphics.FONT_SMALL);
+        label(dc, 30, "CARE", Graphics.FONT_SMALL);
         label(dc, 65, beast.mood(), Graphics.FONT_XTINY);
         label(dc, 94, "SNACKS", Graphics.FONT_XTINY);
-        label(dc, 114, beast.snacks().toString() + " / 12",
+        label(dc, 119, beast.snacks().toString() + " / 12",
             Graphics.FONT_LARGE);
-        label(dc, 158, "FRIENDSHIP " + beast.friendship().toString()
+        label(dc, 165, "FRIENDSHIP " + beast.friendship().toString()
             + "/100", Graphics.FONT_XTINY);
         dc.setColor(LIGHT, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(66, 184, 148, 8);
+        dc.fillRectangle(66, 193, 148, 8);
         dc.setColor(INK, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(67, 185, (beast.friendship() * 146 / 100).toNumber(), 6);
-        label(dc, 202, "1 SNACK / 2500 STEPS", Graphics.FONT_XTINY);
-        label(dc, 230, notice != null ? notice : "SELECT: FEED", Graphics.FONT_XTINY);
+        dc.fillRectangle(67, 194, (beast.friendship() * 146 / 100).toNumber(), 6);
+        label(dc, 205, "1 SNACK / 2500 STEPS", Graphics.FONT_XTINY);
+        label(dc, 231, notice != null ? notice : "SELECT: FEED", Graphics.FONT_XTINY);
         pageDots(dc);
     }
 
     function drawStats(dc) {
-        label(dc, 26, "YOUR BEAST", Graphics.FONT_XTINY);
-        label(dc, 54, beast.speciesName(), Graphics.FONT_SMALL);
-        label(dc, 86, stageLabel(), Graphics.FONT_XTINY);
+        label(dc, 30, "YOUR BEAST", Graphics.FONT_XTINY);
+        label(dc, 55, beast.speciesName(), Graphics.FONT_SMALL);
+        var stage = stageLabel();
         if (beast.stage() >= 3) {
-            label(dc, 109, "FAMILY: " + beast.familyName(),
-                Graphics.FONT_XTINY);
-        } else {
-            label(dc, 109, "FAMILY: UNDISCOVERED", Graphics.FONT_XTINY);
+            stage += " / " + beast.familyName();
         }
-        label(dc, 143, "CREDITED WATCH STEPS", Graphics.FONT_XTINY);
-        label(dc, 163, beast.xp().toString(), Graphics.FONT_LARGE);
-        label(dc, 207, "AGE " + beast.ageDays().toString() + " DAYS",
-            Graphics.FONT_XTINY);
+        label(dc, 92, stage, Graphics.FONT_XTINY);
+        label(dc, 116, "TOTAL STEP XP", Graphics.FONT_XTINY);
+        label(dc, 140, beast.xp().toString(), Graphics.FONT_LARGE);
         if (beast.stage() == 5) {
-            label(dc, 229, "MASTERY " + beast.mastery().toString(),
+            label(dc, 188, "MASTERY " + beast.mastery().toString(),
                 Graphics.FONT_XTINY);
         } else {
-            label(dc, 229, "PATS TODAY " + beast.patsToday().toString()
-                + "/3", Graphics.FONT_XTINY);
+            var remaining = beast.nextSteps() - beast.xp();
+            if (remaining <= 0 && beast.ageDays() < beast.nextAge()) {
+                var days = beast.nextAge() - beast.ageDays();
+                label(dc, 188, "READY IN " + days.toString() + " DAYS", Graphics.FONT_XTINY);
+            } else {
+                label(dc, 188, (remaining > 0 ? remaining : 0).toString() + " XP TO NEXT", Graphics.FONT_XTINY);
+            }
         }
+        label(dc, 214, "DAY " + beast.ageDays().toString() + " | PATS "
+            + beast.patsToday().toString() + "/3", Graphics.FONT_XTINY);
         pageDots(dc);
     }
 }
