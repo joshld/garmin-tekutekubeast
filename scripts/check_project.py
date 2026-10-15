@@ -20,7 +20,7 @@ check(app is not None, "Application is missing in manifest.xml")
 if app is not None:
     check(app.get("entry") == "TekuTekuBeastApp", "Incorrect manifest entry point")
     check(app.get("type") == "watch-app", "App must run natively on the watch")
-    check(len(app.get("id", "")) == 32, "Keep 32-character app ID for saved game compatibility")
+    check(app.get("id") == "54A4F9D3B6584CA4B01C232D20438E5B", "Application ID changed: save compatibility at risk")
     products = [p.get("id") for p in app.findall(".//" + NS + "product")]
     check("enduro4" in products, "Missing Enduro 4 target")
     permissions = [p.get("id") for p in app.findall(".//" + NS + "uses-permission")]
@@ -49,8 +49,11 @@ if "Service" in source:
     check("Background.exit" in source["Service"], "Missing background exit")
 if "State" in source:
     for required in ["ActivityMonitor.getInfo()", "ActivityMonitor.getHistory()",
-                     "Storage.setValue", "function mastery()", "function syncToday()"]:
+                     'store.write("v4"', "function mastery()", "function syncToday()"]:
         check(required in source["State"], "Missing expected state feature: " + required)
+    check('if(!dev)' in source["State"], "Missing DEV commit guard")
+    check('data["xp"]+=delta' in source["State"], "Missing genuine step ledger")
+    check('"baseGrowth"' in source["State"], "Missing separate passive growth")
 
 check((ROOT / "monkey.jungle").is_file(), "Missing monkey.jungle")
 drawables_path = ROOT / "resources/drawables/drawables.xml"
@@ -71,4 +74,4 @@ if errors:
         print(" - " + e)
     sys.exit(1)
 print("Preflight OK: target, resources, app entry, core step integration.")
-print("NOTE: Monkey C compilation/simulator execution has NOT been performed.")
+print("This script checks structure only; see validation notes for SDK/simulator results.")

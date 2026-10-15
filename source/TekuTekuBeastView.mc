@@ -5,335 +5,181 @@ using Toybox.Lang;
 using Toybox.Math;
 
 class TekuTekuBeastView extends WatchUi.View {
-    var beast;
-    var page; // 0 = Pet, 1 = Care, 2 = Stats
-    var refresher;
-    var sprite;
-    var spriteStage;
-    var tick;
-    var notice;
-    var noticeTicks;
-
-    // Exact Enduro 4 MIP palette colors; no dithering on the pixel art.
-    const BG = 0xAAFFAA;
-    const INK = 0x005500;
-    const LIGHT = 0x55AA55;
-    const GROVE = 0x619348;
-    const EMBER = 0xC86632;
-    const TIDE = 0x418CA6;
-    const WISP = 0x966AAB;
-
-    function initialize() {
-        View.initialize();
-        beast = new TekuTekuBeastState();
-        page = 0;
-        refresher = null;
-        sprite = null;
-        spriteStage = -1;
-        tick = 0;
-        notice = null;
-        noticeTicks = 0;
-    }
-
-    function onShow() {
-        beast.syncHistory();
-        loadSprite();
-        refresher = new Timer.Timer();
-        // Gentle foreground-only idle movement; step reconciliation stays 20s.
-        refresher.start(method(:refresh), 1000, true);
-    }
-
-    function onHide() {
-        if (refresher != null) {
-            refresher.stop();
-            refresher = null;
-        }
-    }
-
+    var beast;var page=0;var refresher=null;var sprite=null;var spriteStage=-1;
+    var tick=0;var notice=null;var noticeTicks=0;
+    var menu=null;var selection=0;var rows=[];var live=null;
+    var animation="idle";var animationTicks=0;
+    const BG=0xAAFFAA;const INK=0x005500;const LIGHT=0x55AA55;
+    function initialize(){View.initialize();beast=new TekuTekuBeastState();}
+    function onShow(){beast.syncHistory();loadSprite();refresher=new Timer.Timer();refresher.start(method(:refresh),250,true);}
+    function onHide(){if(refresher!=null){refresher.stop();refresher=null;}beast.commit();}
     function refresh() as Void {
-        tick = (tick + 1) % 20;
-        if (tick == 0) {
-            beast.syncToday();
-            loadSprite();
+        tick=(tick+1)%8000;
+        if(tick%80==0){beast.syncToday();loadSprite();}
+        if(beast.dev && tick%4==0){beast.tick();loadSprite();}
+        if(noticeTicks>0){noticeTicks--;if(noticeTicks==0){notice=null;}}
+        if(animationTicks>0){animationTicks--;if(animationTicks==0){animation="idle";}}
+        // Sleeping/reduced-motion idle only redraws once a second. No hidden timer.
+        if(beast.number("motion")==2 || tick%4==0 || noticeTicks>0){WatchUi.requestUpdate();}
+    }
+    function toast(text,action){notice=text;noticeTicks=12;animation=action;animationTicks=12;loadSprite();WatchUi.requestUpdate();}
+    function openMenu(name){menu=name;selection=0;updateRows();WatchUi.requestUpdate();}
+    function updateRows(){
+        if(menu.equals("Actions")){rows=beast.number("poop")>0?["Clean","Feed","Play","Pat","Rest","Collection","Settings"]:["Feed","Clean","Play","Pat","Rest","Collection","Settings"];if(beast.dev){rows.add("Dev Tools");}}
+        else if(menu.equals("Feed")){rows=["Meal: "+beast.number("meals"),"Snack: "+beast.snacks()];}
+        else if(menu.equals("Settings")){rows=["Developer: "+(beast.dev?"ON":"OFF"),"Sound: "+(beast.number("sound")==0?"OFF":"ON"),"Vibration: "+(beast.number("haptics")==0?"OFF":"ON"),"Motion: "+["OFF","LOW","NORMAL"][beast.number("motion")],"Activity target: "+beast.number("target")];}
+        else if(menu.equals("Developer")){rows=["Enable temporary test","Cancel"];}
+        else if(menu.equals("Discard DEV?")){rows=["Discard test changes","Keep testing"];}
+        else if(menu.equals("Dev Tools")){rows=["Clock speed","Advance time","Force stage","Force family","Adjust needs","Test food / items","Spawn poop","Clean now","Sleep now","Evolve now","Animations","Reset test scenario","Balance settings"];}
+        else if(menu.equals("Clock speed")){rows=["1x","5x","20x","100x"];}
+        else if(menu.equals("Advance time")){rows=["+1 hour","+1 day","+7 days"];}
+        else if(menu.equals("Force stage")){rows=["Egg","Pip","Nimble","Adult","Champion","Legendary","Automatic"];}
+        else if(menu.equals("Force family")){rows=["Grove","Ember","Tide","Wisp"];
+        }else if(menu.equals("Adjust needs")){rows=["Fullness","Happiness","Energy","Cleanliness","Friendship"];}
+        else if(menu.equals("Set value")){rows=["0","25","50","75","100"];}
+        else if(menu.equals("Animations")){rows=["idle","wander","hop","blink","look","eat","happy","clean","sleep","evolve"];}
+        else if(menu.equals("Balance settings")){rows=["Passive: "+beast.number("passiveRate"),"Care cap: "+beast.number("careCap"),"Hatch hours: "+beast.number("hatchHours"),"Legend days: "+beast.number("legendDays")];}
+        else if(menu.equals("Play")){rows=["Star Catch","Memory Steps","Trail Treasure"];}
+        else if(menu.equals("Collection")){rows=["Discoveries","Rare evolution","Archive / new egg"];}
+        else if(menu.equals("Archive / new egg")){rows=["Cancel","Archive and start egg"];}
+    }
+    var needKey=null;
+    function selectAction(){
+        if(menu==null){openMenu("Actions");return;}
+        var name=rows[selection];var n=selection;var context=menu;
+        if(context.equals("Actions")){
+            if(name.equals("Pat")){menu=null;toast(beast.pat()?"HAPPY BEAST!":"PATS: 3/3","happy");}
+            else if(name.equals("Clean")){menu=null;toast(beast.clean()?"ALL CLEAN!":"ALREADY CLEAN","clean");}
+            else if(name.equals("Rest")){beast.rest();menu=null;toast("SWEET DREAMS","sleep");}
+            else{openMenu(name);}return;
         }
-        if (noticeTicks > 0) {
-            noticeTicks--;
-            if (noticeTicks == 0) { notice = null; }
+        if(context.equals("Feed")){menu=null;toast(beast.feedFood(n==0)?"YUM!":"FULL / NO FOOD","eat");return;}
+        if(context.equals("Settings")){
+            if(n==0){openMenu(beast.dev?"Discard DEV?":"Developer");return;}
+            var keys=["","sound","haptics","motion","target"];var key=keys[n];
+            if(n<3){beast.data[key]=1-beast.number(key);}else if(n==3){beast.data[key]=(beast.number(key)+1)%3;}
+            else{beast.data[key]=beast.number(key)==2000?4000:(beast.number(key)==4000?8000:2000);}
+            beast.commit();updateRows();WatchUi.requestUpdate();return;
         }
+        if(context.equals("Developer")){
+            if(n==0){live=beast;beast=beast.enableDev();spriteStage=-1;openMenu("Dev Tools");}else{openMenu("Settings");}return;
+        }
+        if(context.equals("Discard DEV?")){
+            if(n==0){var restored=new TekuTekuBeastState();restored.store=live.store;restored.skipWatch=live.skipWatch;restored.testNow=live.testNow;beast=restored;beast.syncHistory();live=null;spriteStage=-1;menu=null;toast("REAL BEAST RESTORED","idle");}else{openMenu("Settings");}return;
+        }
+        if(context.equals("Dev Tools")){
+            if(n<5 || n==10 || n==12){openMenu(name);return;}
+            if(n==5){beast.devSet("meals",20);beast.devSet("snacks",12);beast.devSet("adventure",20);beast.devSet("charms",4);toast("TEST INVENTORY","happy");}
+            if(n==6){beast.devSet("poop",2);beast.devSet("cleanliness",40);toast("POOP TEST","hop");}
+            if(n==7){beast.clean();toast("CLEAN TEST","clean");}
+            if(n==8){beast.rest();toast("REST TEST","sleep");}
+            if(n==9){beast.devSet("forcedStage",(beast.stage()+1)%6);spriteStage=-1;toast("EVOLUTION TEST","evolve");}
+            if(n==11){live.data=null;beast=live.enableDev();spriteStage=-1;toast("TEST RESET","idle");}
+            menu=null;return;
+        }
+        if(context.equals("Clock speed")){beast.setSpeed([1,5,20,100][n]);openMenu("Dev Tools");return;}
+        if(context.equals("Advance time")){beast.jump([3600,86400,604800][n]);menu=null;toast("TIME ADVANCED","evolve");return;}
+        if(context.equals("Force stage")){beast.devSet("forcedStage",n==6?-1:n);spriteStage=-1;menu=null;toast("STAGE PREVIEW","evolve");return;}
+        if(context.equals("Force family")){beast.devSet("forcedFamily",n+1);spriteStage=-1;menu=null;toast("FAMILY PREVIEW","happy");return;}
+        if(context.equals("Adjust needs")){needKey=["fullness","happiness","energy","cleanliness","friendship"][n];openMenu("Set value");return;}
+        if(context.equals("Set value")){beast.devSet(needKey,n*25);openMenu("Adjust needs");return;}
+        if(context.equals("Animations")){menu=null;toast(name.toUpper(),name);return;}
+        if(context.equals("Balance settings")){
+            var keys=["passiveRate","careCap","hatchHours","legendDays"];var values=[[6000,12000,18000],[150,300,600],[12,24,36],[14,21,25]];
+            var current=beast.number(keys[n]);var index=0;for(var i=0;i<3;i++){if(values[n][i]==current){index=(i+1)%3;}}
+            beast.devSet(keys[n],values[n][index]);updateRows();WatchUi.requestUpdate();return;
+        }
+        if(context.equals("Collection")){
+            if(n==0){menu="Discoveries";rows=[];for(var i=0;i<8;i++){rows.add(["Berry","Kite","Ribbon","Shell","Lantern","Crown","Crystal","Compass"][i]+": "+beast.data["items"][i]);}selection=0;}
+            if(n==1){menu=null;toast(beast.rareEvolve()?"RARE EVOLUTION!":"NEED LEGEND / BOND 70","evolve");}
+            if(n==2){openMenu("Archive / new egg");}WatchUi.requestUpdate();return;
+        }
+        if(context.equals("Archive / new egg")){menu=null;toast(n==1 && beast.newEgg()?"NEW JOURNEY":"BEAST KEPT","evolve");return;}
+        if(context.equals("Play")){menu=null;toast("GAME IN DEVELOPMENT","happy");return;}
         WatchUi.requestUpdate();
     }
-
-    function selectAction() {
-        if (page == 0) {
-            notice = beast.pat() ? "HAPPY BEAST!" : "PATS: 3/3";
-        }
-        if (page == 1) {
-            notice = beast.feed() ? "BOND +5" : "NO SNACKS YET";
-        }
-        noticeTicks = 4;
+    function switchPage(delta){
+        if(menu!=null){selection=(selection+delta+rows.size())%rows.size();}
+        else{page=(page+delta+3)%3;notice=null;}
         WatchUi.requestUpdate();
     }
-
-    function switchPage(delta) {
-        page = (page + delta + 3) % 3;
-        notice = null;
-        noticeTicks = 0;
-        WatchUi.requestUpdate();
-    }
-
-    function safeTextWidth(dc, y, font) {
-        // Fit the whole font box, not just its baseline, inside an inset circle.
-        var radius = dc.getWidth() / 2 - 8;
-        var centerY = dc.getHeight() / 2;
-        var top = y - centerY;
-        if (top < 0) { top = -top; }
-        var bottom = y + dc.getFontHeight(font) - centerY;
-        if (bottom < 0) { bottom = -bottom; }
-        var distance = top > bottom ? top : bottom;
-        if (distance >= radius) { return 0; }
-        return (2 * Math.sqrt(radius * radius - distance * distance)).toNumber() - 4;
-    }
-
-    function label(dc, y, value, font) {
-        var available = safeTextWidth(dc, y, font);
-        if (dc.getTextWidthInPixels(value, font) > available && font == Graphics.FONT_LARGE) {
-            font = Graphics.FONT_SMALL;
-            available = safeTextWidth(dc, y, font);
+    function back(){
+        if(menu!=null){
+            if(menu.equals("Actions")){menu=null;}else if(menu.equals("Settings") || menu.equals("Feed") || menu.equals("Play") || menu.equals("Collection")){openMenu("Actions");}
+            else if(menu.equals("Dev Tools")){openMenu("Actions");}else{openMenu(beast.dev?"Dev Tools":"Actions");}
+            WatchUi.requestUpdate();return true;
         }
-        if (dc.getTextWidthInPixels(value, font) > available && font != Graphics.FONT_XTINY) {
-            font = Graphics.FONT_XTINY;
-            available = safeTextWidth(dc, y, font);
+        if(page!=0){page=0;WatchUi.requestUpdate();return true;}return false;
+    }
+    function safeTextWidth(dc,y,font){
+        var radius=dc.getWidth()/2-8;var c=dc.getHeight()/2;
+        var a=y-c;if(a<0){a=-a;}var b=y+dc.getFontHeight(font)-c;if(b<0){b=-b;}var d=a>b?a:b;
+        if(d>=radius){return 0;}return (2*Math.sqrt(radius*radius-d*d)).toNumber()-4;
+    }
+    function label(dc,y,value,font){
+        if(dc.getTextWidthInPixels(value,font)>safeTextWidth(dc,y,font)){font=Graphics.FONT_XTINY;}
+        var shown=value;while(shown.length()>0 && dc.getTextWidthInPixels(shown,font)>safeTextWidth(dc,y,font)){
+            shown=shown.substring(0,shown.length()-1);}
+        dc.setColor(INK,Graphics.COLOR_TRANSPARENT);dc.drawText(dc.getWidth()/2,y,font,shown,Graphics.TEXT_JUSTIFY_CENTER);
+        var w=dc.getTextWidthInPixels(shown,font);return [dc.getWidth()/2-w/2,y,w,dc.getFontHeight(font),shown];
+    }
+    function y(dc,fraction){return (dc.getHeight()*fraction).toNumber();}
+    function loadSprite(){
+        var s=beast.stage();if(s==spriteStage){return;}spriteStage=s;
+        sprite=WatchUi.loadResource(s==0?Rez.Drawables.Egg:(s==1?Rez.Drawables.Pip:Rez.Drawables.Nimble));
+    }
+    function creature(dc){
+        var x=dc.getWidth()/2-56;var top=y(dc,0.34);
+        var active=animationTicks>0?animation:(beast.mood()=="SLEEPY"?"sleep":"idle");
+        if(beast.number("motion")>0){
+            if(active.equals("wander") || (active.equals("idle") && tick%80<24)){x+=((tick%24)-12);}
+            if(active.equals("hop") || active.equals("happy") || active.equals("evolve")){top-=[0,8,16,8][tick%4];}
         }
-        // Last resort for future longer translations/species, never crop glyphs.
-        var shown = value;
-        while (shown.length() > 0 && dc.getTextWidthInPixels(shown, font) > available) {
-            var keep = shown.length() - 1;
-            if (shown.length() >= 3 && shown.substring(shown.length() - 3, shown.length()) == "...") {
-                keep = shown.length() - 4;
-            }
-            shown = keep > 0 ? value.substring(0, keep) + "..." : "";
-        }
-        dc.setColor(INK, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(dc.getWidth() / 2, y, font, shown,
-            Graphics.TEXT_JUSTIFY_CENTER);
-        var width = dc.getTextWidthInPixels(shown, font);
-        // The isolated visual test checks these exact native-font bounds.
-        return [dc.getWidth() / 2 - width / 2, y, width, dc.getFontHeight(font), shown];
+        if(sprite!=null){dc.drawBitmap(x,top,sprite);}
+        if(active.equals("sleep")){label(dc,y(dc,0.29),"z z Z",Graphics.FONT_XTINY);}
+        if(active.equals("clean")){dc.setColor(0xFFFFFF,Graphics.COLOR_TRANSPARENT);dc.fillCircle(x+15,top+75,5+tick%4);}
+        if(active.equals("eat")){pixelIcon(dc,x+78,top+70,[8,28,62,127,65,127],INK,2);}
+        if(beast.number("poop")>0){pixelIcon(dc,dc.getWidth()/2+56,y(dc,0.63),[8,28,30,62,127,127],INK,2);}
     }
-
-    function todayLabel() {
-        var steps = beast.getTodaySteps();
-        if (steps >= 1000000) {
-            return "TODAY " + (steps / 1000000.0).format("%.1f") + "M";
-        }
-        if (steps >= 100000) {
-            return "TODAY " + (steps / 1000).toString() + "K";
-        }
-        return "TODAY " + steps.toString();
+    function pixelIcon(dc,x,top,rows,color,scale){
+        dc.setColor(color,Graphics.COLOR_TRANSPARENT);for(var r=0;r<rows.size();r++){for(var c=0;c<7;c++){
+            if((rows[r]&(1<<(6-c)))!=0){dc.fillRectangle(x+c*scale,top+r*scale,scale,scale);}}}
     }
-
-    function familyColor(f) {
-        if (f == 1) { return GROVE; }
-        if (f == 2) { return EMBER; }
-        if (f == 3) { return TIDE; }
-        if (f == 4) { return WISP; }
-        return GROVE;
+    function bar(dc,top,value,width){var x=dc.getWidth()/2-width/2;dc.setColor(LIGHT,Graphics.COLOR_TRANSPARENT);dc.fillRectangle(x,top,width,7);
+        dc.setColor(INK,Graphics.COLOR_TRANSPARENT);dc.fillRectangle(x,top,(width*value).toNumber(),7);}
+    function todayLabel(){var n=beast.getTodaySteps();return "STEPS "+(n>=100000?(n/1000).toString()+"K":n.toString());}
+    function stageLabel(){return ["EGG","HATCHLING","JUVENILE","ADULT","CHAMPION","LEGENDARY"][beast.stage()];}
+    function drawPet(dc){
+        label(dc,y(dc,0.12),beast.speciesName(),Graphics.FONT_SMALL);
+        label(dc,y(dc,0.26),beast.dev?"DEV  "+beast.speed+"x":beast.mood(),Graphics.FONT_XTINY);
+        creature(dc);bar(dc,y(dc,0.78),beast.progress(),dc.getWidth()/2);
+        label(dc,y(dc,0.83),notice!=null?notice:todayLabel(),Graphics.FONT_XTINY);
     }
-
-    function loadSprite() {
-        var stage = beast.stage();
-        if (stage == spriteStage) { return; }
-        spriteStage = stage;
-        sprite = null;
-        if (stage == 0) { sprite = WatchUi.loadResource(Rez.Drawables.Egg); }
-        else if (stage == 1) { sprite = WatchUi.loadResource(Rez.Drawables.Pip); }
-        else if (stage == 2) { sprite = WatchUi.loadResource(Rez.Drawables.Nimble); }
+    function drawCare(dc){
+        label(dc,y(dc,0.10),beast.dev?"CARE  DEV":"CARE",Graphics.FONT_SMALL);
+        var keys=["fullness","happiness","energy","cleanliness"];
+        var captions=["FOOD","JOY","ENERGY","CLEAN"];
+        for(var i=0;i<4;i++){var top=y(dc,0.27+i*0.12);label(dc,top,captions[i]+" "+beast.number(keys[i]),Graphics.FONT_XTINY);bar(dc,top+23,beast.number(keys[i])/100.0,110);}
+        label(dc,y(dc,0.79),notice!=null?notice:"MEALS "+beast.number("meals")+"  SNACKS "+beast.snacks(),Graphics.FONT_XTINY);
     }
-
-    function creature(dc) {
-        if (sprite != null) {
-            var lift = tick % 4 == 1 ? 2 : 0;
-            dc.drawBitmap(84, 104 - lift, sprite);
-            return;
-        }
-        // Adult/family artwork is a separate pass; keep all existing saves usable.
-        legacyCreature(dc);
+    function drawStats(dc){
+        label(dc,y(dc,0.10),beast.familyName()+(beast.dev?" DEV":""),Graphics.FONT_SMALL);
+        label(dc,y(dc,0.26),stageLabel()+"  DAY "+beast.ageDays(),Graphics.FONT_XTINY);
+        label(dc,y(dc,0.38),"GROWTH "+beast.growth(),Graphics.FONT_XTINY);
+        label(dc,y(dc,0.49),"WATCH "+beast.xp(),Graphics.FONT_XTINY);
+        label(dc,y(dc,0.60),"BOND "+beast.friendship()+"  XP NEXT "+beast.nextSteps(),Graphics.FONT_XTINY);
+        label(dc,y(dc,0.71),beast.stage()==5?"MASTERY "+beast.mastery():"AGE GATE "+beast.nextAge()+" DAYS",Graphics.FONT_XTINY);
+        label(dc,y(dc,0.82),"ADVENTURE "+beast.number("adventure"),Graphics.FONT_XTINY);
     }
-
-    function pixelIcon(dc, x, y, rows as Lang.Array<Lang.Number>, color, scale) {
-        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-        for (var row = 0; row < rows.size(); row++) {
-            for (var col = 0; col < 7; col++) {
-                if ((rows[row] & (1 << (6 - col))) != 0) {
-                    dc.fillRectangle(x + col * scale, y + row * scale, scale, scale);
-                }
-            }
-        }
+    function drawMenu(dc){
+        label(dc,y(dc,0.12),menu,Graphics.FONT_SMALL);
+        if(beast.dev){label(dc,y(dc,0.25),"DEV / TEMPORARY",Graphics.FONT_XTINY);}
+        for(var i=-1;i<=1;i++){var index=selection+i;if(index<0 || index>=rows.size()){continue;}
+            var top=y(dc,0.48+i*0.15);if(i==0){dc.setColor(LIGHT,Graphics.COLOR_TRANSPARENT);dc.fillRoundedRectangle(dc.getWidth()*0.14,top-2,dc.getWidth()*0.72,29,4);}
+            label(dc,top,rows[index],Graphics.FONT_XTINY);}
+        label(dc,y(dc,0.79),(selection+1)+" / "+rows.size(),Graphics.FONT_XTINY);
     }
-
-    function statusIcons(dc) {
-        var heart = [54, 127, 127, 62, 28, 8];
-        for (var i = 0; i < 3; i++) {
-            var color = beast.friendship() > i * 34 ? INK : LIGHT;
-            pixelIcon(dc, 89 + i * 20, 90, heart, color, 2);
-        }
-        var snack = [8, 28, 62, 127, 65, 127];
-        pixelIcon(dc, 160, 90, snack, INK, 2);
-        dc.drawText(180, 80, Graphics.FONT_XTINY,
-            beast.snacks().toString(), Graphics.TEXT_JUSTIFY_LEFT);
-    }
-
-    function pageDots(dc) {
-        for (var i = 0; i < 3; i++) {
-            dc.setColor(i == page ? INK : LIGHT, Graphics.COLOR_TRANSPARENT);
-            dc.fillCircle(126 + i * 14, 258, 3);
-        }
-    }
-
-    // Temporary higher-stage drawing, retained until family sprite work lands.
-    function legacyCreature(dc) {
-        var stage = beast.stage();
-        var cx = dc.getWidth() / 2;
-        var cy = 163;
-        var size = 23 + stage * 4;
-        var color = familyColor(beast.family());
-        dc.setColor(INK, Graphics.COLOR_TRANSPARENT);
-        if (stage == 0) {
-            dc.fillEllipse(cx, cy, 35, 45);
-            dc.setColor(BG, Graphics.COLOR_TRANSPARENT);
-            dc.fillEllipse(cx, cy, 31, 41);
-            dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-            dc.fillEllipse(cx, cy + 10, 18, 18);
-            return;
-        }
-
-        // Ears or horns differ by lineage; rounded body and large eyes.
-        if (stage >= 3) {
-            if (beast.family() == 1) {
-                dc.fillRectangle(cx - size, cy - size - 10, 14, 34);
-                dc.fillRectangle(cx + size - 14, cy - size - 10, 14, 34);
-            } else if (beast.family() == 2) {
-                dc.fillRectangle(cx - size + 3, cy - size - 16, 14, 36);
-                dc.fillRectangle(cx + size - 17, cy - size - 16, 14, 36);
-            } else if (beast.family() == 3) {
-                dc.fillCircle(cx - size + 2, cy, 15);
-                dc.fillCircle(cx + size - 2, cy, 15);
-            } else {
-                dc.fillCircle(cx, cy - size + 3, 17);
-            }
-        } else {
-            dc.fillCircle(cx - size + 3, cy - size + 12, 13);
-            dc.fillCircle(cx + size - 3, cy - size + 12, 13);
-        }
-
-        dc.setColor(INK, Graphics.COLOR_TRANSPARENT);
-        dc.fillCircle(cx, cy, size + 3);
-        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-        dc.fillCircle(cx, cy, size);
-        dc.setColor(INK, Graphics.COLOR_TRANSPARENT);
-        dc.fillCircle(cx - 15, cy - 6, 5);
-        dc.fillCircle(cx + 15, cy - 6, 5);
-        dc.fillRectangle(cx - 8, cy + 15, 16, 3);
-        dc.fillRectangle(cx - size + 8, cy + size - 1, 12, 8);
-        dc.fillRectangle(cx + size - 20, cy + size - 1, 12, 8);
-    }
-
-    function onUpdate(dc) {
-        dc.setColor(BG, BG);
-        dc.clear();
-        if (page == 0) { drawPet(dc); }
-        else if (page == 1) { drawCare(dc); }
-        else { drawStats(dc); }
-    }
-
-    function stageLabel() {
-        var s = beast.stage();
-        if (s == 0) { return "EGG"; }
-        if (s == 1) { return "HATCHLING"; }
-        if (s == 2) { return "JUVENILE"; }
-        if (s == 3) { return "ADULT"; }
-        if (s == 4) { return "CHAMPION"; }
-        return "LEGENDARY";
-    }
-
-    function drawPet(dc) {
-        label(dc, 30, "TEKUTEKU BEAST", Graphics.FONT_XTINY);
-        label(dc, 54, beast.speciesName(), Graphics.FONT_SMALL);
-        statusIcons(dc);
-        creature(dc);
-        dc.setColor(LIGHT, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(88, 214, 104, 2);
-
-        var progress = 0;
-        var maximum = beast.nextSteps();
-        if (beast.stage() == 5) {
-            progress = beast.masteryProgress();
-            maximum = 25000;
-        } else {
-            var previous = 0;
-            if (beast.stage() == 1) { previous = 2000; }
-            if (beast.stage() == 2) { previous = 20000; }
-            if (beast.stage() == 3) { previous = 70000; }
-            if (beast.stage() == 4) { previous = 150000; }
-            progress = beast.xp() - previous;
-            maximum -= previous;
-        }
-        if (progress < 0) { progress = 0; }
-        if (progress > maximum) { progress = maximum; }
-        var width = ((progress * 146) / maximum).toNumber();
-        dc.setColor(LIGHT, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(66, 217, 148, 8);
-        dc.setColor(INK, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(67, 218, width, 6);
-
-        // Keep one bottom text row. Exact evolution details live on Your Beast.
-        var footer = notice != null ? notice : todayLabel();
-        label(dc, 228, footer,
-            Graphics.FONT_XTINY);
-        pageDots(dc);
-    }
-
-    function drawCare(dc) {
-        label(dc, 30, "CARE", Graphics.FONT_SMALL);
-        label(dc, 65, beast.mood(), Graphics.FONT_XTINY);
-        label(dc, 94, "SNACKS", Graphics.FONT_XTINY);
-        label(dc, 119, beast.snacks().toString() + " / 12",
-            Graphics.FONT_LARGE);
-        label(dc, 165, "FRIENDSHIP " + beast.friendship().toString()
-            + "/100", Graphics.FONT_XTINY);
-        dc.setColor(LIGHT, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(66, 193, 148, 8);
-        dc.setColor(INK, Graphics.COLOR_TRANSPARENT);
-        dc.fillRectangle(67, 194, (beast.friendship() * 146 / 100).toNumber(), 6);
-        label(dc, 205, "1 SNACK / 2500 STEPS", Graphics.FONT_XTINY);
-        label(dc, 231, notice != null ? notice : "SELECT: FEED", Graphics.FONT_XTINY);
-        pageDots(dc);
-    }
-
-    function drawStats(dc) {
-        label(dc, 30, "YOUR BEAST", Graphics.FONT_XTINY);
-        label(dc, 55, beast.speciesName(), Graphics.FONT_SMALL);
-        var stage = stageLabel();
-        if (beast.stage() >= 3) {
-            stage += " / " + beast.familyName();
-        }
-        label(dc, 92, stage, Graphics.FONT_XTINY);
-        label(dc, 116, "TOTAL STEP XP", Graphics.FONT_XTINY);
-        label(dc, 140, beast.xp().toString(), Graphics.FONT_LARGE);
-        if (beast.stage() == 5) {
-            label(dc, 188, "MASTERY " + beast.mastery().toString(),
-                Graphics.FONT_XTINY);
-        } else {
-            var remaining = beast.nextSteps() - beast.xp();
-            if (remaining <= 0 && beast.ageDays() < beast.nextAge()) {
-                var days = beast.nextAge() - beast.ageDays();
-                label(dc, 188, "READY IN " + days.toString() + " DAYS", Graphics.FONT_XTINY);
-            } else {
-                label(dc, 188, (remaining > 0 ? remaining : 0).toString() + " XP TO NEXT", Graphics.FONT_XTINY);
-            }
-        }
-        label(dc, 214, "DAY " + beast.ageDays().toString() + " | PATS "
-            + beast.patsToday().toString() + "/3", Graphics.FONT_XTINY);
-        pageDots(dc);
-    }
+    function pageDots(dc){for(var i=0;i<3;i++){dc.setColor(i==page?INK:LIGHT,Graphics.COLOR_TRANSPARENT);dc.fillCircle(dc.getWidth()/2+(i-1)*14,y(dc,0.92),3);}}
+    function onUpdate(dc){dc.setColor(BG,BG);dc.clear();
+        if(menu!=null){drawMenu(dc);}else{if(page==0){drawPet(dc);}else if(page==1){drawCare(dc);}else{drawStats(dc);}pageDots(dc);}}
 }

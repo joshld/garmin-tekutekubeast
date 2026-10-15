@@ -19,4 +19,6 @@ class TekuTekuBeastInput extends WatchUi.BehaviorDelegate {
         view.switchPage(-1);
         return true;
     }
+    function onBack() { return view.back(); }
+    function onTap(event) { view.selectAction(); return true; }
 }
