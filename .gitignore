@@ -1,0 +1,11 @@
+bin/
+*.prg
+*.iq
+*.debug.xml
+*.api
+*.opt
+*.mir
+*.bak
+.DS_Store
+__pycache__/
+.vscode/.monkeyc*
