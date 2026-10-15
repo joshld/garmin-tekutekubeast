@@ -9,3 +9,4 @@ bin/
 .DS_Store
 __pycache__/
 .vscode/.monkeyc*
+developer_key
