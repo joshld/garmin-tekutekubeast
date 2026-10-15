@@ -40,7 +40,6 @@ for suffix in expected:
         source[suffix] = content
         check("class TekuTekuBeast" + suffix in content,
               "Missing class in " + filename)
-        check("StepPal" not in content, "Stale class name in " + filename)
 
 if "App" in source:
     check("Background.registerForStepsEvent" in source["App"], "Missing steps subscription")

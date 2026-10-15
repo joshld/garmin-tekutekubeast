@@ -5,8 +5,8 @@ using Toybox.System;
 class TekuTekuBeastService extends System.ServiceDelegate {
     function initialize() { ServiceDelegate.initialize(); }
     function onSteps() {
-        var pal = new TekuTekuBeastState();
-        pal.syncToday();
+        var beast = new TekuTekuBeastState();
+        beast.syncToday();
         Background.exit(null);
     }
 }

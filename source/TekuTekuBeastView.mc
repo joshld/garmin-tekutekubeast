@@ -3,7 +3,7 @@ using Toybox.Timer;
 using Toybox.WatchUi;
 
 class TekuTekuBeastView extends WatchUi.View {
-    var pal;
+    var beast;
     var page; // 0 = Pet, 1 = Care, 2 = Stats
     var refresher;
 
@@ -17,13 +17,13 @@ class TekuTekuBeastView extends WatchUi.View {
 
     function initialize() {
         View.initialize();
-        pal = new TekuTekuBeastState();
+        beast = new TekuTekuBeastState();
         page = 0;
         refresher = null;
     }
 
     function onShow() {
-        pal.syncHistory();
+        beast.syncHistory();
         refresher = new Timer.Timer();
         refresher.start(method(:refresh), 20000, true);
     }
@@ -36,13 +36,13 @@ class TekuTekuBeastView extends WatchUi.View {
     }
 
     function refresh() as Void {
-        pal.syncToday();
+        beast.syncToday();
         WatchUi.requestUpdate();
     }
 
     function selectAction() {
-        if (page == 0) { pal.pat(); }
-        if (page == 1) { pal.feed(); }
+        if (page == 0) { beast.pat(); }
+        if (page == 1) { beast.feed(); }
         WatchUi.requestUpdate();
     }
 
@@ -67,11 +67,11 @@ class TekuTekuBeastView extends WatchUi.View {
 
     // Native primitive placeholder sprite until final pixel art is created.
     function creature(dc) {
-        var stage = pal.stage();
+        var stage = beast.stage();
         var cx = dc.getWidth() / 2;
         var cy = 138;
         var size = 27 + stage * 6;
-        var color = familyColor(pal.family());
+        var color = familyColor(beast.family());
         dc.setColor(INK, Graphics.COLOR_TRANSPARENT);
         if (stage == 0) {
             dc.fillEllipse(cx, cy, 35, 45);
@@ -84,13 +84,13 @@ class TekuTekuBeastView extends WatchUi.View {
 
         // Ears or horns differ by lineage; rounded body and large eyes.
         if (stage >= 3) {
-            if (pal.family() == 1) {
+            if (beast.family() == 1) {
                 dc.fillRectangle(cx - size, cy - size - 10, 14, 34);
                 dc.fillRectangle(cx + size - 14, cy - size - 10, 14, 34);
-            } else if (pal.family() == 2) {
+            } else if (beast.family() == 2) {
                 dc.fillRectangle(cx - size + 3, cy - size - 16, 14, 36);
                 dc.fillRectangle(cx + size - 17, cy - size - 16, 14, 36);
-            } else if (pal.family() == 3) {
+            } else if (beast.family() == 3) {
                 dc.fillCircle(cx - size + 2, cy, 15);
                 dc.fillCircle(cx + size - 2, cy, 15);
             } else {
@@ -122,7 +122,7 @@ class TekuTekuBeastView extends WatchUi.View {
     }
 
     function stageLabel() {
-        var s = pal.stage();
+        var s = beast.stage();
         if (s == 0) { return "EGG"; }
         if (s == 1) { return "HATCHLING"; }
         if (s == 2) { return "JUVENILE"; }
@@ -133,23 +133,23 @@ class TekuTekuBeastView extends WatchUi.View {
 
     function drawPet(dc) {
         label(dc, 19, "TEKUTEKU BEAST", Graphics.FONT_SMALL);
-        label(dc, 51, pal.speciesName(), Graphics.FONT_SMALL);
+        label(dc, 51, beast.speciesName(), Graphics.FONT_SMALL);
         creature(dc);
-        label(dc, 185, pal.mood(), Graphics.FONT_SMALL);
+        label(dc, 185, beast.mood(), Graphics.FONT_SMALL);
 
-        var remaining = pal.nextSteps() - pal.xp();
+        var remaining = beast.nextSteps() - beast.xp();
         var progress = 0;
-        var maximum = pal.nextSteps();
-        if (pal.stage() == 5) {
-            progress = pal.masteryProgress();
+        var maximum = beast.nextSteps();
+        if (beast.stage() == 5) {
+            progress = beast.masteryProgress();
             maximum = 25000;
         } else {
             var previous = 0;
-            if (pal.stage() == 1) { previous = 2000; }
-            if (pal.stage() == 2) { previous = 20000; }
-            if (pal.stage() == 3) { previous = 70000; }
-            if (pal.stage() == 4) { previous = 150000; }
-            progress = pal.xp() - previous;
+            if (beast.stage() == 1) { previous = 2000; }
+            if (beast.stage() == 2) { previous = 20000; }
+            if (beast.stage() == 3) { previous = 70000; }
+            if (beast.stage() == 4) { previous = 150000; }
+            progress = beast.xp() - previous;
             maximum -= previous;
         }
         if (progress < 0) { progress = 0; }
@@ -160,11 +160,11 @@ class TekuTekuBeastView extends WatchUi.View {
         dc.setColor(INK, Graphics.COLOR_TRANSPARENT);
         dc.fillRectangle(78, 218, width, 7);
 
-        if (pal.stage() == 5) {
-            label(dc, 232, "MASTERY LV " + pal.mastery().toString(),
+        if (beast.stage() == 5) {
+            label(dc, 232, "MASTERY LV " + beast.mastery().toString(),
                 Graphics.FONT_XTINY);
-        } else if (remaining <= 0 && pal.ageDays() < pal.nextAge()) {
-            var left = pal.nextAge() - pal.ageDays();
+        } else if (remaining <= 0 && beast.ageDays() < beast.nextAge()) {
+            var left = beast.nextAge() - beast.ageDays();
             label(dc, 232, "READY IN " + left.toString() + " DAYS",
                 Graphics.FONT_XTINY);
         } else {
@@ -172,39 +172,39 @@ class TekuTekuBeastView extends WatchUi.View {
             label(dc, 232, leftSteps.toString() + " STEPS TO NEXT",
                 Graphics.FONT_XTINY);
         }
-        label(dc, 251, "TODAY " + pal.getTodaySteps().toString(),
+        label(dc, 251, "TODAY " + beast.getTodaySteps().toString(),
             Graphics.FONT_XTINY);
         label(dc, 265, "SELECT: PAT", Graphics.FONT_XTINY);
     }
 
     function drawCare(dc) {
         label(dc, 25, "CARE", Graphics.FONT_LARGE);
-        label(dc, 78, "MOOD: " + pal.mood(), Graphics.FONT_SMALL);
+        label(dc, 78, "MOOD: " + beast.mood(), Graphics.FONT_SMALL);
         label(dc, 118, "SNACKS", Graphics.FONT_SMALL);
-        label(dc, 147, pal.snacks().toString() + " / 12",
+        label(dc, 147, beast.snacks().toString() + " / 12",
             Graphics.FONT_LARGE);
-        label(dc, 196, "FRIENDSHIP " + pal.friendship().toString()
+        label(dc, 196, "FRIENDSHIP " + beast.friendship().toString()
             + "/100", Graphics.FONT_SMALL);
         label(dc, 229, "1 SNACK / 2500 STEPS", Graphics.FONT_XTINY);
         label(dc, 252, "SELECT: FEED", Graphics.FONT_SMALL);
     }
 
     function drawStats(dc) {
-        label(dc, 24, "YOUR PAL", Graphics.FONT_LARGE);
+        label(dc, 24, "BEAST STATS", Graphics.FONT_SMALL);
         label(dc, 67, "STAGE: " + stageLabel(), Graphics.FONT_SMALL);
-        if (pal.stage() >= 3) {
-            label(dc, 91, "FAMILY: " + pal.familyName(),
+        if (beast.stage() >= 3) {
+            label(dc, 91, "FAMILY: " + beast.familyName(),
                 Graphics.FONT_SMALL);
         }
         label(dc, 124, "CREDITED WATCH STEPS", Graphics.FONT_XTINY);
-        label(dc, 149, pal.xp().toString(), Graphics.FONT_LARGE);
-        label(dc, 192, "AGE " + pal.ageDays().toString() + " DAYS",
+        label(dc, 149, beast.xp().toString(), Graphics.FONT_LARGE);
+        label(dc, 192, "AGE " + beast.ageDays().toString() + " DAYS",
             Graphics.FONT_SMALL);
-        if (pal.stage() == 5) {
-            label(dc, 216, "MASTERY " + pal.mastery().toString(),
+        if (beast.stage() == 5) {
+            label(dc, 216, "MASTERY " + beast.mastery().toString(),
                 Graphics.FONT_SMALL);
         }
-        label(dc, 241, "PATS TODAY " + pal.patsToday().toString()
+        label(dc, 241, "PATS TODAY " + beast.patsToday().toString()
             + "/3", Graphics.FONT_SMALL);
         label(dc, 259, "UP/DOWN: NAVIGATE", Graphics.FONT_XTINY);
     }

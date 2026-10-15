@@ -1,6 +1,6 @@
 # TekuTekuBeast (テクテクビースト) — step-powered virtual pet for Garmin Enduro 4
 
-**Project formerly known as StepPal.** The Connect IQ application identifier remains unchanged to preserve existing watch save data when upgrading. The internal storage keys also remain unchanged.
+The Connect IQ application identifier and internal storage keys remain stable to preserve existing watch save data when upgrading.
 
 **Development build — compiled with Connect IQ SDK 9.2.0 and exercised in the Enduro 4 simulator profile (firmware 6.0.3). It has not yet been installed on physical Enduro 4 hardware.**
 
@@ -36,11 +36,3 @@ Garmin **Enduro 4**: `enduro4`, 280×280 MIP. Native `watch-app`, not a watch fa
 - Physical Enduro 4 behaviour needs verification against Garmin Connect IQ SDK.
 
 Sources: [Background services](https://developer.garmin.com/connect-iq/articles/core-topics/Backgrounding.html), [ActivityMonitor](https://developer.garmin.com/connect-iq/api-docs/Toybox/ActivityMonitor.html).
-
-## Repository rename
-
-The GitHub repository's `garmin-steppal` slug should be renamed to `garmin-tekutekubeast` using **Settings → General → Repository name → Rename** on GitHub. This renames the remote without changing commit history. After changing it, update your local Git remote via:
-
-```sh
-git remote set-url origin https://github.com/joshld/garmin-tekutekubeast.git
-```
