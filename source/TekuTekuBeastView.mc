@@ -190,7 +190,7 @@ class TekuTekuBeastView extends WatchUi.View {
     }
 
     function drawStats(dc) {
-        label(dc, 24, "BEAST STATS", Graphics.FONT_SMALL);
+        label(dc, 24, "YOUR BEAST", Graphics.FONT_SMALL);
         label(dc, 67, "STAGE: " + stageLabel(), Graphics.FONT_SMALL);
         if (beast.stage() >= 3) {
             label(dc, 91, "FAMILY: " + beast.familyName(),
