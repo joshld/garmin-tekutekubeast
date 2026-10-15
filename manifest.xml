@@ -3,6 +3,6 @@
   <iq:application id="54A4F9D3B6584CA4B01C232D20438E5B" type="watch-app" name="@Strings.AppName" entry="TekuTekuBeastApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="3.2.0">
     <iq:products><iq:product id="enduro4"/></iq:products>
     <iq:permissions><iq:uses-permission id="Background"/></iq:permissions>
-    <iq:languages/>
+    <iq:languages><iq:language>eng</iq:language></iq:languages>
   </iq:application>
 </iq:manifest>

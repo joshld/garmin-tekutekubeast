@@ -2,7 +2,7 @@
 
 **Project formerly known as StepPal.** The Connect IQ application identifier remains unchanged to preserve existing watch save data when upgrading. The internal storage keys also remain unchanged.
 
-**Source prototype — not yet compiled, simulator-tested or installed on an Enduro 4.**
+**Development build — compiled with Connect IQ SDK 9.2.0 and exercised in the Enduro 4 simulator profile (firmware 6.0.3). It has not yet been installed on physical Enduro 4 hardware.**
 
 TekuTekuBeast is a *native Garmin Connect IQ watch app*, coded in Monkey C. It reads **step counts measured by the watch itself**, even when you have not started an activity. Garmin background 1,000-step milestones plus on-opening reconciliation help update progress without running a permanent foreground app. No phone app, cloud or account is required.
 
@@ -26,7 +26,7 @@ Garmin **Enduro 4**: `enduro4`, 280×280 MIP. Native `watch-app`, not a watch fa
 3. Create/select a developer key, compile and run in the Enduro 4 simulator.
 4. Verify history reconciliation, daily rollover, background events, save-state migration, controls and battery before sideloading to the watch.
 
-**Status:** experimental. The visual creature is drawn with native canvas primitives as a placeholder. Unique pixel-art creature sprites, rare evolutions, museum/retirement, collections and animations are planned but not yet implemented. The Garmin SDK is not available here for compilation.
+**Status:** experimental. The visual creature is drawn with native canvas primitives as a placeholder. Unique pixel-art creature sprites, rare evolutions, museum/retirement, collections and animations are planned but not yet implemented. Simulator validation covered first-launch baselining, step credit, duplicate background-event protection and persistence across an app restart; physical-watch behaviour still needs verification.
 
 ## Important caveats
 - Only steps recorded on the Enduro 4 itself are reliably included by its step event.

@@ -35,7 +35,7 @@ class TekuTekuBeastView extends WatchUi.View {
         }
     }
 
-    function refresh() {
+    function refresh() as Void {
         pal.syncToday();
         WatchUi.requestUpdate();
     }

@@ -11,7 +11,8 @@ class TekuTekuBeastApp extends Application.AppBase {
         }
     }
     function getInitialView() {
-        return [new TekuTekuBeastView(), new TekuTekuBeastInput()];
+        var view = new TekuTekuBeastView();
+        return [view, new TekuTekuBeastInput(view)];
     }
     function getServiceDelegate() {
         return [new TekuTekuBeastService()];

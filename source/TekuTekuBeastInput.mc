@@ -1,17 +1,22 @@
 using Toybox.WatchUi;
 
 class TekuTekuBeastInput extends WatchUi.BehaviorDelegate {
-    function initialize() { BehaviorDelegate.initialize(); }
+    var view;
+
+    function initialize(view) {
+        BehaviorDelegate.initialize();
+        self.view = view;
+    }
     function onSelect() {
-        WatchUi.getCurrentView()[0].selectAction();
+        view.selectAction();
         return true;
     }
     function onNextPage() {
-        WatchUi.getCurrentView()[0].switchPage(1);
+        view.switchPage(1);
         return true;
     }
     function onPreviousPage() {
-        WatchUi.getCurrentView()[0].switchPage(-1);
+        view.switchPage(-1);
         return true;
     }
 }
