@@ -34,7 +34,7 @@ No branching choices for ordinary evolution. Branch timing and tie-break priorit
 - Wisp: Flicklet → Nocturne → Starweaver; rare Eclipse Eidolon.
 - Shared hatchling Pip, shared juvenile Nimble, and Egg.
 
-Each final species will eventually have unique hand-drawn pixel-art silhouettes, idle / happy / sleeping animation frames.
+Egg, Pip and Nimble now have concept-inspired pixel-art bitmap sprites and a gentle foreground idle bob. Each family species still needs a distinct pixel-art silhouette; separate idle / happy / sleeping animation frames remain planned. See `art/README.md` for implementation scope.
 
 ## Rare exceptions (future)
 Earn a **Star Charm** by registering your first standard Legendary in a future collection. At least 70 friendship lets you spend one to make a same-family rare Legendary once that future pet is eligible; it is optional and not random monetisation. Collecting all four normal family Legendaries can eventually unlock a single-use Wanderer's Compass permitting one unusual family change on a future pet.
@@ -52,4 +52,4 @@ Earn a **Star Charm** by registering your first standard Legendary in a future c
 - Friendship max 100; mood is cosmetic, never fatal.
 
 ## Limitations & tests
-Garmin daily step history includes up to seven days. If background events fail and the app does not open for longer, older steps may not be recovered. Initial current-day steps are treated as baseline. Device testing, battery validation, storage migration, week/date edge cases, and simulator testing are required. This is an uncompiled proof-of-concept.
+Garmin daily step history includes up to seven days. If background events fail and the app does not open for longer, older steps may not be recovered. Initial current-day steps are treated as baseline. The app has been compiled and exercised in the Enduro 4 simulator. Physical-device testing, battery validation, storage migration and week/date edge cases still need verification.

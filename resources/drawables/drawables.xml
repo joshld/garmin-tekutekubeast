@@ -1,1 +1,6 @@
-<resources><bitmap id="LauncherIcon" filename="launcher.png"/></resources>
+<resources>
+    <bitmap id="LauncherIcon" filename="beast-launcher.png" dithering="none"/>
+    <bitmap id="Egg" filename="egg.png" dithering="none"/>
+    <bitmap id="Pip" filename="pip.png" dithering="none"/>
+    <bitmap id="Nimble" filename="nimble.png" dithering="none"/>
+</resources>

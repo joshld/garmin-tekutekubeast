@@ -26,7 +26,7 @@ Garmin **Enduro 4**: `enduro4`, 280×280 MIP. Native `watch-app`, not a watch fa
 3. Create/select a developer key, compile and run in the Enduro 4 simulator.
 4. Verify history reconciliation, daily rollover, background events, save-state migration, controls and battery before sideloading to the watch.
 
-**Status:** experimental. The visual creature is drawn with native canvas primitives as a placeholder. Unique pixel-art creature sprites, rare evolutions, museum/retirement, collections and animations are planned but not yet implemented. Simulator validation covered first-launch baselining, step credit, duplicate background-event protection and persistence across an app restart; physical-watch behaviour still needs verification.
+**Status:** experimental. The first artwork pass adds concept-inspired pixel-art sprites for Egg, Pip and Nimble, compact watch layouts, a foreground idle bob and care-action feedback. Adult/Champion/Legendary family sprites still use the previous primitive drawings; rare evolutions, museum/retirement, collections and expression animations remain planned. See the [artwork notes](art/README.md) for scope and the isolated simulator preview. Simulator validation covered first-launch baselining, step credit, duplicate background-event protection and persistence across an app restart; physical-watch behaviour still needs verification.
 
 ## Important caveats
 - Only steps recorded on the Enduro 4 itself are reliably included by its step event.

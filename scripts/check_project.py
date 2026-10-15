@@ -2,6 +2,7 @@
 """Fast, SDK-independent structural preflight; NOT a Monkey C compiler."""
 from pathlib import Path
 import sys
+import struct
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -52,7 +53,18 @@ if "State" in source:
         check(required in source["State"], "Missing expected state feature: " + required)
 
 check((ROOT / "monkey.jungle").is_file(), "Missing monkey.jungle")
-check((ROOT / "resources/drawables/launcher.png").is_file(), "Missing launcher icon")
+drawables_path = ROOT / "resources/drawables/drawables.xml"
+drawables = ET.parse(drawables_path).getroot()
+for bitmap in drawables.iter("bitmap"):
+    bitmap_path = drawables_path.parent / bitmap.get("filename", "")
+    check(bitmap_path.is_file(), "Missing bitmap: " + str(bitmap_path))
+    if bitmap.get("id") == "LauncherIcon" and bitmap_path.is_file():
+        header = bitmap_path.read_bytes()[:24]
+        check(header[:8] == b"\x89PNG\r\n\x1a\n" and len(header) == 24,
+              "Launcher must be a valid PNG")
+        if len(header) == 24:
+            check(struct.unpack(">II", header[16:24]) == (40, 40),
+                  "Enduro 4 launcher must be 40x40")
 if errors:
     print("Preflight FAILED (structural checks only):")
     for e in errors:
