@@ -16,6 +16,10 @@ Work in `D:\\working\\garmin-tekutekubeast` or `joshld/garmin-tekutekubeast` on 
 - Foreground-only animations/sounds; no audible background step/poop notifications.
 - Follow safe editing: run simulator tests and layout audit before pushing; note unverified items, don't claim hardware tests without hardware.
 
+## Feature roadmap: Garmin Glance and inclusive activity rewards
+
+Read [activity and glance design](ACTIVITY_AND_GLANCE.md). Add a glance **within the same installed watch app** using getGlanceView() for the Enduro 4, and eventually compatible other devices, with low-memory cached pet summary and no background animations. Activity should meaningfully increase adventure opportunities, cosmetics, toys and loot; no nonactive player is denied pet evolution, mini-games or rare creature access. Use active minutes and supported wheelchair push data in addition to steps with null guards and no double rewards. Do not claim functionality until simulator and device checks are done.
+
 ## First prerequisite: on-watch Developer Mode and inclusive growth
 
 Implement [newest v0.4 review](V0_4_REVIEW_AMENDMENTS.md) **before** the original P0–P5 tickets. On the normal watch application use Settings → Developer Mode and Dev Tools to accelerate a virtual lifecycle clock (1×/5×/20×/100×, +1h/+1d/+7d), force stages/needs and test the real Pet/Care/Play UI. The dev branch is a reversible snapshot INSIDE the same app, not a second app or separately installed Developer Lab. Discard synthetic state on exit; keep real watch steps and real pet save untouched. Then implement complete zero-step growth and bonuses for movement, with ~25 passive-only vs ~21 active Legendary days as a provisional target. Update old stage/step-only text in this roadmap accordingly.
