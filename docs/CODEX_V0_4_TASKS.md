@@ -1,6 +1,6 @@
 # Codex execution plan — TekuTekuBeast v0.4
 
-**Read [v0.4 review amendments](V0_4_REVIEW_AMENDMENTS.md) before implementation.** Prior step-only evolution assumptions are superseded. Add a separate Developer Lab and make all normal evolutions possible with zero steps; growth must include passive and care XP. Preserve current saves. Simplify the Pet screen by dropping the app title and shortening other screens.
+**Read [v0.4 review amendments](V0_4_REVIEW_AMENDMENTS.md) before implementation.** Prior step-only evolution assumptions are superseded. Add Developer Mode **inside the same installed watch app** (not a second Developer Lab application) and make every normal evolution possible at zero steps; activity provides extra items/rewards and only a modest growth advantage. Preserve current saves. Simplify the Pet screen by dropping the app title and shortening other screens.
 
 **This is the requested implementation plan, not a claim that new care/games/animation features are coded.**
 
@@ -10,11 +10,15 @@ Work in `D:\\working\\garmin-tekutekubeast` or `joshld/garmin-tekutekubeast` on 
 
 ### Non-negotiables
 - Keep `manifest.xml` app ID identical; preserve all existing persistent Storage keys (birth, birthEpoch, birthBaseline, xp, snacks, snackRemainder, friendship, patDay, pats, schema, family and daily watermarks).
-- Do not retroactively count steps, double-count steps or let mini-games create step XP.
-- Do not change automatic family evolution paths (Grove/Ember/Tide/Wisp) or their existing stage thresholds without specific user approval.
+- Do not retroactively count steps, double-count steps or let mini-games create **real watch step XP**. Passive time and care/game actions MAY award separate growth XP, per the new review.
+- Preserve automatic Grove/Ember/Tide/Wisp branching but add nonstep paths to all four families; the user explicitly requested that no evolution depend on being active. Retain stage thresholds provisionally and tune passive growth (~25 days to Legendary) with existing saved pets preserved.
 - No pet death, no punishment for recovery or inactivity, no mandatory gameplay while walking/running.
 - Foreground-only animations/sounds; no audible background step/poop notifications.
 - Follow safe editing: run simulator tests and layout audit before pushing; note unverified items, don't claim hardware tests without hardware.
+
+## First prerequisite: on-watch Developer Mode and inclusive growth
+
+Implement [newest v0.4 review](V0_4_REVIEW_AMENDMENTS.md) **before** the original P0–P5 tickets. On the normal watch application use Settings → Developer Mode and Dev Tools to accelerate a virtual lifecycle clock (1×/5×/20×/100×, +1h/+1d/+7d), force stages/needs and test the real Pet/Care/Play UI. The dev branch is a reversible snapshot INSIDE the same app, not a second app or separately installed Developer Lab. Discard synthetic state on exit; keep real watch steps and real pet save untouched. Then implement complete zero-step growth and bonuses for movement, with ~25 passive-only vs ~21 active Legendary days as a provisional target. Update old stage/step-only text in this roadmap accordingly.
 
 ## Ordered implementation tickets
 

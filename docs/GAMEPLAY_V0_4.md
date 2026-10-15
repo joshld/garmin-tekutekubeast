@@ -1,17 +1,17 @@
 # TekuTekuBeast — v0.4 Care, Play, Animation & Sound Specification
 
-**Important newer review:** [Accessibility, passive growth, Developer Lab, evolution pacing and simplified UI](V0_4_REVIEW_AMENDMENTS.md) overrides earlier step-only progression assumptions. Numbers remain provisional.
+**Important newer review:** [Inclusive growth, on-watch Developer Mode, evolution pacing and simplified UI](V0_4_REVIEW_AMENDMENTS.md) overrides earlier step-only progression assumptions. Numbers remain provisional.
 
 **Status:** APPROVED DIRECTION / PROPOSED IMPLEMENTATION; NOT PRESENT IN THE CURRENT WATCH BUILD.
 **Target:** Garmin Enduro 4 (Connect IQ native Monkey C watch-app, round 280 x 280 MIP / 64 colours).
-**Goal:** Keep watch-recorded walking/steps as the primary evolution progress, and add enjoyable, lightweight Tamagotchi-style care and games.
+**Goal:** Provide the full virtual-pet experience at zero steps, while rewarding additional real watch activity with bonus items and some growth acceleration, plus care and games.
 **Design policy:** Rest/recovery friendly, non-punitive, no permanent death, no fake steps, no pay-to-win, optional audio, no intrusive background prompts.
 
 ## Existing implementation to preserve
 
 The main branch already has Egg, Pip and Nimble pixel-art sprites, three watch screens (Pet/Care/Your Beast), watch-based ActivityMonitor step XP, background milestone reconciliation, pets that do not die, current friendship and snack counters, stage progression and family branching. It has been compiled and exercised in the Enduro 4 simulator per README. Preserve the app ID and existing Storage keys so the user keeps their current Pip and 5,974+ XP.
 
-Existing family rules and thresholds stay as in `docs/EVOLUTION_DESIGN.md`. Care/games may affect friendship and future rare-form eligibility, but MUST NOT override the existing automatic Grove/Ember/Tide/Wisp family selection by default.
+The existing step-only family criteria in `docs/EVOLUTION_DESIGN.md` will be adapted so all four families can also evolve through nonstep care/play/temperament patterns. Ordinary family selection stays mostly automatic, with earned rare exceptions; consult the newer v0.4 review before implementation.
 
 ## 1. Care attributes (0..100) and clock handling
 
