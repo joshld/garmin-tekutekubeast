@@ -1,6 +1,6 @@
 using Toybox.WatchUi;
 
-class StepPalInput extends WatchUi.BehaviorDelegate {
+class TekuTekuBeastInput extends WatchUi.BehaviorDelegate {
     function initialize() { BehaviorDelegate.initialize(); }
     function onSelect() {
         WatchUi.getCurrentView()[0].selectAction();

@@ -5,7 +5,7 @@ using Toybox.Time.Gregorian;
 
 // Shared foreground/background model. All credit is from watch step totals.
 (:background)
-class StepPalState {
+class TekuTekuBeastState {
     function initialize() {}
 
     function number(key) {

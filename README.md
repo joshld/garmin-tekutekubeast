@@ -1,8 +1,10 @@
-# StepPal — step-powered virtual pet for Garmin Enduro 4
+# TekuTekuBeast (テクテクビースト) — step-powered virtual pet for Garmin Enduro 4
+
+**Project formerly known as StepPal.** The Connect IQ application identifier remains unchanged to preserve existing watch save data when upgrading. The internal storage keys also remain unchanged.
 
 **Source prototype — not yet compiled, simulator-tested or installed on an Enduro 4.**
 
-StepPal is a *native Garmin Connect IQ watch app*, coded in Monkey C. It reads **step counts measured by the watch itself**, even when you have not started an activity. Garmin background 1,000-step milestones plus on-opening reconciliation help update progress without running a permanent foreground app. No phone app, cloud or account is required.
+TekuTekuBeast is a *native Garmin Connect IQ watch app*, coded in Monkey C. It reads **step counts measured by the watch itself**, even when you have not started an activity. Garmin background 1,000-step milestones plus on-opening reconciliation help update progress without running a permanent foreground app. No phone app, cloud or account is required.
 
 ## What the prototype is designed to do
 - Egg → Pip → Nimble → Adult → Champion → Legendary using **steps and elapsed days**.
@@ -34,3 +36,11 @@ Garmin **Enduro 4**: `enduro4`, 280×280 MIP. Native `watch-app`, not a watch fa
 - Physical Enduro 4 behaviour needs verification against Garmin Connect IQ SDK.
 
 Sources: [Background services](https://developer.garmin.com/connect-iq/articles/core-topics/Backgrounding.html), [ActivityMonitor](https://developer.garmin.com/connect-iq/api-docs/Toybox/ActivityMonitor.html).
+
+## Repository rename
+
+The GitHub repository's `garmin-steppal` slug should be renamed to `garmin-tekutekubeast` using **Settings → General → Repository name → Rename** on GitHub. This renames the remote without changing commit history. After changing it, update your local Git remote via:
+
+```sh
+git remote set-url origin https://github.com/joshld/garmin-tekutekubeast.git
+```

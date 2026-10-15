@@ -1,4 +1,4 @@
-# StepPal evolution design (v0.3)
+# TekuTekuBeast (テクテクビースト) evolution design (v0.3)
 
 This is the game-design specification; not all ideas are implemented in the present watch-app prototype.
 

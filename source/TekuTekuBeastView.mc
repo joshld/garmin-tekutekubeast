@@ -2,7 +2,7 @@ using Toybox.Graphics;
 using Toybox.Timer;
 using Toybox.WatchUi;
 
-class StepPalView extends WatchUi.View {
+class TekuTekuBeastView extends WatchUi.View {
     var pal;
     var page; // 0 = Pet, 1 = Care, 2 = Stats
     var refresher;
@@ -17,7 +17,7 @@ class StepPalView extends WatchUi.View {
 
     function initialize() {
         View.initialize();
-        pal = new StepPalState();
+        pal = new TekuTekuBeastState();
         page = 0;
         refresher = null;
     }
@@ -132,7 +132,7 @@ class StepPalView extends WatchUi.View {
     }
 
     function drawPet(dc) {
-        label(dc, 19, "STEP PAL", Graphics.FONT_LARGE);
+        label(dc, 19, "TEKUTEKU BEAST", Graphics.FONT_SMALL);
         label(dc, 51, pal.speciesName(), Graphics.FONT_SMALL);
         creature(dc);
         label(dc, 185, pal.mood(), Graphics.FONT_SMALL);
