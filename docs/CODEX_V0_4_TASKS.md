@@ -1,5 +1,7 @@
 # Codex execution plan — TekuTekuBeast v0.4
 
+**Read [v0.4 review amendments](V0_4_REVIEW_AMENDMENTS.md) before implementation.** Prior step-only evolution assumptions are superseded. Add a separate Developer Lab and make all normal evolutions possible with zero steps; growth must include passive and care XP. Preserve current saves. Simplify the Pet screen by dropping the app title and shortening other screens.
+
 **This is the requested implementation plan, not a claim that new care/games/animation features are coded.**
 
 ## Context and contract

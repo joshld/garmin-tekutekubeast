@@ -1,5 +1,7 @@
 # TekuTekuBeast — v0.4 Care, Play, Animation & Sound Specification
 
+**Important newer review:** [Accessibility, passive growth, Developer Lab, evolution pacing and simplified UI](V0_4_REVIEW_AMENDMENTS.md) overrides earlier step-only progression assumptions. Numbers remain provisional.
+
 **Status:** APPROVED DIRECTION / PROPOSED IMPLEMENTATION; NOT PRESENT IN THE CURRENT WATCH BUILD.
 **Target:** Garmin Enduro 4 (Connect IQ native Monkey C watch-app, round 280 x 280 MIP / 64 colours).
 **Goal:** Keep watch-recorded walking/steps as the primary evolution progress, and add enjoyable, lightweight Tamagotchi-style care and games.
