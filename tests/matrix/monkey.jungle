@@ -1,6 +1,11 @@
 project.manifest = manifest.xml
 base.sourcePath = ../../source;../art-preview/source;source
 base.resourcePath = ../../resources;../art-preview/resources
+enduro4.resourcePath = ../../resources-pet144;../art-preview/resources
+enduro3.resourcePath = ../../resources-pet144;../art-preview/resources
+fenix7x.resourcePath = ../../resources-pet144;../art-preview/resources
+fenix7xpro.resourcePath = ../../resources-pet144;../art-preview/resources
+fenix8solar51mm.resourcePath = ../../resources-pet144;../art-preview/resources
 fr265.resourcePath = ../../resources-native144;../art-preview/resources
 fr965.resourcePath = ../../resources-native192;../art-preview/resources
 venu3.resourcePath = ../../resources-native192;../art-preview/resources

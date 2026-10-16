@@ -9,4 +9,7 @@ class TekuTekuBeastService extends System.ServiceDelegate {
         beast.syncToday();
         Background.exit(null);
     }
+    // Silent schedule reconciliation; never import a foreground view or feedback.
+    function onSleepTime(){onSteps();}
+    function onWakeTime(){onSteps();}
 }

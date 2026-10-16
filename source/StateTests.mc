@@ -62,7 +62,7 @@ function familiesTest(logger){
 (:test)
 function navigationAndDevTest(logger){
     var v=new TekuTekuBeastView();v.beast=TestSupport.fixture();v.selectAction();
-    Test.assertEqual(v.rows.size(),7);v.selection=6;v.selectAction();Test.assert(v.menu.equals("Settings"));
+    Test.assertEqual(v.rows.size(),8);v.selection=6;v.selectAction();Test.assert(v.menu.equals("Settings"));
     v.selectAction();v.selectAction();Test.assert(v.beast.dev);Test.assert(v.menu.equals("Dev Tools"));
     v.selection=0;v.selectAction();v.selection=3;v.selectAction();Test.assertEqual(v.beast.speed,100);
     v.selection=1;v.selectAction();v.selection=2;v.selectAction();Test.assertEqual(v.beast.ageDays(),7);
@@ -71,20 +71,31 @@ function navigationAndDevTest(logger){
 }
 (:test)
 function miniGamesTest(logger){
-    var s=TestSupport.fixture();var star=new BeastGameView(s,0);star.selectAction();
-    for(var i=0;i<5;i++){star.elapsed=i*16+4;star.selectAction();}
-    Test.assertEqual(star.phase,3);Test.assertEqual(star.hits,5);Test.assertEqual(s.number("games"),1);
-    var memory=new BeastGameView(s,1);memory.selectAction();memory.phase=2;
-    for(var i=0;i<memory.sequence.size();i++){memory.memoryInput(memory.sequence[i]);}
-    Test.assertEqual(memory.phase,3);Test.assertEqual(s.number("games"),2);Test.assertEqual(s.xp(),0l);
-    var scan=new BeastGameView(s,1);scan.scanning=true;scan.sequence=[0,1,2];scan.phase=2;
-    for(var i=0;i<3;i++){scan.tick=i*4;scan.selectAction();}Test.assertEqual(scan.phase,3);
-    // The scan-mode game used the third rewarded slot. Further play is practice.
-    var quit=new BeastGameView(s,0);quit.selectAction();Test.assertEqual(s.number("games"),3);
-    // Automatic timeout completes exactly five attempts and no duplicate award.
+    var s=TestSupport.fixture();s.data["haptics"]=0;
+    var star=new BeastGameView(s,0);star.selectAction();
+    for(var attempt=0;attempt<15;attempt++){
+        star.lane=star.target;star.elapsed=(star.period()/2).toNumber()-1;star.selectAction();star.refresh();
+        Test.assert(star.caught);
+        while(star.phase==1 && star.attempts==attempt){star.refresh();}
+    }
+    Test.assertEqual(star.phase,3);Test.assertEqual(star.hits,15);Test.assertEqual(s.number("games"),1);
+    var memory=new BeastGameView(s,1);memory.selectAction();
+    for(var round=0;round<3;round++){
+        memory.phase=2;
+        while(memory.phase==2){memory.memoryInput(memory.sequence[memory.cursor]);}
+        memory.continueMemory();
+    }
+    Test.assertEqual(memory.phase,3);Test.assertEqual(memory.hits,3);Test.assertEqual(s.number("games"),2);
+    var scan=new BeastGameView(s,1);scan.scanning=true;scan.selectAction();
+    for(var round=0;round<3;round++){
+        scan.phase=2;
+        while(scan.phase==2){scan.tick=scan.sequence[scan.cursor]*6;scan.selectAction();}
+        scan.continueMemory();
+    }
+    Test.assertEqual(scan.phase,3);Test.assertEqual(s.number("games"),3);
     var timeout=new BeastGameView(s,0);timeout.selectAction();
-    for(var i=0;i<80;i++){timeout.refresh();}
-    Test.assertEqual(timeout.phase,3);Test.assertEqual(s.number("games"),3);
+    for(var i=0;i<300;i++){timeout.refresh();}
+    Test.assertEqual(timeout.phase,3);Test.assertEqual(s.number("games"),3);Test.assertEqual(s.xp(),0l);
     timeout.refresh();Test.assertEqual(s.number("games"),3);return true;
 }
 (:test)
@@ -147,4 +158,96 @@ function foregroundTimerLifecycleTest(logger){
     Test.assert(started && inactiveStopped && resumed && view.refresher==null && gameStopped);
     Test.assert(caughtUp);
     return true;
+}
+
+(:test)
+function v04UpgradePreservationTest(logger){
+    var old=TestSupport.fixture();old.observe(old.today(),5974);old.data["family"]=2;old.data["stageFloor"]=3;
+    old.data["friendship"]=77;old.data["collection"]=7;old.data["rareCollection"]=2;old.data["items"][6]=8;
+    old.data["snacks"]=5;old.data["careGrowth"]=250l;old.data["activityBonus"]=3000l;old.commit();
+    var saved=old.store.read("v4");
+    var newKeys=["sleepMode","bedMinute","wakeMinute","watchBed","watchWake","nextBed","nextWake","scheduleAt","sleepSource","autoLights","lights","lightsUntil","vibeStyle","gameSerial","gameDone","session","sessions","gameClaims","easy","v5"];
+    for(var i=0;i<newKeys.size();i++){saved.remove(newKeys[i]);}
+    old.store.write("v4",saved);var restored=new TekuTekuBeastState();restored.store=old.store;restored.skipWatch=true;restored.testNow=old.testNow;restored.start();
+    Test.assertEqual(restored.xp(),5974l);Test.assertEqual(restored.stage(),3);Test.assertEqual(restored.family(),2);
+    Test.assertEqual(restored.friendship(),77);Test.assertEqual(restored.snacks(),5);Test.assertEqual(restored.number("collection"),7);
+    Test.assertEqual(restored.number("rareCollection"),2);Test.assertEqual(restored.data["items"][6],8);
+    Test.assertEqual(restored.number("careGrowth"),250l);Test.assertEqual(restored.number("activityBonus"),3000l);
+    Test.assertEqual(restored.data["counts"][old.today()%32],5974);Test.assertEqual(restored.number("version"),4);
+    Test.assertEqual(restored.data["sessions"].size(),3);restored.commit();restored.data=null;restored.start();
+    Test.assertEqual(restored.number("gameSerial"),0);Test.assertEqual(restored.xp(),5974l);return true;
+}
+(:test)
+function scheduledSleepAndLightsTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=1;s.data["bedMinute"]=1320;s.data["wakeMinute"]=420;
+    s.testNow+=((1320-BeastSleep.minuteAt(s.now())+1440)%1440)*60;
+    s.data["lastCare"]=s.now();s.data["energy"]=0;s.data["poop"]=2;Test.assert(s.isNight());Test.assert(s.isDark());Test.assert(s.mood().equals("ASLEEP"));
+    var v=new TekuTekuBeastView();v.beast=s;v.animation="happy";v.animationTicks=12;Test.assert(v.visualState().equals("sleep"));
+    s.toggleLights();Test.assert(!s.isDark());Test.assert(s.isNight());s.testNow+=8*3600;s.tick();Test.assert(s.number("energy")>=64);
+    Test.assert(s.isNight());Test.assert(s.isDark());s.testNow+=3600;s.tick();Test.assert(!s.isNight());
+    s.data["poop"]=0;s.data["energy"]=0;Test.assert(s.mood().equals("SLEEPY"));Test.assert(v.visualState().equals("sleep"));
+    s.rest();Test.assert(s.mood().equals("RESTING"));var energy=s.number("energy");s.testNow-=3600;s.tick();Test.assertEqual(s.number("energy"),energy);
+    s.data["sleepMode"]=2;s.data["sleepUntil"]=0l;s.data["energy"]=80;Test.assert(!s.isNight());return true;
+}
+(:test)
+function sleepUpcomingFallbackTest(logger){
+    var s=TestSupport.fixture();s.data["nextBed"]=s.now()+18*3600;s.data["nextWake"]=s.now()+2*3600;
+    Test.assert(s.isNight());s.data["nextBed"]=s.now()+2*3600;s.data["nextWake"]=s.now()+10*3600;Test.assert(!s.isNight());
+    s.data["nextBed"]=0l;s.data["nextWake"]=0l;s.data["watchBed"]=0;s.data["watchWake"]=1439;
+    Test.assert(s.isNight());s.data["watchWake"]=0;Test.assert(!s.isNight());
+    Test.assert(BeastSleep.inWindow(60,1320,420));Test.assert(!BeastSleep.inWindow(600,1320,420));
+    Test.assert(BeastSleep.inWindow(600,540,1020));return true;
+}
+(:test)
+function gameSessionAtomicityTest(logger){
+    var s=TestSupport.fixture();s.data["adventure"]=2;s.commit();var trip=s.beginSession(2);var id=trip["id"];
+    Test.assertEqual(s.number("adventure"),1);Test.assertEqual(s.beginSession(2)["id"],id);Test.assertEqual(s.number("adventure"),1);
+    trip["route"]=3;trip["node"]=2;trip["finds"]=3;Test.assert(s.saveSession(trip));
+    s.data=null;s.start();Test.assertEqual(s.data["sessions"][2]["route"],3);Test.assertEqual(s.number("adventure"),1);
+    var answer=s.completeSession(trip,true);Test.assert(answer.find("FOUND ")==0);Test.assertEqual(s.number("encounters"),1);
+    Test.assert(s.completeSession(trip,true).equals("ALREADY SAVED"));Test.assert(!s.saveSession(trip));Test.assertEqual(s.number("encounters"),1);
+    Test.assertEqual(s.xp(),0l);var arcade=s.beginSession(0);var slots=s.number("games");s.completeSession(arcade,true);s.completeSession(arcade,true);
+    Test.assertEqual(s.number("games"),slots+1);Test.assertEqual(s.xp(),0l);return true;
+}
+(:test)
+function gameRetryReplayAndSuspendTest(logger){
+    var s=TestSupport.fixture();s.data["haptics"]=0;var game=new BeastGameView(s,1);game.selectAction();game.phase=2;
+    var first=game.sequence[0];game.memoryInput((first+1)%3);Test.assertEqual(game.phase,4);Test.assert(game.replayRound);Test.assertEqual(s.number("games"),0);
+    game.continueMemory();Test.assertEqual(game.phase,1);game.phase=2;game.cursor=0;game.memoryInput((first+1)%3);Test.assert(!game.replayRound);
+    game.continueMemory();Test.assertEqual(game.round,1);game.onHide();var resumed=new BeastGameView(s,1);resumed.onShow();resumed.onHide();
+    Test.assertEqual(resumed.round,1);Test.assertEqual(resumed.retries,0);Test.assertEqual(s.number("games"),0);
+    var trip=new BeastGameView(s,2);s.data["adventure"]=1;trip.trail=2;trip.selectAction();
+    for(var stop=0;stop<3;stop++){for(var t=0;t<12;t++){trip.refresh();}Test.assertEqual(trip.phase,2);trip.choice=stop%2;trip.selectAction();Test.assertEqual(trip.phase,4);trip.nextTrail();}
+    Test.assertEqual(trip.phase,3);Test.assertEqual(s.number("adventure"),0);Test.assertEqual(s.number("encounters"),1);
+    Test.assertEqual(s.number("games"),0);Test.assertEqual(s.xp(),0l);return true;
+}
+(:test)
+function devNewSystemsIsolationTest(logger){
+    var s=TestSupport.fixture();s.observe(s.today(),4200);s.commit();var d=s.enableDev();d.simulateSleep(true);
+    d.toggleLights();d.data["adventure"]=20;var trip=d.beginSession(2);trip["finds"]=3;d.completeSession(trip,true);
+    d.data["easy"]=1;d.jump(7*86400);d.commit();
+    var restored=new TekuTekuBeastState();restored.store=s.store;restored.testNow=s.testNow;restored.skipWatch=true;restored.start();
+    Test.assertEqual(restored.number("adventure"),0);Test.assertEqual(restored.number("encounters"),0);Test.assertEqual(restored.number("easy"),0);
+    Test.assertEqual(restored.number("sleepMode"),0);Test.assertEqual(restored.number("lightsUntil"),0l);Test.assertEqual(restored.xp(),4200l);
+    Test.assertEqual(restored.number("gameSerial"),0);return true;
+}
+(:test)
+function sessionMidnightAndPracticeTest(logger){
+    var s=TestSupport.fixture();s.data["games"]=3;var session=s.beginSession(0);var energy=s.number("energy");
+    Test.assert(s.completeSession(session,true).equals("PRACTICE"));Test.assertEqual(s.number("energy"),energy);
+    var next=s.beginSession(1);s.testNow+=86400;s.tick();Test.assertEqual(s.number("games"),0);
+    s.completeSession(next,true);Test.assertEqual(s.number("games"),1);s.data=null;s.start();s.completeSession(next,true);
+    Test.assertEqual(s.number("games"),1);var trip=s.beginSession(2);Test.assert(trip["practice"]);
+    trip["finds"]=9;Test.assert(s.completeSession(trip,true).equals("SCOUT COMPLETE"));
+    Test.assertEqual(s.number("encounters"),0);Test.assertEqual(s.number("adventure"),0);Test.assertEqual(s.number("discoveryMask"),0);
+    Test.assertEqual(s.xp(),0l);return true;
+}
+(:test)
+function quietBedtimeFeedbackTest(logger){
+    var s=TestSupport.fixture();var d=s.enableDev();d.simulateSleep(true);d.data["sound"]=1;d.data["haptics"]=1;
+    new FeedbackManager().testCue(d,true);Test.assert(FeedbackManager.lastStatus.equals("BEDTIME: QUIET"));
+    Test.assertEqual(d.number("sound"),1);Test.assertEqual(d.number("haptics"),1);
+    d.simulateSleep(false);d.data["sound"]=0;d.data["haptics"]=0;FeedbackManager.lastCue=-2000;
+    new FeedbackManager().cue(d,"eat");Test.assert(FeedbackManager.lastStatus.equals("FEEDBACK OFF"));
+    Test.assertEqual(s.xp(),0l);return true;
 }

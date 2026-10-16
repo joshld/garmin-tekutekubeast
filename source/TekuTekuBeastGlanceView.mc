@@ -2,8 +2,9 @@ using Toybox.Application.Storage;
 using Toybox.WatchUi;
 using Toybox.Graphics;
 using Toybox.Lang;
+using Toybox.Time;
 
-// This entry point only reads the real cached save. No State, clock, timers,
+// This entry point only reads the real cached save. No State, growth advancement, timers,
 // feedback, migration or inventory writes are reachable from the glance.
 (:glance)
 class TekuTekuBeastGlanceView extends WatchUi.GlanceView {
@@ -18,7 +19,14 @@ class TekuTekuBeastGlanceView extends WatchUi.GlanceView {
         var index=0;
         if(snapshot!=null && snapshot.hasKey("cachedSprite")){index=snapshot["cachedSprite"] as Lang.Number;}
         if(index<0 || index>=ids.size()){index=0;}
-        if(index!=cachedId){sprite=WatchUi.loadResource(ids[index]);cachedId=index;}
+        var sleeping=snapshot!=null && (BeastSleep.sleeping(snapshot,Time.now().value()) || BeastSleep.value(snapshot,"energy",80)<20);
+        var key=index+(sleeping?100:0);
+        if(key!=cachedId){
+            if(sleeping){
+                ids=[Rez.Drawables.V5EggSleepSmall,Rez.Drawables.V5PipSleepSmall,Rez.Drawables.V5NimbleSleepSmall,Rez.Drawables.V5Grove3SleepSmall,Rez.Drawables.V5Grove4SleepSmall,Rez.Drawables.V5Grove5SleepSmall,Rez.Drawables.V5Ember3SleepSmall,Rez.Drawables.V5Ember4SleepSmall,Rez.Drawables.V5Ember5SleepSmall,Rez.Drawables.V5Tide3SleepSmall,Rez.Drawables.V5Tide4SleepSmall,Rez.Drawables.V5Tide5SleepSmall,Rez.Drawables.V5Wisp3SleepSmall,Rez.Drawables.V5Wisp4SleepSmall,Rez.Drawables.V5Wisp5SleepSmall];
+            }
+            sprite=WatchUi.loadResource(ids[index]);cachedId=key;
+        }
     }
     function onUpdate(dc){
         readSummary();
@@ -26,8 +34,8 @@ class TekuTekuBeastGlanceView extends WatchUi.GlanceView {
         if(sprite!=null){dc.drawBitmap(4,(dc.getHeight()-40)/2,sprite);}
         var name="EGG";var mood="OPEN GAME";var progress=0.0;
         if(snapshot!=null && snapshot.hasKey("cachedName")){
-            name=snapshot["cachedName"];mood=snapshot["cachedMood"];progress=snapshot["cachedProgress"];
-            if(snapshot["poop"]>0){mood="CLEANUP";}
+            name=snapshot["cachedName"];mood=BeastSleep.mood(snapshot,Time.now().value());progress=snapshot["cachedProgress"];
+            if(snapshot["poop"]>0 && !BeastSleep.sleeping(snapshot,Time.now().value()) && BeastSleep.value(snapshot,"energy",80)>=20){mood="CLEANUP";}
         }
         var font=Graphics.FONT_XTINY;var left=50;var width=dc.getWidth()-left-12;
         var lines=[name];var split=name.find(" ");
@@ -50,6 +58,13 @@ class TekuTekuBeastGlanceView extends WatchUi.GlanceView {
         if(top<0){top=0;}
         for(var j=0;j<lines.size();j++){drawLine(dc,left,top+row*j,font,lines[j]);}
         drawLine(dc,left,top+row*lines.size(),font,mood);
+        if(snapshot!=null && BeastSleep.value(snapshot,"poop",0)>0){
+            var pixels=[8,28,30,62,127,127];dc.setColor(0xFFFF55,Graphics.COLOR_TRANSPARENT);
+            for(var r=0;r<pixels.size();r++){for(var c=0;c<7;c++){
+                if((pixels[r]&(1<<(6-c)))!=0){dc.fillRectangle(dc.getWidth()-10+c,3+r,1,1);}
+            }}
+        }
+        dc.setColor(0x005500,Graphics.COLOR_TRANSPARENT);dc.fillRectangle(left,dc.getHeight()-8,width,4);
         dc.setColor(0x55AA55,Graphics.COLOR_TRANSPARENT);dc.fillRectangle(left,dc.getHeight()-8,(width*progress).toNumber(),4);
     }
     function drawLine(dc,left,top,font,value){dc.drawText(left,top,font,value,Graphics.TEXT_JUSTIFY_LEFT);}

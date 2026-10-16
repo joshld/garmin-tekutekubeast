@@ -1,6 +1,11 @@
 project.manifest = manifest.xml
 base.sourcePath = source
 base.resourcePath = resources
+enduro4.resourcePath = resources-pet144
+enduro3.resourcePath = resources-pet144
+fenix7x.resourcePath = resources-pet144
+fenix7xpro.resourcePath = resources-pet144
+fenix8solar51mm.resourcePath = resources-pet144
 fr265.resourcePath = resources-native144
 fr965.resourcePath = resources-native192
 venu3.resourcePath = resources-native192

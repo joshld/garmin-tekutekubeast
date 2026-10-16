@@ -96,6 +96,24 @@ for native_size in (144, 192):
             check(struct.unpack(">II", header[16:24]) == (native_size, native_size),
                   "Wrong native sprite size: " + resource_id)
 
+for directory, size in (("resources",128),("resources-pet144",144),("resources-native144",200),("resources-native192",232)):
+    catalog = ROOT / directory / "drawables/drawables.xml"
+    check(catalog.is_file(), "Missing v0.5 resource catalog: " + directory)
+    if not catalog.is_file():
+        continue
+    for bitmap in ET.parse(catalog).getroot().iter("bitmap"):
+        resource_id = bitmap.get("id", "")
+        if not resource_id.startswith("V5"):
+            continue
+        path = catalog.parent / bitmap.get("filename", "")
+        check(path.is_file(), "Missing v0.5 bitmap: " + str(path))
+        if path.is_file():
+            header = path.read_bytes()[:24]
+            expected = 40 if resource_id.endswith("Small") else size
+            check(struct.unpack(">II",header[16:24]) == (expected,expected), "Wrong v0.5 bitmap size: " + resource_id)
+            if resource_id.endswith("Small"):
+                check(bitmap.get("scope") == "glance", "Sleeping Glance sprite lacks glance scope")
+
 if errors:
     print("Preflight FAILED (structural checks only):")
     for e in errors:

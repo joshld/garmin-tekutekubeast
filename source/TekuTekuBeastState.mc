@@ -2,6 +2,7 @@ using Toybox.ActivityMonitor;
 using Toybox.Time;
 using Toybox.Time.Gregorian;
 using Toybox.Lang;
+using Toybox.UserProfile;
 
 (:background)
 class TekuTekuBeastState {
@@ -25,6 +26,7 @@ class TekuTekuBeastState {
             if(!data.hasKey("activityBonus")){data["activityBonus"]=0l;}
             if(!data.hasKey("activityUnitGrowth")){data["activityUnitGrowth"]=1000;}
             if(!data.hasKey("discoveryMask")){data["discoveryMask"]=0;for(var i=0;i<8;i++){if(data["items"][i]>0){data["discoveryMask"]|=1<<i;}}}
+            migrateV5();
             return;
         }
         var exists=store.read("birth")!=null;
@@ -58,8 +60,39 @@ class TekuTekuBeastState {
         // Capture existing stages before changing the hatch rule. No retroactive
         // passive XP, no reset of legacy keys, and a retained migration snapshot.
         if(exists){data["stageFloor"]=oldStage(xp(),ageDays());if(number("family")>0){data["stageFloor"]=max(3,number("stageFloor"));}}
-        store.write("v4.migration",store.copy(data));commit();
+        migrateV5();store.write("v4.migration",store.copy(data));commit();
     }
+    function migrateV5(){
+        // Additive migration: canonical key/version and all existing values stay
+        // intact. A single atomic document also owns resumable game transactions.
+        var defaults={"sleepMode"=>0,"bedMinute"=>1320,"wakeMinute"=>420,"watchBed"=>1320,"watchWake"=>420,
+            "nextBed"=>0l,"nextWake"=>0l,"scheduleAt"=>0l,"sleepSource"=>"FALLBACK","autoLights"=>1,"lights"=>0,"lightsUntil"=>0l,"vibeStyle"=>0,
+            "gameSerial"=>0,"gameDone"=>0,"session"=>null,"sessions"=>[null,null,null],"gameClaims"=>[0,0,0],"easy"=>0,"v5"=>1};
+        var keys=defaults.keys();for(var i=0;i<keys.size();i++){if(!data.hasKey(keys[i])){data[keys[i]]=defaults[keys[i]];}}
+    }
+    function refreshSleep(){
+        if(dev || skipWatch || number("sleepMode")!=0){return;}
+        data["nextBed"]=0l;data["nextWake"]=0l;data["scheduleAt"]=now();data["sleepSource"]="FALLBACK";
+        data["watchBed"]=number("bedMinute");data["watchWake"]=number("wakeMinute");
+        try{
+            var p=UserProfile.getProfile();
+            if(p!=null){
+                if(p.sleepTime!=null && p.wakeTime!=null){
+                    data["watchBed"]=(p.sleepTime.value()/60)%1440;data["watchWake"]=(p.wakeTime.value()/60)%1440;data["sleepSource"]="WATCH TYPICAL";
+                }
+                if((p has :upcomingSleepTime) && (p has :upcomingWakeTime) && p.upcomingSleepTime!=null && p.upcomingWakeTime!=null){
+                    var b=p.upcomingSleepTime.value().toLong();var w=p.upcomingWakeTime.value().toLong();
+                    if(b>now() && w>now() && b-now()<=172800 && w-now()<=172800){
+                        data["nextBed"]=b;data["nextWake"]=w;data["sleepSource"]="WATCH UPCOMING";
+                    }
+                }
+            }
+        }catch(e instanceof Lang.Exception){data["sleepSource"]="FALLBACK";}
+    }
+    function isNight(){return BeastSleep.night(data,now());}
+    function isSleeping(){return BeastSleep.sleeping(data,now());}
+    function isDark(){return BeastSleep.dark(data,now());}
+    function toggleLights(){data["lights"]=isDark()?0:1;data["lightsUntil"]=now()+3600;commit();}
     function calendarMoment(key){
         return Gregorian.moment({:year=>(key/10000).toNumber(),:month=>((key/100)%100).toNumber(),:day=>key%100,:hour=>0,:minute=>0,:second=>0}).value().toLong();
     }
@@ -115,6 +148,10 @@ class TekuTekuBeastState {
             data["fullness"]=max(30,number("fullness")-3*((old+h)/6-old/6));
             data["happiness"]=max(40,number("happiness")-2*((old+h)/8-old/8));
             data["energy"]=min(100,number("energy")+5*((old+h)/4-old/4));
+            for(var hour=0;hour<h;hour++){
+                var at=number("lastCare")+hour*3600+1800;
+                if(BeastSleep.sleeping(data,at)){data["energy"]=min(100,number("energy")+8);}
+            }
             data["lastCare"]=care>86400?t:number("lastCare")+h*3600;
         }
         if(number("poopDue")>0 && t>=number("poopDue") && number("poop")<2 && t-number("lastPoop")>=14400){
@@ -134,7 +171,7 @@ class TekuTekuBeastState {
         var food=number("snackRemainder")+delta;data["snacks"]=min(12,number("snacks")+food/2500);data["snackRemainder"]=food%2500;
     }
     function syncToday(){
-        start();tick();
+        start();refreshSleep();tick();
         if(!dev && !skipWatch){var info=ActivityMonitor.getInfo();if(info.steps!=null){observe(today(),info.steps);}
             var minutes=null;var pushes=null;
             if(info has :activeMinutesDay){var a=info.activeMinutesDay;if(a!=null){minutes=a.moderate+a.vigorous;}}
@@ -204,6 +241,40 @@ class TekuTekuBeastState {
         data["games"]++;data["energy"]-=10;data["happiness"]=clamp(number("happiness")+(win?15:5));
         data["friendship"]=clamp(friendship()+2);careReward(win?75:40,kind==0?1:3);commit();return win?"WELL PLAYED!":"NICE TRY!";
     }
+    function beginSession(kind){
+        tick();var current=data["sessions"][kind];if(current!=null){return store.copy(current);}
+        data["gameSerial"]++;var seed=((realNow()%100000)+number("gameSerial")*719).toNumber();
+        var session={"id"=>number("gameSerial"),"kind"=>kind,"round"=>0,"elapsed"=>0,"attempts"=>0,
+            "hits"=>0,"score"=>0,"combo"=>0,"best"=>0,"sequence"=>[],"cursor"=>0,"retries"=>0,
+            "phase"=>1,"route"=>0,"node"=>0,"risk"=>0,"finds"=>0,"seed"=>seed,"travel"=>0,"choice"=>0};
+        session["practice"]=kind==2 && number("adventure")<1;
+        if(kind==2 && !session["practice"]){data["adventure"]--;}
+        data["sessions"][kind]=session;commit();return store.copy(session);
+    }
+    function saveSession(session){
+        var kind=session["kind"];var current=data["sessions"][kind];
+        if(current==null || current["id"]!=session["id"] || data["gameClaims"][kind]>=session["id"]){return false;}
+        data["sessions"][kind]=store.copy(session);commit();return true;
+    }
+    function completeSession(session,win){
+        tick();var kind=session["kind"];var current=data["sessions"][kind];
+        if(current==null || current["id"]!=session["id"] || data["gameClaims"][kind]>=session["id"]){return "ALREADY SAVED";}
+        // Claim + final inventory/reward + removal are one atomic Storage write.
+        data["gameClaims"][kind]=session["id"];data["sessions"][kind]=null;
+        if(kind==2){
+            if(session.hasKey("practice") && session["practice"]){commit();return "SCOUT COMPLETE";}
+            // Route choices shape loot pools; an unowned item is favoured without
+            // ever requiring activity. Seed is durable: replay/restart cannot reroll.
+            var route=session["route"];var pools=[[0,1,2,7],[0,5,1,6],[0,3,2,7],[0,4,6,5]];
+            var seed=(session["seed"]*17+session["risk"]*31+session["finds"]*13)%65521;
+            var pool=pools[route];var item=pool[seed%pool.size()];
+            if(session["finds"]>=2){for(var i=0;i<8;i++){var candidate=(seed+i)%8;if((number("discoveryMask")&(1<<candidate))==0){item=candidate;break;}}}
+            data["items"][item]++;data["discoveryMask"]=number("discoveryMask")|(1<<item);data["encounters"]++;
+            data["personality"][route]++;if(item==0){data["snacks"]=min(12,snacks()+1);}
+            commit();return "FOUND "+["BERRY","KITE","RIBBON","SHELL","LANTERN","CROWN","CRYSTAL","COMPASS"][item];
+        }
+        var outcome=gameReward(win,kind);commit();return outcome;
+    }
     function explore(choice){
         tick();if(number("adventure")<1){return "EARN ENERGY";}data["adventure"]--;data["encounters"]++;
         var item=(number("encounters")+choice)%8;data["items"][item]++;data["discoveryMask"]=number("discoveryMask")|(1<<item);data["personality"][choice%4]++;
@@ -229,9 +300,7 @@ class TekuTekuBeastState {
         data["personality"]=[0,0,0,0];data["lastGrowth"]=now();data["growthRemainder"]=0l;commit();return true;
     }
     function mood(){
-        if(number("poop")>0){return "MESSY";}if(number("sleepUntil")>now() || number("energy")<20){return "SLEEPY";}
-        if(number("fullness")<45){return "HUNGRY";}if(number("happiness")>=85){return "EXCITED";}
-        if(number("happiness")>=70){return "PLAYFUL";}return friendship()>=25?"CONTENT":"COZY";
+        return BeastSleep.mood(data,now());
     }
     function enableDev(){
         syncHistory();var b=new TekuTekuBeastState();b.store=store;b.data=store.copy(data);b.dev=true;
@@ -240,4 +309,11 @@ class TekuTekuBeastState {
     function setSpeed(value){virtualNow=now();anchor=realNow();speed=value;}
     function jump(seconds){virtualNow=now()+seconds;anchor=realNow();tick();}
     function devSet(key,value){if(dev){data[key]=value;}}
+    function simulateSleep(night){
+        if(!dev){return;}data["sleepMode"]=1;
+        var minute=BeastSleep.minuteAt(now());data["bedMinute"]=(minute+(night?1439:1))%1440;
+        data["wakeMinute"]=(minute+(night?60:1439))%1440;data["sleepUntil"]=0l;
+        data["lightsUntil"]=0l;data["nextBed"]=0l;data["nextWake"]=0l;
+        if(!night){data["energy"]=80;}
+    }
 }
