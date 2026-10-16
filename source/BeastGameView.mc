@@ -163,6 +163,16 @@ class BeastGameView extends TekuTekuBeastView {
         else{selectAction();}
     }
     function resultTouchChoice(top){return top>touchWidth*0.845?1:0;}
+    function resultDetail(){
+        if(kind!=2){return "SCORE "+score+"  BEST "+(kind==0?best:hits);}
+        return result.equals("SCOUT COMPLETE")?"SCOUT: NO LOOT":"IN YOUR COLLECTION";
+    }
+    function trailChoice(){
+        if(node==2){return choice==0?"> OPEN SLOWLY":"> PUSH OPEN";}
+        var safe=node==0?["HELP","SEARCH","FOLLOW","FOLLOW"]:["CROSS","CLIMB","SEARCH","READ"];
+        var bold=node==0?["EXPLORE","CLIMB","DIVE","CHASE"]:["DETOUR","CIRCLE","DIVE","TOUCH"];
+        return "> "+(choice==0?safe[trail]:bold[trail]);
+    }
     function back(){checkpoint();WatchUi.popView(WatchUi.SLIDE_RIGHT);return true;}
     function drawPlayer(dc,cx,ground,pose,hop){
         if(frames==null){loadSprite();}
@@ -212,7 +222,7 @@ class BeastGameView extends TekuTekuBeastView {
         }else if(phase==3){
             label(dc,y(dc,0.25),result,Graphics.FONT_XTINY);
             drawPlayer(dc,dc.getWidth()/2,y(dc,0.66),beast.number("motion")==0?0:(tick%8<4?4:1),beast.number("motion")==2 && tick%8<4?5:0);
-            label(dc,y(dc,0.65),kind==2?"IN YOUR COLLECTION":"SCORE "+score+"  BEST "+(kind==0?best:hits),Graphics.FONT_XTINY);
+            label(dc,y(dc,0.65),resultDetail(),Graphics.FONT_XTINY);
             label(dc,y(dc,0.75),(resultChoice==0?"> ":"")+(kind==2?"ANOTHER TRIP":"PLAY AGAIN"),Graphics.FONT_XTINY);
             label(dc,y(dc,0.86),(resultChoice==1?"> ":"")+"EXIT",Graphics.FONT_XTINY);
         }else if(kind==0){
@@ -236,7 +246,7 @@ class BeastGameView extends TekuTekuBeastView {
             drawMap(dc);
             if(phase==2){
                 label(dc,y(dc,0.675),[["HELP A FRIEND","SEARCH THE CAVE","FOLLOW BUBBLES","FOLLOW A WISP"],["CROSS THE BRIDGE","CLIMB THE RIDGE","CHECK THE REEF","READ THE RUNES"],["OPEN THE CHEST","OPEN THE CHEST","OPEN THE CHEST","OPEN THE CHEST"]][node][trail],Graphics.FONT_XTINY);
-                label(dc,y(dc,0.775),choice==0?"> SEARCH":"> DETOUR",Graphics.FONT_XTINY);
+                label(dc,y(dc,0.775),trailChoice(),Graphics.FONT_XTINY);
                 label(dc,y(dc,0.875),"GO",Graphics.FONT_XTINY);
             }else{label(dc,y(dc,0.76),phase==4?hint:"EXPLORING...",Graphics.FONT_XTINY);}
         }

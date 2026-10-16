@@ -81,6 +81,10 @@ function miniGamesTest(logger){
     }
     Test.assertEqual(star.phase,3);Test.assertEqual(star.hits,15);Test.assertEqual(s.number("games"),1);
     Test.assertEqual(star.desiredGamePeriod(),1000);
+    var scout=new BeastGameView(s,2);scout.result="SCOUT COMPLETE";Test.assert(scout.resultDetail().equals("SCOUT: NO LOOT"));
+    scout.result="FOUND BERRY";Test.assert(scout.resultDetail().equals("IN YOUR COLLECTION"));
+    Test.assert(scout.trailChoice().equals("> HELP"));scout.node=1;Test.assert(scout.trailChoice().equals("> CROSS"));
+    scout.choice=1;Test.assert(scout.trailChoice().equals("> DETOUR"));scout.node=2;Test.assert(scout.trailChoice().equals("> PUSH OPEN"));
     var memory=new BeastGameView(s,1);memory.selectAction();
     for(var round=0;round<3;round++){
         memory.phase=2;
