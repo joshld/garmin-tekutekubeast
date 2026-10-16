@@ -1,44 +1,112 @@
-# TekuTekuBeast (テクテクビースト) — step-powered virtual pet for Garmin Enduro 4
+# TekuTekuBeast
 
-The Connect IQ application identifier and internal storage keys remain stable to preserve existing watch save data when upgrading.
+A native, offline Garmin virtual-beast game. Grow through time, care and play;
+genuine watch activity adds growth and extra adventure opportunities. No phone,
+internet connection, exercise requirement, death or recovery-day punishment.
 
-**Development build — compiled with Connect IQ SDK 9.2.0 and exercised in the Enduro 4 simulator profile (firmware 6.0.3). It has not yet been installed on physical Enduro 4 hardware.**
+**v0.4 development beta.** Source implementation is real; physical-watch audio,
+battery, upgrade and Glance-list checks are still required. See the exact
+[validation log](docs/V0_4_VALIDATION.md) and [device matrix](docs/DEVICE_MATRIX.md) before making support
+or hardware-testing claims.
 
-TekuTekuBeast is a *native Garmin Connect IQ watch app*, coded in Monkey C. It reads **step counts measured by the watch itself**, even when you have not started an activity. Garmin background 1,000-step milestones plus on-opening reconciliation help update progress without running a permanent foreground app. No phone app, cloud or account is required.
+## Play
 
-## What the prototype is designed to do
-- Egg → Pip → Nimble → Adult → Champion → Legendary using **steps and elapsed days**.
-- Four automatic evolution families based on recent activity: **Grove**, **Ember**, **Tide** and **Wisp**.
-- 1 XP per newly counted step, saved persistently with per-day step watermarks to avoid double credit.
-- Earn one snack per 2,500 new steps (max 12), feed your creature or pat it to increase friendship.
-- No permanent pet death, no XP penalties for resting.
-- Unlimited post-Legendary Mastery levels: one extra level per 25,000 steps after 300,000.
-- Three app screens: Pet / Care / Stats. UP/DOWN navigates; SELECT pats or feeds.
+- Pet / Care / Details: UP and DOWN change pages; SELECT opens Actions.
+- Actions: Feed, Clean, Play, Pat, Rest, Collection and Settings. BACK returns.
+- Two free daily meals, earned snacks, fullness, joy, energy, cleanliness, poop
+  and friendship. Feeding schedules poop; Clean clears it directly.
+- Star Catch: five reaction attempts. Memory Steps: repeat UP/SELECT/DOWN.
+  Trail Treasure: spend Adventure Energy on a family-themed route and discovery.
+- Three rewarded games/day, then unlimited practice. Games never create steps.
+- Collect food, toys and cosmetics; register normal and rare family Legendaries.
+  Keep a favourite forever with mastery, or explicitly archive and start an egg.
+- Touch swipes navigate where available; Memory also supports a timed SELECT
+  choice on watches without UP. Dedicated app Menu input can advance selection
+  on touch-first models; five-button system shortcuts are not intercepted.
 
-**Device & glance roadmap:** [Watch compatibility, activity bonuses and on-watch Glance](docs/ACTIVITY_AND_GLANCE.md) — design only, not yet in current app.
+## Growth and activity
 
-**Review amendments (newest requirements):** [Inclusive ~3–4-week progression, on-watch Developer Mode, hatch pacing, cleaner UI and more Garmin watches](docs/V0_4_REVIEW_AMENDMENTS.md). Proposed only; no gameplay code changed.
+Genuine watch steps remain a separate lifetime ledger. Default growth is 12,000
+per elapsed day, optional care growth (300/day), plus genuine step growth.
+Passive-only Legendary is about 25 days; active play can reach the 21-day age
+floor. Egg naturally hatches around 24 hours; care or activity can accelerate it,
+but never before eight hours. Existing evolved pets never revert to eggs.
 
-**New v0.4 proposal (not yet implemented):** [Care, games, poop, animation and sound specification](docs/GAMEPLAY_V0_4.md) · [Prioritised Codex implementation plan](docs/CODEX_V0_4_TASKS.md). These proposed features are not part of the current build.
+Grove, Ember, Tide and Wisp have nonactivity personality paths. Step milestones,
+supported active minutes and wheelchair pushes grant additional Adventure Energy
+and growth bonuses (default 1,000 growth per milestone, capped at five/day);
+overlapping physical metrics are not credited separately. Care and games earn
+the same exploration currency and access to the same discoveries. Activity type
+identification is not assumed for an unrelated Connect IQ watch app.
 
-See [evolution design](docs/EVOLUTION_DESIGN.md) for stage numbers, complete species trees, rare forms, Star Charms, retirement and collection roadmap.
+See [evolution rules](docs/EVOLUTION_DESIGN.md) for the actual implemented tree.
 
-## Build target and setup
+## Developer Mode — same installed app
 
-Garmin **Enduro 4**: `enduro4`, 280×280 MIP. Native `watch-app`, not a watch face.
+Actions > Settings > Developer > Enable temporary test. The normal screens
+remain, with a small DEV indicator and Dev Tools:
 
-1. Install [Garmin Connect IQ SDK](https://developer.garmin.com/connect-iq/sdk/) and its VS Code Monkey C extension.
-2. Open the repository and select the Enduro 4 device in the SDK.
-3. Create/select a developer key, compile and run in the Enduro 4 simulator.
-4. Verify history reconciliation, daily rollover, background events, save-state migration, controls and battery before sideloading to the watch.
+- 1× / 5× / 20× / 100× virtual clock; +1 hour / +1 day / +7 days.
+- Force stage/family; set needs; grant test stock; spawn/clean poop; sleep/evolve.
+- Preview poses, games, sound and vibration; change test balancing values.
+- Reset to the real-pet copy, a fresh egg, a hungry/messy pet or a Legendary.
 
-**Status:** experimental. The first artwork pass adds concept-inspired pixel-art sprites for Egg, Pip and Nimble, compact watch layouts, a foreground idle bob and care-action feedback. Adult/Champion/Legendary family sprites still use the previous primitive drawings; rare evolutions, museum/retirement, collections and expression animations remain planned. See the [artwork notes](art/README.md) for scope and the isolated simulator preview. Simulator validation covered first-launch baselining, step credit, duplicate background-event protection and persistence across an app restart; physical-watch behaviour still needs verification.
+DEV is an in-memory test branch. Discard is the default and only way back to real
+play; app restart also discards it. Real time, Garmin counters and real storage
+are never fabricated. Exiting reloads the genuine save and reconciles watch
+steps recorded during testing. There is no second Developer Lab app to install.
 
-## Important caveats
-- Only steps recorded on the Enduro 4 itself are reliably included by its step event.
-- Background step callbacks are periodic at each 1,000-step milestone; foreground app reads the precise current count.
-- Garmin history can recover only up to seven recent days; missing events beyond that may lead to lost credit.
-- On installation, steps already taken that day become the initial baseline.
-- Physical Enduro 4 behaviour needs verification against Garmin Connect IQ SDK.
+## Artwork, Glance and feedback
 
-Sources: [Background services](https://developer.garmin.com/connect-iq/articles/core-topics/Backgrounding.html), [ActivityMonitor](https://developer.garmin.com/connect-iq/api-docs/Toybox/ActivityMonitor.html).
+All 15 normal species have concept-inspired pixel art and six poses, plus
+wandering, hopping, blinking, looking, eating, sleeping, cleaning and evolution
+reactions. See [art assets and prompts](art/README.md). Only current frames are
+cached; AMOLED variants are pre-sized for crisp, efficient rendering.
+
+The same watch app implements a read-only native Glance: current sprite/name,
+mood, growth and cleanup status. No Glance-owned animation timer, save mutation
+or audio. Actual availability in a watch's Glances list still needs hardware
+verification, especially on older firmware.
+
+Sound defaults OFF; gentle vibration ON. Settings are independent and respect
+supported system mute/vibration/DND flags. No background step or poop alerts.
+Motion OFF/LOW/NORMAL is available. Physical audible/haptic behaviour is not yet
+claimed verified.
+
+## Build and test (Windows)
+
+Accepted profiles cover Enduro 4/3, Enduro 2 via Garmin's Fenix 7X definition,
+Fenix 7/7S/7X/7X Pro, Fenix 8 Solar 47/51mm, Forerunner 265/965,
+Venu 3 and vivoactive 5. These are simulator-tested profiles, not physical-watch
+certification. Original Enduro is excluded for artwork RAM exhaustion; Fenix
+6X is excluded because its 32KB background budget crashes step reconciliation.
+See the [exact matrix](docs/DEVICE_MATRIX.md), including memory and SDK aliases.
+
+Install Garmin Connect IQ SDK/device profiles and Java 17. Keep `developer_key`
+local and out of Git. With the SDK simulator open:
+
+```powershell
+./scripts/build.ps1
+./scripts/run-simulator.ps1
+./scripts/build.ps1 -Tests -Output bin/v04-tests.prg
+./scripts/run-simulator.ps1 -Tests -Program bin/v04-tests.prg
+./scripts/device-matrix.ps1
+./scripts/build.ps1 -Export -Output bin/TekuTekuBeast-0.4.0.iq
+```
+
+`scripts/check_project.py` is structural preflight, not a compiler. The internal
+visual/matrix QA harness uses a separate test ID and in-memory model; it is not
+the user's Developer Mode and must never be uploaded to the Store.
+
+## Save and platform limits
+
+The application ID is unchanged: `54A4F9D3B6584CA4B01C232D20438E5B`.
+Versioned storage keeps genuine XP, rewards and their day watermarks in one
+record, retains legacy keys and a migration snapshot, and never merges DEV
+state. Upgrade the existing app; uninstalling may remove Garmin Storage.
+
+Garmin history normally covers seven recent days. If background events fail and
+the game is not opened longer than that, older missing steps cannot be recovered.
+Positive elapsed growth still catches up over long absences; care decay is
+bounded. Optional retirement retains the last full archived pet and collection
+registrations; it is never automatic.

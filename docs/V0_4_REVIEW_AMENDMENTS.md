@@ -1,6 +1,8 @@
 # v0.4 design review — on-watch Developer Mode, inclusive progression, fast testing and clean UI
 
-**Status: newest product requirements, proposed for implementation (NOT YET IN THE WATCH BUILD).** This document supersedes earlier v0.4 proposals wherever they specify a **separate Developer Lab app**, step-dependent evolution, or ~100-day passive-only Legendary progression. Existing game code is unchanged by this document.
+**Status: implemented v0.4 development beta; physical-watch acceptance pending.**
+See [validation](V0_4_VALIDATION.md). These requirements supersede older proposals
+for a separate Developer Lab, step-dependent evolution or ~100-day passive growth.
 
 ## 1. Primary product rule: full experience even at zero steps
 

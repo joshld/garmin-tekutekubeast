@@ -1,55 +1,81 @@
-# TekuTekuBeast (テクテクビースト) evolution design (v0.3)
+# TekuTekuBeast evolution — v0.4
 
-This is the game-design specification; not all ideas are implemented in the present watch-app prototype.
+Native, offline Connect IQ watch app. Activity is a bonus, not a requirement.
+There is no death, XP loss, de-evolution or recovery-day punishment.
 
-## Device and gameplay
-Native Garmin Enduro 4 Connect IQ watch app. Only steps counted **by the watch** are credited. No companion mobile app and no manually recording workouts. A Garmin background steps event occurs at multiples of 1,000 and the foreground app uses ActivityMonitor history to reconcile missing intermediate steps. No punishment for recovering, resting, or taking a day off.
+## Separate ledgers
 
-## Evolution stages (both steps and minimum age required)
+- `xp`: genuine lifetime watch-recorded steps, deduplicated by local day.
+- `baseGrowth`: elapsed time since v0.4 migration / the current pet's creation.
+- `careGrowth`: bounded care and mini-game growth, never Garmin steps.
+- `activityBonus`: additional growth from shared physical milestones, including
+  active minutes and wheelchair pushes; it never changes watch XP.
+- Current-pet growth combines passive/care/activity growth and genuine steps above its
+  per-pet baseline. Retiring a Legendary never resets lifetime watch XP.
 
-| Stage | Total credited steps | Minimum age |
+Legacy keys remain intact. Migration retains an already-earned stage as a
+floor, recovers calendar age for early saves without `birthEpoch`, and retains
+the existing family, snacks, friendship and watermarks. No passive growth is
+retroactively credited before migration. Original app ID stays unchanged.
+
+## Default balance (provisional, testable in Dev Tools)
+
+12,000 passive growth/day, up to 300 care growth/day, plus one growth per newly
+eligible genuine step. Positive elapsed growth is not capped to one day;
+negative clock movement earns nothing. Care decay alone is bounded to 24h.
+
+| Stage | Growth | Minimum age |
 |---|---:|---:|
-| Egg | 0 | 0 days |
-| Pip / hatchling | 2,000 | 0 days |
-| Nimble / juvenile | 20,000 | 2 days |
+| Egg | 0 | — |
+| Pip | Natural hatch at about 24h | Acceleration floor 8h |
+| Nimble | 20,000 | 2 days |
 | Adult | 70,000 | 7 days |
 | Champion | 150,000 | 14 days |
 | Legendary | 300,000 | 21 days |
 
-After reaching Legendary, the pet keeps the same species, earning one **Mastery level every additional 25,000 credited steps** indefinitely.
+Egg acceleration uses genuine activity / interaction, not an instant 2,000-step
+hatch. An existing Pip never reverts. Zero-step passive-only Legendary takes
+about 25 days; consistent activity can reach the 21-day age floor. Mastery then
+advances every 25,000 additional growth, including passive/care growth.
 
-## Automatic branching
-Family is calculated from up to seven recent days of device step history when Adult is reached; the family stays locked:
-1. **Ember**: two days with >= 18,000 new steps each.
-2. **Grove**: otherwise, five days with >= 6,000 new steps each.
-3. **Tide**: otherwise, three days >= 3,000 and one easy day < 3,000.
-4. **Wisp**: any other activity pattern.
+## Automatic families
 
-No branching choices for ordinary evolution. Branch timing and tie-break priority can be tuned.
+Adult family selection combines activity pattern bonuses and care personality.
+Patting/feeding favours Grove; Star Catch favours Ember; cleaning/rest favours
+Tide; Memory Steps favours Wisp. Trail choices and toys also influence scores.
+Activity can add Grove/Ember/Tide biases but never locks out a nonactivity path.
+Ties use a durable birth/serial seed, not an unconditional Wisp fallback. The
+family then stays locked except explicit temporary developer previews.
 
-## Species tree
-- Grove: Mossbit → Thornbuck → Verdant Elder; rare Lumenhart.
-- Ember: Cindercub → Pyrolynx → Solflare Dragon; rare Ashen Phoenix.
-- Tide: Puddlefin → Currentail → Deepwater Leviathan; rare Moonwater Kirin.
-- Wisp: Flicklet → Nocturne → Starweaver; rare Eclipse Eidolon.
-- Shared hatchling Pip, shared juvenile Nimble, and Egg.
+| Family | Adult | Champion | Legendary | Rare variant |
+|---|---|---|---|---|
+| Grove | Mossbit | Thornbuck | Verdant Elder | Lumenhart |
+| Ember | Cindercub | Pyrolynx | Solflare | Ashen Phoenix |
+| Tide | Puddlefin | Currentail | Leviathan | Moonwater Kirin |
+| Wisp | Flicklet | Nocturne | Starweaver | Eclipse Eidolon |
 
-Egg, Pip and Nimble now have concept-inspired pixel-art bitmap sprites and a gentle foreground idle bob. Each family species still needs a distinct pixel-art silhouette; separate idle / happy / sleeping animation frames remain planned. See `art/README.md` for implementation scope.
+## Earned exceptions and collection
 
-## Rare exceptions (future)
-Earn a **Star Charm** by registering your first standard Legendary in a future collection. At least 70 friendship lets you spend one to make a same-family rare Legendary once that future pet is eligible; it is optional and not random monetisation. Collecting all four normal family Legendaries can eventually unlock a single-use Wanderer's Compass permitting one unusual family change on a future pet.
+The first standard Legendary in each family registers in the museum and earns
+a Star Charm. A Legendary with friendship 70 can spend a Charm on its same-family
+rare variant. Every requirement is attainable without activity. Rare artwork
+currently uses an earned crown overlay, not a separate full sprite atlas.
 
-## Lifespan and replayability
-- **No permanent death** by default. Rest days do not drain XP or de-evolve pets.
-- Keep your favorite Legendary forever; mastery progression has no fixed final level.
-- Planned: optional retirement into a collection/museum after Legendary, then start a new Egg with separate per-pet XP and lifetime achievements.
-- Pets must not pressure users to exceed safe activity or compromise recovery.
+Keep a favourite forever with ongoing mastery, or explicitly confirm Archive
+and start egg after Legendary. The last archived pet's full snapshot is retained;
+normal/rare family registrations and inventory remain. This is never automatic.
+The trail Compass is currently a cosmetic collectible; a future cross-family
+Wanderer's Compass exception is not implemented.
 
-## Daily care
-- Every 2,500 new credited steps earns one snack (max 12 held).
-- SELECT on Pet adds +2 friendship, up to 3 times per day.
-- SELECT on Care consumes a snack to add +5 friendship.
-- Friendship max 100; mood is cosmetic, never fatal.
+## Activity rewards and limitations
 
-## Limitations & tests
-Garmin daily step history includes up to seven days. If background events fail and the app does not open for longer, older steps may not be recovered. Initial current-day steps are treated as baseline. The app has been compiled and exercised in the Enduro 4 simulator. Physical-device testing, battery validation, storage migration and week/date edge cases still need verification.
+Real steps, supported active minutes and wheelchair pushes can grant additional
+Adventure Energy. Overlapping metrics share one daily milestone watermark.
+Care/games grant the same energy and access to the same eight discovery types.
+Activity targets are selectable; no streak loss or exercise prompts.
+
+Garmin history only exposes a recent window (normally seven days). Missed
+background events beyond that cannot be reconstructed. Uninstalling may remove
+Garmin Storage: upgrade the same app, do not uninstall to update.
+
+See [validation](V0_4_VALIDATION.md) for actual simulator / hardware status.

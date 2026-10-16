@@ -1,6 +1,9 @@
 # TekuTekuBeast — Garmin targets, activity rewards and glance design
 
-**Status: design & development backlog; not implemented**. Reference: the current manifest enables only `enduro4`. Full virtual-pet experience with zero steps remains a non-negotiable requirement. See `docs/V0_4_REVIEW_AMENDMENTS.md` for the on-watch Developer Mode and ~3–4 week progression target.
+**Status: implemented v0.4 development beta.** These are original design tiers;
+see [validation](V0_4_VALIDATION.md) and [accepted profiles](DEVICE_MATRIX.md)
+for actual tests and physical-watch acceptance. Inclusive growth, shared
+step/minute/push rewards and the native Glance are in source.
 
 ## 1. Watch compatibility plan
 
@@ -8,7 +11,7 @@ Compatibility is per specific Garmin device definition, NOT all devices named as
 
 | Tier | Representative models | Display | Work |
 |---|---|---|---|
-| Current | Enduro 4 | 280×280, 64-colour MIP | Existing build, glance not yet implemented |
+| Primary | Enduro 4 | 280×280, 64-colour MIP | Game and native Glance implemented; see validation |
 | A | Enduro 3, Enduro 2, Fenix 7X / 7X Pro, Fenix 8 Solar 51mm | 280×280, 64-colour MIP | Run API, resources, memory, UI, button and step-history tests per device |
 | B | Enduro original, Fenix 6X, Fenix 7 / 7S, Fenix 8 Solar 47mm | 240–280 MIP | Check API & background memory; adaptive UI and input |
 | C | Fenix 8/9 AMOLED, Forerunner 265/965/970, Venu, vívoactive | Varying AMOLED and MIP | Display resolution, color conversion, touch/button and performance variants |

@@ -1,4 +1,4 @@
-param([string[]]$Devices=@('enduro4','enduro3','fenix7x','fenix7xpro','fenix8solar51mm','fenix8solar47mm','fenix6xpro','fenix7','fenix7s','fr265','fr965','venu3','vivoactive5'))
+param([string[]]$Devices=@('enduro4','enduro3','fenix7x','fenix7xpro','fenix8solar51mm','fenix8solar47mm','fenix7','fenix7s','fr265','fr965','venu3','vivoactive5'))
 $project=Split-Path $PSScriptRoot -Parent
 $results=@()
 $expectedTests=[regex]::Matches((Get-Content "$project/source/StateTests.mc" -Raw),'(?m)^function \w+Test\(logger\)').Count

@@ -82,6 +82,20 @@ for bitmap in drawables.iter("bitmap"):
         if len(header) == 24:
             check(struct.unpack(">II", header[16:24]) == (40, 40),
                   "Enduro 4 launcher must be 40x40")
+for native_size in (144, 192):
+    native_xml = ROOT / f"resources-native{native_size}/drawables/drawables.xml"
+    check(native_xml.is_file(), f"Missing native {native_size}px asset catalog")
+    if not native_xml.is_file():
+        continue
+    for bitmap in ET.parse(native_xml).getroot().iter("bitmap"):
+        path = native_xml.parent / bitmap.get("filename", "")
+        check(path.is_file(), "Missing native resource: " + str(path))
+        resource_id = bitmap.get("id", "")
+        if path.is_file() and resource_id.startswith("V4") and not resource_id.endswith("Small"):
+            header = path.read_bytes()[:24]
+            check(struct.unpack(">II", header[16:24]) == (native_size, native_size),
+                  "Wrong native sprite size: " + resource_id)
+
 if errors:
     print("Preflight FAILED (structural checks only):")
     for e in errors:

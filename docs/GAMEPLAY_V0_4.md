@@ -2,7 +2,9 @@
 
 **Important newer review:** [Inclusive growth, on-watch Developer Mode, evolution pacing and simplified UI](V0_4_REVIEW_AMENDMENTS.md) overrides earlier step-only progression assumptions. Numbers remain provisional.
 
-**Status:** APPROVED DIRECTION / PROPOSED IMPLEMENTATION; NOT PRESENT IN THE CURRENT WATCH BUILD.
+**Status:** Implemented v0.4 development beta. This preserves the historical
+design; [validation](V0_4_VALIDATION.md) and [evolution](EVOLUTION_DESIGN.md)
+record the actual implementation, final tuning and pending hardware acceptance.
 **Target:** Garmin Enduro 4 (Connect IQ native Monkey C watch-app, round 280 x 280 MIP / 64 colours).
 **Goal:** Provide the full virtual-pet experience at zero steps, while rewarding additional real watch activity with bonus items and some growth acceleration, plus care and games.
 **Design policy:** Rest/recovery friendly, non-punitive, no permanent death, no fake steps, no pay-to-win, optional audio, no intrusive background prompts.

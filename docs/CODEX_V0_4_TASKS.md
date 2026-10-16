@@ -2,7 +2,9 @@
 
 **Read [v0.4 review amendments](V0_4_REVIEW_AMENDMENTS.md) before implementation.** Prior step-only evolution assumptions are superseded. Add Developer Mode **inside the same installed watch app** (not a second Developer Lab application) and make every normal evolution possible at zero steps; activity provides extra items/rewards and only a modest growth advantage. Preserve current saves. Simplify the Pet screen by dropping the app title and shortening other screens.
 
-**This is the requested implementation plan, not a claim that new care/games/animation features are coded.**
+**Implementation status:** v0.4 gameplay, artwork, games and Glance are now in
+source. This preserves the original plan; [validation](V0_4_VALIDATION.md)
+records completed tests and remaining physical-watch checks.
 
 ## Context and contract
 
