@@ -13,6 +13,8 @@ foreach($device in $Devices){
         if($measurement.Count -eq 0 -or $log -match 'Error|crash' -or !($log -match '^GLANCE_LAYOUT: 0 failures$')){throw "No clean Glance measurement/layout: $log"}
         $m=$measurement[-1].Matches[0]
         $used=[int]$m.Groups[2].Value;$total=[int]$m.Groups[3].Value
+        if($total -gt 65536){throw 'Not running in the native Glance budget; select Glance launch mode and rerun'}
+        if(!($log -match '^GLANCE_SCENES: 60 awake/tired/nap/night$')){throw 'Incomplete Glance scenario audit'}
         if($used -ge $total){throw 'Glance memory exhausted'}
         $results+=@{device=$device;glance='PASS';dimensions=$m.Groups[1].Value;used=$used;total=$total}
         Write-Output "GLANCE PASS $device $used / $total"

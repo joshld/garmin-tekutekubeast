@@ -73,6 +73,7 @@ function navigationAndDevTest(logger){
 function miniGamesTest(logger){
     var s=TestSupport.fixture();s.data["haptics"]=0;
     var star=new BeastGameView(s,0);star.selectAction();
+    Test.assertEqual(star.resultTouchChoice(220),0);Test.assertEqual(star.resultTouchChoice(255),1);
     for(var attempt=0;attempt<15;attempt++){
         star.lane=star.target;star.elapsed=(star.period()/2).toNumber()-1;star.selectAction();star.refresh();
         Test.assert(star.caught);

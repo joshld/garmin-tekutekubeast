@@ -152,11 +152,12 @@ class BeastGameView extends TekuTekuBeastView {
         WatchUi.requestUpdate();
     }
     function touch(point){
-        if(phase==3){resultChoice=point[1]>touchWidth*0.76?1:0;selectAction();return;}
+        if(phase==3){resultChoice=resultTouchChoice(point[1]);selectAction();return;}
         if(kind==0 && phase==1){lane=point[0]<touchWidth/3?0:(point[0]>touchWidth*2/3?2:1);selectAction();}
         else if(kind==1 && phase==2){memoryInput(point[0]<touchWidth/3?0:(point[0]>touchWidth*2/3?2:1));WatchUi.requestUpdate();}
         else{selectAction();}
     }
+    function resultTouchChoice(top){return top>touchWidth*0.845?1:0;}
     function back(){checkpoint();WatchUi.popView(WatchUi.SLIDE_RIGHT);return true;}
     function drawPlayer(dc,cx,ground,pose,hop){
         if(frames==null){loadSprite();}
@@ -171,8 +172,9 @@ class BeastGameView extends TekuTekuBeastView {
     }
     function drawArrow(dc,x,top,move,chosen){
         var rows=move==0?[8,28,62,8,8,8,8]:(move==1?[0,28,62,62,62,28,0]:[8,8,8,8,62,28,8]);
-        if(chosen){dc.setColor(LIGHT,Graphics.COLOR_TRANSPARENT);dc.fillRoundedRectangle(x-7,top-6,28,28,5);}
-        pixelIcon(dc,x,top,rows,INK,2);
+        var scale=beast.max(2,(dc.getWidth()/140).toNumber());x-=(7*scale-14)/2;
+        if(chosen){dc.setColor(LIGHT,Graphics.COLOR_TRANSPARENT);dc.fillRoundedRectangle(x-7,top-6,7*scale+14,7*scale+14,5);}
+        pixelIcon(dc,x,top,rows,INK,scale);
     }
     function drawMap(dc){
         var color=[0x005500,0xAA0000,0x0055AA,0x5500AA][trail];
@@ -181,6 +183,10 @@ class BeastGameView extends TekuTekuBeastView {
             var x=dc.getWidth()*(0.29+i*0.21);dc.drawCircle(x,ground,6);
             if(i<2){dc.drawLine(x+6,ground,x+dc.getWidth()*0.21-6,ground);}
         }
+        // A visible goal, rather than an abstract reward dispenser.
+        var iconScale=beast.max(2,(dc.getWidth()/140).toNumber());
+        pixelIcon(dc,dc.getWidth()*0.71-3.5*iconScale,y(dc,0.60),[62,127,65,127,65,65,127],0xAA5500,iconScale);
+        dc.setColor(0xFFFF55,Graphics.COLOR_TRANSPARENT);dc.fillRectangle(dc.getWidth()*0.71-1,y(dc,0.60)+6,3,4);
         var progress=phase==5?beast.min(1.0,travel/12.0):1.0;
         var cx=dc.getWidth()*(0.29+0.21*beast.max(0,node-1)+0.21*(node>0?progress:0));
         drawPlayer(dc,cx,ground-8,phase==5?tick%2:5,phase==5 && tick%2==0?3:0);
@@ -190,19 +196,19 @@ class BeastGameView extends TekuTekuBeastView {
     function onUpdate(dc){
         touchWidth=dc.getWidth();darkScene=false;dc.setColor(BG,BG);dc.clear();loadSprite();
         devBadge(dc,INK);
-        label(dc,y(dc,0.12),["BEAST BOUNCE","FOLLOW MY LEAD","TINY TRAIL"][kind],Graphics.FONT_XTINY);
+        label(dc,y(dc,0.12),["BEAST BOUNCE","FOLLOW ME","TINY TRAIL"][kind],Graphics.FONT_XTINY);
         if(phase==0){
             label(dc,y(dc,0.25),kind==2?"< "+["GROVE","EMBER","TIDE","WISP"][trail]+" >":(kind==0?"SELECT: HOP":"COPY YOUR BEAST"),Graphics.FONT_XTINY);
-            drawPlayer(dc,dc.getWidth()/2,y(dc,0.66),tick%12<2?4:0,0);
-            label(dc,y(dc,0.68),kind==2?((tick/8)%2==0?"1 ENERGY = 1 TRIP":"CARE/PLAY EARNS IT"):(kind==0?(scanning?"MENU / TOUCH: MOVE":"UP / DOWN: MOVE"):"UP / SELECT / DOWN"),Graphics.FONT_XTINY);
-            label(dc,y(dc,0.78),kind==2?(beast.number("adventure")>0?"ENERGY "+beast.number("adventure"):"SCOUT: NO LOOT"):(beast.number("games")>=3?"FREE PRACTICE":(beast.number("easy")==1?"EASY - UP/DOWN":"NORMAL - UP/DOWN")),Graphics.FONT_XTINY);
+            drawPlayer(dc,dc.getWidth()/2,y(dc,0.65),tick%12<2?4:0,0);
+            label(dc,y(dc,0.66),kind==2?((tick/8)%2==0?"1 ENERGY = 1 TRIP":"CARE/PLAY EARNS IT"):(kind==0?(scanning?"MENU / TOUCH: MOVE":"UP / DOWN: MOVE"):(scanning?"SELECT: GLOW":"UP / SELECT / DOWN")),Graphics.FONT_XTINY);
+            label(dc,y(dc,0.76),kind==2?(beast.number("adventure")>0?"ENERGY "+beast.number("adventure"):"SCOUT: NO LOOT"):(beast.number("games")>=3?"FREE PRACTICE":(beast.number("easy")==1?"< EASY >":"< NORMAL >")),Graphics.FONT_XTINY);
             var paused=beast.data["sessions"][kind]!=null;
             label(dc,y(dc,0.86),paused?"RESUME":"START",Graphics.FONT_XTINY);
         }else if(phase==3){
             label(dc,y(dc,0.25),result,Graphics.FONT_XTINY);
             drawPlayer(dc,dc.getWidth()/2,y(dc,0.66),tick%2==0?4:1,beast.number("motion")==2 && tick%2==0?5:0);
-            label(dc,y(dc,0.67),kind==2?"IN YOUR COLLECTION":"SCORE "+score+"  BEST "+(kind==0?best:hits),Graphics.FONT_XTINY);
-            label(dc,y(dc,0.78),(resultChoice==0?"> ":"")+(kind==2?"ANOTHER TRIP":"PLAY AGAIN"),Graphics.FONT_XTINY);
+            label(dc,y(dc,0.65),kind==2?"IN YOUR COLLECTION":"SCORE "+score+"  BEST "+(kind==0?best:hits),Graphics.FONT_XTINY);
+            label(dc,y(dc,0.75),(resultChoice==0?"> ":"")+(kind==2?"ANOTHER TRIP":"PLAY AGAIN"),Graphics.FONT_XTINY);
             label(dc,y(dc,0.86),(resultChoice==1?"> ":"")+"EXIT",Graphics.FONT_XTINY);
         }else if(kind==0){
             label(dc,y(dc,0.23),"ROUND "+(round+1)+"/3  SCORE "+score,Graphics.FONT_XTINY);
@@ -210,11 +216,11 @@ class BeastGameView extends TekuTekuBeastView {
             for(var i=0;i<3;i++){dc.setColor(i==lane?INK:LIGHT,Graphics.COLOR_TRANSPARENT);dc.fillRectangle(dc.getWidth()*(0.29+i*0.21)-14,ground,28,4);}
             var lift=jumpTicks>0?[0,8,18,27,27,18,8,0][jumpTicks]*dc.getWidth()/280.0:0;
             drawPlayer(dc,cx,ground,jumpTicks>0?1:(caught?4:0),lift);
-            if(!caught){pixelIcon(dc,dc.getWidth()*(0.29+target*0.21)-7,y(dc,0.33)+dc.getHeight()*0.29*starPosition(),[8,8,127,62,28,54,65],INK,2);}
+            if(!caught){var scale=beast.max(2,(dc.getWidth()/140).toNumber());pixelIcon(dc,dc.getWidth()*(0.29+target*0.21)-3.5*scale,y(dc,0.33)+dc.getHeight()*0.29*starPosition(),[8,8,127,62,28,54,65],INK,scale);}
             label(dc,y(dc,0.74),caught?hint:"SELECT: HOP!",Graphics.FONT_XTINY);
             label(dc,y(dc,0.85),hits+" / "+attempts+" STARS",Graphics.FONT_XTINY);
         }else if(kind==1){
-            label(dc,y(dc,0.23),"ROUND "+(round+1)+"/3  "+(phase==1?"WATCH":"YOUR TURN"),Graphics.FONT_XTINY);
+            label(dc,y(dc,0.23),"ROUND "+(round+1)+"/3  "+(phase==1?"WATCH":(scanning?"SELECT":"YOUR TURN")),Graphics.FONT_XTINY);
             var move=phase==1?sequence[beast.min(sequence.size()-1,(elapsed/tempo()).toNumber())]:(cursor>0?sequence[cursor-1]:1);
             var lift=move==0?12:(move==2?0:5);
             drawPlayer(dc,dc.getWidth()/2+(move-1)*12,y(dc,0.66),move==0?1:(move==1?4:5),lift);
@@ -224,9 +230,9 @@ class BeastGameView extends TekuTekuBeastView {
             label(dc,y(dc,0.23),["GROVE","EMBER","TIDE","WISP"][trail]+"  STOP "+(node+1)+"/3",Graphics.FONT_XTINY);
             drawMap(dc);
             if(phase==2){
-                label(dc,y(dc,0.70),[["HELP A FRIEND","SEARCH THE CAVE","FOLLOW BUBBLES","FOLLOW A WISP"],["CROSS THE BRIDGE","CLIMB THE RIDGE","CHECK THE REEF","READ THE RUNES"],["OPEN THE CHEST","OPEN THE CHEST","OPEN THE CHEST","OPEN THE CHEST"]][node][trail],Graphics.FONT_XTINY);
-                label(dc,y(dc,0.80),choice==0?"> SEARCH":"> DETOUR",Graphics.FONT_XTINY);
-                label(dc,y(dc,0.88),"GO",Graphics.FONT_XTINY);
+                label(dc,y(dc,0.675),[["HELP A FRIEND","SEARCH THE CAVE","FOLLOW BUBBLES","FOLLOW A WISP"],["CROSS THE BRIDGE","CLIMB THE RIDGE","CHECK THE REEF","READ THE RUNES"],["OPEN THE CHEST","OPEN THE CHEST","OPEN THE CHEST","OPEN THE CHEST"]][node][trail],Graphics.FONT_XTINY);
+                label(dc,y(dc,0.775),choice==0?"> SEARCH":"> DETOUR",Graphics.FONT_XTINY);
+                label(dc,y(dc,0.875),"GO",Graphics.FONT_XTINY);
             }else{label(dc,y(dc,0.76),phase==4?hint:"EXPLORING...",Graphics.FONT_XTINY);}
         }
     }

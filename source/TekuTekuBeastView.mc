@@ -204,7 +204,7 @@ class TekuTekuBeastView extends WatchUi.View {
         var frame=0;var stride=motion==2?tick:(tick/4).toNumber();var moving=false;var left=false;
         var family=beast.family();if(family==1){stride=(stride/2).toNumber();}if(family==4){stride+=32;}
         if(active.equals("sleep")){frame=3;}
-        else if(active.equals("eat")){frame=2;}
+        else if(active.equals("eat")){frame=motion>0 && stride%4==3?0:2;}
         else if(active.equals("look")){frame=5;}
         else if(active.equals("blink") || active.equals("clean")){frame=4;}
         else if(motion>0 && beast.stage()>0){
@@ -259,14 +259,14 @@ class TekuTekuBeastView extends WatchUi.View {
     function todayLabel(){var n=beast.getTodaySteps();return "STEPS "+(n>=100000?(n/1000).toString()+"K":n.toString());}
     function stageLabel(){return ["EGG","HATCHLING","JUVENILE","ADULT","CHAMPION","LEGENDARY"][beast.stage()];}
     function drawPet(dc){
-        var color=darkScene?BG:INK;var count=0;
-        if(beast.number("fullness")<45){pixelIcon(dc,dc.getWidth()/2-28,y(dc,0.12),[8,12,54,127,127,62,28],color,2);count++;}
-        if(beast.number("happiness")<50){pixelIcon(dc,dc.getWidth()/2-7,y(dc,0.12),[54,127,119,62,28,8],color,2);count++;}
-        if(beast.number("energy")<20 && !visualState().equals("sleep")){pixelIcon(dc,dc.getWidth()/2+14,y(dc,0.12),[14,24,48,48,56,30,15],color,2);count++;}
+        var color=darkScene?BG:INK;var scale=beast.max(2,(dc.getWidth()/140).toNumber());
+        if(beast.number("fullness")<45){pixelIcon(dc,dc.getWidth()/2-10*scale,y(dc,0.12),[8,12,54,127,127,62,28],color,scale);}
+        if(beast.number("happiness")<50){pixelIcon(dc,dc.getWidth()/2-2*scale,y(dc,0.12),[54,127,119,62,28,8],color,scale);}
+        if(beast.number("energy")<20 && !visualState().equals("sleep")){pixelIcon(dc,dc.getWidth()/2+6*scale,y(dc,0.12),[14,24,48,48,56,30,15],color,scale);}
         devBadge(dc,color);
         creature(dc);
         // Poop is a fixed floor object, not attached to the moving creature.
-        if(beast.number("poop")>0){var scale=beast.max(2,(dc.getWidth()/140).toNumber());pixelIcon(dc,dc.getWidth()*0.73,y(dc,0.73),[8,28,30,62,127,127],0xAA5500,scale);}
+        if(beast.number("poop")>0){pixelIcon(dc,dc.getWidth()*0.73,y(dc,0.73),[8,28,30,62,127,127],0xAA5500,scale);}
         bar(dc,y(dc,0.80),beast.progress(),dc.getWidth()/2);
         label(dc,y(dc,0.83),notice!=null?notice:todayLabel(),Graphics.FONT_XTINY);
     }
@@ -291,7 +291,7 @@ class TekuTekuBeastView extends WatchUi.View {
             label(dc,top,name.substring(0,split),Graphics.FONT_XTINY);
             label(dc,top+dc.getFontHeight(Graphics.FONT_XTINY),name.substring(split+1,name.length()),Graphics.FONT_XTINY);
         }else{label(dc,top,name,Graphics.FONT_XTINY);}
-        label(dc,y(dc,0.26),stageLabel()+"  DAY "+beast.ageDays(),Graphics.FONT_XTINY);
+        label(dc,y(dc,0.28),stageLabel()+"  DAY "+beast.ageDays(),Graphics.FONT_XTINY);
         label(dc,y(dc,0.38),beast.familyName()+" / "+beast.growth(),Graphics.FONT_XTINY);
         label(dc,y(dc,0.49),"WATCH "+beast.xp(),Graphics.FONT_XTINY);
         label(dc,y(dc,0.60),beast.stage()==0?"HATCH "+beast.hatchDurationHours().toFloat().format("%.0f")+"H":"NEXT "+(beast.nextSteps()/1000)+"K BOND "+beast.friendship(),Graphics.FONT_XTINY);
