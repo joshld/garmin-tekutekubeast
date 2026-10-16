@@ -1,0 +1,49 @@
+Tiny steps, epic companions.
+
+TekuTekuBeast is a native, offline virtual-beast game for compatible Garmin watches. Hatch an egg, build friendship and raise a creature through care, play, time and optional real-world activity.
+
+YOUR BEAST, YOUR PACE
+
+Your beast grows even when you take no steps. Feed, pet, clean, rest and play your way through the game. All four creature families and rare forms have routes that do not require exercise.
+
+ACTIVITY ADDS ADVENTURE
+
+Genuine watch-recorded steps earn lifetime XP and bonus growth. Activity also provides additional rewards and adventure opportunities, with alternative routes through care and mini-games. Games never create artificial Garmin steps.
+
+CARE AND PLAY
+
+• Feed meals and earned snacks—even on inactive days.
+• Look after fullness, happiness, energy and cleanliness.
+• Clean up poop, give pats and help your beast rest.
+• Play Star Catch, Memory Steps and Trail Treasure.
+• Discover food, toys, accessories and collectibles.
+
+GROW AND EVOLVE
+
+• Eggs hatch naturally after roughly 24 hours; interaction and activity can reduce this to around 8 hours.
+• Progress through Hatchling, Juvenile, Adult, Champion and Legendary stages.
+• Discover Grove, Ember, Tide and Wisp families through your beast’s personality and your gameplay.
+• Unlock rare forms and continue growing through Legendary mastery.
+• Rest without permanent death, lost XP or punishment for recovery days.
+
+MADE FOR YOUR WATCH
+
+Enjoy expressive retro pixel-art creatures, button controls, touchscreen support where available, compact care screens and a native pet Glance on supported models.
+
+Short sounds and gentle vibration have independent settings. Sound is off by default.
+
+TEMPORARY DEVELOPER MODE
+
+Explore accelerated time, evolution stages and care scenarios inside the normal app. Test progress is isolated from your real beast and discarded when you exit.
+
+Progress is stored on your watch. Normal gameplay requires no phone companion, internet connection, cloud account or recorded workout.
+
+GETTING STARTED
+
+Open TekuTekuBeast to begin, then return periodically to care for your beast and reconcile recent watch activity.
+
+DEVELOPMENT BETA
+
+Features and balancing may change. Supported profiles have been simulator-tested; physical-watch save upgrades, Glance behaviour, sounds, vibration and battery use still require testing. Rare forms currently use a crown overlay.
+
+When upgrading, update the existing installation—do not uninstall first.

@@ -27,6 +27,14 @@ wandering, hops, family-specific motion, blink/look, chewing, cleaning puffs,
 sleep and evolution feedback. No animation timer survives view hiding or app
 inactivity. Motion OFF/LOW/NORMAL is available in Settings.
 
+## Store artwork and copy
+
+[store/v0.4/README.md](store/v0.4/README.md) indexes the new four-family cover,
+retained generated original and prompt, current simulator captures, and
+copy-ready description/release notes. The cover is promotional pixel art based
+on the game's sprite atlases, not a gameplay screenshot. These assets are not
+loaded by the watch and do not change the signed v0.4.0 binary.
+
 ## Verification
 
 The internal `tests/art-preview` / `tests/matrix` harness renders one scene per

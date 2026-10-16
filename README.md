@@ -4,8 +4,9 @@ A native, offline Garmin virtual-beast game. Grow through time, care and play;
 genuine watch activity adds growth and extra adventure opportunities. No phone,
 internet connection, exercise requirement, death or recovery-day punishment.
 
-**v0.4 development beta.** Source implementation is real; physical-watch audio,
-battery, upgrade and Glance-list checks are still required. See the exact
+**v0.4 development beta.** The user has confirmed Developer Mode is visible and
+the Glance now appears on their physical Enduro 4. Full save-upgrade, Glance
+launch/session, audio and battery checks remain open. See the exact
 [validation log](docs/V0_4_VALIDATION.md) and [device matrix](docs/DEVICE_MATRIX.md) before making support
 or hardware-testing claims.
 
@@ -65,13 +66,19 @@ cached; AMOLED variants are pre-sized for crisp, efficient rendering.
 
 The same watch app implements a read-only native Glance: current sprite/name,
 mood, growth and cleanup status. No Glance-owned animation timer, save mutation
-or audio. Actual availability in a watch's Glances list still needs hardware
-verification, especially on older firmware.
+or audio. The user confirmed availability on their physical Enduro 4 on
+16 October 2026; selection-to-game and timeout behaviour remain unverified.
+See the [hardware acceptance log](docs/WATCH_ACCEPTANCE.md) for the exact scope.
 
 Sound defaults OFF; gentle vibration ON. Settings are independent and respect
 supported system mute/vibration/DND flags. No background step or poop alerts.
 Motion OFF/LOW/NORMAL is available. Physical audible/haptic behaviour is not yet
 claimed verified.
+
+Store-ready [description and What's New text](art/store/v0.4/README.md), the new
+500px family-art cover and genuine simulator captures are versioned together.
+These are store assets, not watch resources or evidence of a completed listing
+submission.
 
 ## Build and test (Windows)
 

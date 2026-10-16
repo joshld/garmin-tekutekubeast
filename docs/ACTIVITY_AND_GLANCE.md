@@ -5,6 +5,12 @@ see [validation](V0_4_VALIDATION.md) and [accepted profiles](DEVICE_MATRIX.md)
 for actual tests and physical-watch acceptance. Inclusive growth, shared
 step/minute/push rewards and the native Glance are in source.
 
+**Hardware update, 16 October 2026:** the user confirmed that TekuTekuBeast now
+appears in their physical Enduro 4 Glances list and Developer Mode is visible.
+Glance rendering, selection-to-game and session timeout checks are still open;
+see [WATCH_ACCEPTANCE.md](WATCH_ACCEPTANCE.md). The refresh action that resolved
+the initially missing entry was not confirmed.
+
 ## 1. Watch compatibility plan
 
 Compatibility is per specific Garmin device definition, NOT all devices named as one family. Enabling a device in the manifest is not proof that it works.

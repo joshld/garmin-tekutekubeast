@@ -28,11 +28,15 @@ over real progress. Settings > Developer enables it; Discard exits it.
 
 ## Beta limitations
 
-Physical-watch upgrade, Glances-list installation/launch, audible tones,
-vibration and battery life still need hardware testing. Simulator testing is
-not a claim that those hardware checks have occurred. Original Enduro is not
+The user has confirmed the Glance now appears on their physical Enduro 4 and
+Developer Mode is visible. Save-upgrade integrity, Glance launch/session behaviour,
+audible tones, vibration and battery life still need hardware testing. Simulator
+testing is not a claim that those hardware checks have occurred. Original Enduro is not
 supported by this artwork build because it exhausts memory. Fenix 6X is also
 excluded: its smaller background memory budget crashes the step callback.
 Rare forms currently use a crown overlay on the family's Legendary sprite.
 Running activity type is not inferred; real steps and supported minutes/pushes
 are used. See [validation](V0_4_VALIDATION.md) for detailed evidence and limits.
+
+Copy-ready store text and the replacement cover are maintained in
+[art/store/v0.4](../art/store/v0.4/README.md).

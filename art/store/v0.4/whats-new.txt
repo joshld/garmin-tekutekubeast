@@ -1,0 +1,20 @@
+v0.4.0 — A bigger world for your beast!
+
+• Grow through time, care and play—even with zero steps. Activity adds bonus growth and rewards.
+• Eggs now hatch naturally after about 24 hours. Care and activity can accelerate hatching to a minimum of about 8 hours.
+• Expanded care: meals, snacks, happiness, energy, cleanliness, poop, cleaning, petting and resting.
+• Play Star Catch, Memory Steps and Trail Treasure.
+• Discover food, toys, accessories and collection entries through activity or care and play.
+• New expressive pixel-art creatures with walking, hopping, blinking, eating and sleeping animations.
+• Simplified watch screens and a native pet Glance on supported watches.
+• Optional sounds and vibration with independent settings. Sound is off by default.
+• Built-in Developer Mode for temporary testing without overwriting your real beast.
+• Expanded compatibility across individually simulator-tested Garmin models.
+
+UPDATING
+
+Update your existing installation without uninstalling first. Save migration is designed to preserve your beast, step history, XP, friendship and inventory.
+
+DEVELOPMENT BETA
+
+Physical-watch save upgrades, Glance behaviour, sounds, vibration and battery use still require testing. Features and balancing may change.

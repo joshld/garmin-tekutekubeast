@@ -63,6 +63,15 @@ The SDK Glance host is resident: wrapper captures an explicit memory result,
 then stops only its own SDK connection. Timeout without clean evidence fails.
 Production Glance has no test payload, System.exit or timer.
 
+### User-reported physical Enduro 4 checks - 16 October 2026
+
+The user confirmed Developer Mode is visible in their installed app and later
+confirmed that TekuTekuBeast now appears in the Glances list. It was initially
+missing. The user did not identify which refresh action resolved this, so no
+specific sync/restart remedy is claimed verified. This is user-reported hardware
+evidence, not agent-operated physical-watch testing. See
+[WATCH_ACCEPTANCE.md](WATCH_ACCEPTANCE.md) for remaining checks.
+
 ### Resource budget and remaining hardware acceptance
 
 Pet requests at most four foreground frames/second, static pages/menus one/sec,
@@ -73,10 +82,11 @@ The final Enduro 4 audit measured 66,592 peak used bytes of 781,976 available, i
 the QA harness. These are SDK measurements and implementation budgets, not
 physical-watch CPU/battery-life claims.
 
-- No physical watch, audible-tone, vibration, battery or actual-user upgrade
-  testing. Hardware acceptance remains open in issues #5/#7/#10.
-- On Enduro 4, add the existing app to Glances, select it, verify full-game and
-  mini-game session timeouts. Simulator preview is not the watch's Glances list.
+- No agent-operated physical-watch testing. User-confirmed Glance availability
+  and visible Developer Mode do not verify sounds, vibration, battery, save
+  migration or DEV isolation on hardware. Issues #5/#7/#10 remain open.
+- Glance availability is user-confirmed on Enduro 4. Still select it and verify
+  full-game launch, rendering and mini-game session timeouts on the watch.
 - Upgrade without uninstalling; check the user's actual Pip/history/settings.
   Fixtures and simulator Pip are not a backup of the user's watch Storage.
 - On hardware toggle DEV, advance/reset, record activity, discard and reopen.

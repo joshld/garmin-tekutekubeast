@@ -66,8 +66,11 @@ names with dots to retain readable mood/cleanup status and a separate meter.
 
 Fenix 6X's simulator also disables native watch-app Glance launch, but the
 decisive rejection is the background-step Out Of Memory failure described below.
-Physical Enduro 4 Glances-list addition, selection-to-game and session timeout
-acceptance remain open in issue #10.
+The user confirmed on 16 October 2026 that the Glance now appears on their
+physical Enduro 4, after initially being absent. Selection-to-game, actual
+rendering and session timeout acceptance remain open in issue #10. This limited
+user confirmation is not general hardware certification; see
+[the acceptance log](WATCH_ACCEPTANCE.md).
 
 ## Excluded / not yet accepted
 

@@ -30,7 +30,16 @@ was launched separately from the final package and displayed the real cached
 Pip/COZY/growth summary at approximately 24.6 KiB of 59.9 KiB SDK memory.
 This is the actual production save view, not the synthetic Glance QA payload.
 
-This is not a physical-watch test. Actual-user save upgrade, Glances-list
-addition/launch, real sensor sessions, audible tones, vibration and battery life
-remain hardware acceptance checks. Update the same beta installation without
-uninstalling; do not replace it with an isolated QA app.
+The tests above are simulator tests, not agent-operated physical-watch tests.
+On 16 October 2026 the user reported Developer Mode visible on their watch and
+confirmed that TekuTekuBeast now appears in their Enduro 4 Glances list.
+Actual-user save migration, Glance selection-to-game/rendering/timeouts, real
+sensor sessions, audible tones, vibration and battery life remain hardware
+acceptance checks. See [the acceptance log](WATCH_ACCEPTANCE.md). Update the same
+beta installation without uninstalling; do not replace it with an isolated QA app.
+
+The subsequent store-art/documentation update does not change the application
+binary or the hashes recorded above. Store assets and copy live in
+[art/store/v0.4](../art/store/v0.4/README.md). The user reported a Garmin submission
+error followed by the dashboard showing 0.4.0; successful saving of all listing
+metadata has not been independently verified.

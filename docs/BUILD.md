@@ -79,8 +79,10 @@ You can also test the watch UI with the Enduro 4 five-button navigation.
 
 For Store updates use the production signed `.iq` export and update the same
 existing beta listing. Do not uninstall the watch app first: uninstalling may
-remove Garmin Storage. Physical-watch upgrade and Glances-list checks still
-need to be performed. A PRG can be sideloaded via `GARMIN/APPS` where Garmin
+remove Garmin Storage. The user has confirmed Developer Mode is visible and the
+Glance now appears on their physical Enduro 4. Full save preservation and Glance
+launch/session checks remain open; see [WATCH_ACCEPTANCE.md](WATCH_ACCEPTANCE.md).
+A PRG can be sideloaded via `GARMIN/APPS` where Garmin
 exposes that folder; avoid duplicate Store/sideload installations.
 
 ## Automated checks
