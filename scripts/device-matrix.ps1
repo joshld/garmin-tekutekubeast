@@ -2,7 +2,7 @@ param([string[]]$Devices=@('enduro4','enduro3','fenix7x','fenix7xpro','fenix8sol
 $project=Split-Path $PSScriptRoot -Parent
 $results=@()
 $expectedTests=[regex]::Matches((Get-Content "$project/source/StateTests.mc" -Raw),'(?m)^function \w+Test\(logger\)').Count
-if(Test-Path "$project/bin/device-matrix.json"){$results=@(Get-Content "$project/bin/device-matrix.json" -Raw | ConvertFrom-Json)}
+if(Test-Path "$project/bin/v05-device-matrix.json"){$results=@(Get-Content "$project/bin/v05-device-matrix.json" -Raw | ConvertFrom-Json)}
 foreach($device in $Devices){
     $results=@($results | Where-Object {$_.device -ne $device})
     try {
@@ -25,5 +25,5 @@ foreach($device in $Devices){
         $results+=@{device=$device;error="$($_.Exception.Message)"}
         Write-Output "MATRIX FAIL $device : $($_.Exception.Message)"
     }
-    $results | ConvertTo-Json -Depth 4 | Set-Content "$project/bin/device-matrix.json"
+    $results | ConvertTo-Json -Depth 4 | Set-Content "$project/bin/v05-device-matrix.json"
 }

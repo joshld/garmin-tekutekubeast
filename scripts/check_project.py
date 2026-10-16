@@ -110,6 +110,8 @@ for directory, size in (("resources",128),("resources-pet144",144),("resources-n
         if path.is_file():
             header = path.read_bytes()[:24]
             expected = 40 if resource_id.endswith("Small") else size
+            if resource_id.startswith("V5Game"):
+                expected = 80 if directory in ("resources","resources-pet144") else (128 if directory=="resources-native144" else 144)
             check(struct.unpack(">II",header[16:24]) == (expected,expected), "Wrong v0.5 bitmap size: " + resource_id)
             if resource_id.endswith("Small"):
                 check(bitmap.get("scope") == "glance", "Sleeping Glance sprite lacks glance scope")

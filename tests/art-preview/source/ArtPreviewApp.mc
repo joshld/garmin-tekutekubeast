@@ -35,7 +35,7 @@ class ArtLayoutAuditView extends TekuTekuBeastView {
     function initialize(){
         TekuTekuBeastView.initialize();beast=new ArtPreviewState();
         for(var i=0;i<menuNames.size();i++){openMenu(menuNames[i]);menuCounts.add(rows.size());menuTotal+=rows.size();}
-        menu=null;sceneCount=165+menuTotal+3+12+messages.size()+12+270;
+        menu=null;sceneCount=165+menuTotal+3+18+messages.size()+12+270;
     }
     function sceneAt(index){
         if(index<165){
@@ -48,7 +48,7 @@ class ArtLayoutAuditView extends TekuTekuBeastView {
             if(index<menuCounts[i]){return [1,0,0,menuNames[i],index,"idle",0];}index-=menuCounts[i];
         }
         if(index<3){return [5,4,index,null,0,"idle",1];}index-=3;
-        if(index<12){return [1,0,index/4,"GAME",index%4,"idle",0];}index-=12;
+        if(index<18){return [1,0,index/6,"GAME",index%6,"idle",0];}index-=18;
         if(index<messages.size()){return [1,0,0,null,0,"idle",0,messages[index]];}
         index-=messages.size();if(index<12){return [5,1+index/3,index%3,null,0,"idle",0,null,1];}
         index-=12;var specimen=(index/18).toNumber();
@@ -84,7 +84,9 @@ class ArtLayoutAuditView extends TekuTekuBeastView {
         }
         if(scene[3]!=null && scene[3].equals("GAME")){
             var game=new AuditGame(beast,page,self);game.phase=scene[4];game.sequence=[0,1,2,0,1];game.result="WELL PLAYED!";
+            game.hint="GREAT!";game.lane=scene[4]==1?0:2;game.jumpTicks=4;game.tick=12;
             boxes=[];game.onUpdate(dc);
+            checkGraphic(dc,game.gameBounds,"Game creature");
         }else{
             if(scene[3]!=null){openMenu(scene[3]);selection=scene[4];}else{menu=null;}
             loadSprite();boxes=[];TekuTekuBeastView.onUpdate(dc);
@@ -103,6 +105,13 @@ class ArtLayoutAuditView extends TekuTekuBeastView {
             audited=true;refresher.stop();System.println("LAYOUT_AUDIT: "+cursor+" scenes; "+failures.size()+" failures");
             System.println("LAYOUT_MEMORY: peak="+peakMemory+" total="+totalMemory);
             for(var i=0;i<failures.size();i++){System.println(failures[i]);}WatchUi.requestUpdate();
+        }
+    }
+    function checkGraphic(dc,bounds,name){
+        var radius=dc.getWidth()/2-8;
+        for(var corner=0;corner<4;corner++){
+            var px=bounds[0]+(corner%2==0?0:bounds[2]);var py=bounds[1]+(corner<2?0:bounds[3]);
+            if((px-dc.getWidth()/2)*(px-dc.getWidth()/2)+(py-dc.getHeight()/2)*(py-dc.getHeight()/2)>radius*radius){failures.add(name+" circle");}
         }
     }
     function onUpdate(dc){

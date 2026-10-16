@@ -191,12 +191,18 @@ function scheduledSleepAndLightsTest(logger){
 }
 (:test)
 function sleepUpcomingFallbackTest(logger){
+    Test.assert(!BeastSleep.validSchedule(0,0));Test.assert(!BeastSleep.validSchedule(1441,420));Test.assert(BeastSleep.validSchedule(1320,420));
     var s=TestSupport.fixture();s.data["nextBed"]=s.now()+18*3600;s.data["nextWake"]=s.now()+2*3600;
     Test.assert(s.isNight());s.data["nextBed"]=s.now()+2*3600;s.data["nextWake"]=s.now()+10*3600;Test.assert(!s.isNight());
     s.data["nextBed"]=0l;s.data["nextWake"]=0l;s.data["watchBed"]=0;s.data["watchWake"]=1439;
     Test.assert(s.isNight());s.data["watchWake"]=0;Test.assert(!s.isNight());
     Test.assert(BeastSleep.inWindow(60,1320,420));Test.assert(!BeastSleep.inWindow(600,1320,420));
-    Test.assert(BeastSleep.inWindow(600,540,1020));return true;
+    Test.assert(BeastSleep.inWindow(600,540,1020));
+    s.data["sleepMode"]=1;s.data["bedMinute"]=1320;s.data["wakeMinute"]=420;
+    s.testNow+=((1320-BeastSleep.minuteAt(s.now())+1440)%1440)*60;
+    s.data["lastCare"]=s.now();s.data["energy"]=0;s.data["poop"]=0;s.data["fullness"]=80;s.data["friendship"]=25;
+    s.testNow+=9*3600;var forecast=BeastSleep.previewMood(s.data,s.now());Test.assertEqual(s.number("energy"),0);
+    Test.assert(BeastSleep.forecastEnergy(s.data,s.now())>=64);s.tick();Test.assert(s.mood().equals(forecast));return true;
 }
 (:test)
 function gameSessionAtomicityTest(logger){
@@ -205,7 +211,9 @@ function gameSessionAtomicityTest(logger){
     trip["route"]=3;trip["node"]=2;trip["finds"]=3;Test.assert(s.saveSession(trip));
     s.data=null;s.start();Test.assertEqual(s.data["sessions"][2]["route"],3);Test.assertEqual(s.number("adventure"),1);
     var answer=s.completeSession(trip,true);Test.assert(answer.find("FOUND ")==0);Test.assertEqual(s.number("encounters"),1);
+    Test.assertEqual(s.friendship(),1);
     Test.assert(s.completeSession(trip,true).equals("ALREADY SAVED"));Test.assert(!s.saveSession(trip));Test.assertEqual(s.number("encounters"),1);
+    Test.assertEqual(s.friendship(),1);
     Test.assertEqual(s.xp(),0l);var arcade=s.beginSession(0);var slots=s.number("games");s.completeSession(arcade,true);s.completeSession(arcade,true);
     Test.assertEqual(s.number("games"),slots+1);Test.assertEqual(s.xp(),0l);return true;
 }

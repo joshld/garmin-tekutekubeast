@@ -78,11 +78,12 @@ class TekuTekuBeastState {
             var p=UserProfile.getProfile();
             if(p!=null){
                 if(p.sleepTime!=null && p.wakeTime!=null){
-                    data["watchBed"]=(p.sleepTime.value()/60)%1440;data["watchWake"]=(p.wakeTime.value()/60)%1440;data["sleepSource"]="WATCH TYPICAL";
+                    var bed=p.sleepTime.value()/60;var wake=p.wakeTime.value()/60;
+                    if(BeastSleep.validSchedule(bed,wake)){data["watchBed"]=bed;data["watchWake"]=wake;data["sleepSource"]="WATCH TYPICAL";}
                 }
                 if((p has :upcomingSleepTime) && (p has :upcomingWakeTime) && p.upcomingSleepTime!=null && p.upcomingWakeTime!=null){
                     var b=p.upcomingSleepTime.value().toLong();var w=p.upcomingWakeTime.value().toLong();
-                    if(b>now() && w>now() && b-now()<=172800 && w-now()<=172800){
+                    if(b!=w && b>now() && w>now() && b-now()<=172800 && w-now()<=172800){
                         data["nextBed"]=b;data["nextWake"]=w;data["sleepSource"]="WATCH UPCOMING";
                     }
                 }
@@ -271,6 +272,7 @@ class TekuTekuBeastState {
             if(session["finds"]>=2){for(var i=0;i<8;i++){var candidate=(seed+i)%8;if((number("discoveryMask")&(1<<candidate))==0){item=candidate;break;}}}
             data["items"][item]++;data["discoveryMask"]=number("discoveryMask")|(1<<item);data["encounters"]++;
             data["personality"][route]++;if(item==0){data["snacks"]=min(12,snacks()+1);}
+            data["happiness"]=clamp(number("happiness")+8);data["friendship"]=clamp(friendship()+1);careReward(25,route);
             commit();return "FOUND "+["BERRY","KITE","RIBBON","SHELL","LANTERN","CROWN","CRYSTAL","COMPASS"][item];
         }
         var outcome=gameReward(win,kind);commit();return outcome;

@@ -2,7 +2,7 @@ param([string[]]$Devices=@('enduro4','enduro3','fenix7x','fenix7xpro','fenix8sol
 # Set the simulator's Settings > Glance Launch Mode to Glance before running.
 $project=Split-Path $PSScriptRoot -Parent
 $results=@()
-if(Test-Path "$project/bin/glance-matrix.json"){$results=@(Get-Content "$project/bin/glance-matrix.json" -Raw | ConvertFrom-Json)}
+if(Test-Path "$project/bin/v05-glance-matrix.json"){$results=@(Get-Content "$project/bin/v05-glance-matrix.json" -Raw | ConvertFrom-Json)}
 foreach($device in $Devices){
     $results=@($results | Where-Object {$_.device -ne $device})
     try {
@@ -20,5 +20,5 @@ foreach($device in $Devices){
         $results+=@{device=$device;error="$($_.Exception.Message)"}
         Write-Output "GLANCE FAIL $device : $($_.Exception.Message)"
     }
-    $results | ConvertTo-Json -Depth 4 | Set-Content "$project/bin/glance-matrix.json"
+    $results | ConvertTo-Json -Depth 4 | Set-Content "$project/bin/v05-glance-matrix.json"
 }

@@ -25,22 +25,22 @@ class BeastArt {
     }
     function index(stage,family){return stage<3?stage:3+(family-1)*3+stage-3;}
     function frames(stage,family){
-        if(stage==0){var egg=WatchUi.loadResource(Rez.Drawables.V4Egg0);return [egg,egg,egg,egg,egg,egg];}
-        var ids=[[Rez.Drawables.V4Egg0,Rez.Drawables.V4Egg1,Rez.Drawables.V4Egg2,Rez.Drawables.V4Egg3,Rez.Drawables.V4Egg4,Rez.Drawables.V4Egg5],
-            [Rez.Drawables.V4Pip0,Rez.Drawables.V4Pip1,Rez.Drawables.V4Pip2,Rez.Drawables.V4Pip3,Rez.Drawables.V4Pip4,Rez.Drawables.V4Pip5],
-            [Rez.Drawables.V4Nimble0,Rez.Drawables.V4Nimble1,Rez.Drawables.V4Nimble2,Rez.Drawables.V4Nimble3,Rez.Drawables.V4Nimble4,Rez.Drawables.V4Nimble5],
-            [Rez.Drawables.V4Grove30,Rez.Drawables.V4Grove31,Rez.Drawables.V4Grove32,Rez.Drawables.V4Grove33,Rez.Drawables.V4Grove34,Rez.Drawables.V4Grove35],
-            [Rez.Drawables.V4Grove40,Rez.Drawables.V4Grove41,Rez.Drawables.V4Grove42,Rez.Drawables.V4Grove43,Rez.Drawables.V4Grove44,Rez.Drawables.V4Grove45],
-            [Rez.Drawables.V4Grove50,Rez.Drawables.V4Grove51,Rez.Drawables.V4Grove52,Rez.Drawables.V4Grove53,Rez.Drawables.V4Grove54,Rez.Drawables.V4Grove55],
-            [Rez.Drawables.V4Ember30,Rez.Drawables.V4Ember31,Rez.Drawables.V4Ember32,Rez.Drawables.V4Ember33,Rez.Drawables.V4Ember34,Rez.Drawables.V4Ember35],
-            [Rez.Drawables.V4Ember40,Rez.Drawables.V4Ember41,Rez.Drawables.V4Ember42,Rez.Drawables.V4Ember43,Rez.Drawables.V4Ember44,Rez.Drawables.V4Ember45],
-            [Rez.Drawables.V4Ember50,Rez.Drawables.V4Ember51,Rez.Drawables.V4Ember52,Rez.Drawables.V4Ember53,Rez.Drawables.V4Ember54,Rez.Drawables.V4Ember55],
-            [Rez.Drawables.V4Tide30,Rez.Drawables.V4Tide31,Rez.Drawables.V4Tide32,Rez.Drawables.V4Tide33,Rez.Drawables.V4Tide34,Rez.Drawables.V4Tide35],
-            [Rez.Drawables.V4Tide40,Rez.Drawables.V4Tide41,Rez.Drawables.V4Tide42,Rez.Drawables.V4Tide43,Rez.Drawables.V4Tide44,Rez.Drawables.V4Tide45],
-            [Rez.Drawables.V4Tide50,Rez.Drawables.V4Tide51,Rez.Drawables.V4Tide52,Rez.Drawables.V4Tide53,Rez.Drawables.V4Tide54,Rez.Drawables.V4Tide55],
-            [Rez.Drawables.V4Wisp30,Rez.Drawables.V4Wisp31,Rez.Drawables.V4Wisp32,Rez.Drawables.V4Wisp33,Rez.Drawables.V4Wisp34,Rez.Drawables.V4Wisp35],
-            [Rez.Drawables.V4Wisp40,Rez.Drawables.V4Wisp41,Rez.Drawables.V4Wisp42,Rez.Drawables.V4Wisp43,Rez.Drawables.V4Wisp44,Rez.Drawables.V4Wisp45],
-            [Rez.Drawables.V4Wisp50,Rez.Drawables.V4Wisp51,Rez.Drawables.V4Wisp52,Rez.Drawables.V4Wisp53,Rez.Drawables.V4Wisp54,Rez.Drawables.V4Wisp55]];
+        if(stage==0){var egg=WatchUi.loadResource(Rez.Drawables.V5GameEgg0);return [egg,egg,egg,egg,egg,egg];}
+        var ids=[[Rez.Drawables.V5GameEgg0,Rez.Drawables.V5GameEgg1,Rez.Drawables.V5GameEgg2,Rez.Drawables.V5GameEgg3,Rez.Drawables.V5GameEgg4,Rez.Drawables.V5GameEgg5],
+            [Rez.Drawables.V5GamePip0,Rez.Drawables.V5GamePip1,Rez.Drawables.V5GamePip2,Rez.Drawables.V5GamePip3,Rez.Drawables.V5GamePip4,Rez.Drawables.V5GamePip5],
+            [Rez.Drawables.V5GameNimble0,Rez.Drawables.V5GameNimble1,Rez.Drawables.V5GameNimble2,Rez.Drawables.V5GameNimble3,Rez.Drawables.V5GameNimble4,Rez.Drawables.V5GameNimble5],
+            [Rez.Drawables.V5GameGrove30,Rez.Drawables.V5GameGrove31,Rez.Drawables.V5GameGrove32,Rez.Drawables.V5GameGrove33,Rez.Drawables.V5GameGrove34,Rez.Drawables.V5GameGrove35],
+            [Rez.Drawables.V5GameGrove40,Rez.Drawables.V5GameGrove41,Rez.Drawables.V5GameGrove42,Rez.Drawables.V5GameGrove43,Rez.Drawables.V5GameGrove44,Rez.Drawables.V5GameGrove45],
+            [Rez.Drawables.V5GameGrove50,Rez.Drawables.V5GameGrove51,Rez.Drawables.V5GameGrove52,Rez.Drawables.V5GameGrove53,Rez.Drawables.V5GameGrove54,Rez.Drawables.V5GameGrove55],
+            [Rez.Drawables.V5GameEmber30,Rez.Drawables.V5GameEmber31,Rez.Drawables.V5GameEmber32,Rez.Drawables.V5GameEmber33,Rez.Drawables.V5GameEmber34,Rez.Drawables.V5GameEmber35],
+            [Rez.Drawables.V5GameEmber40,Rez.Drawables.V5GameEmber41,Rez.Drawables.V5GameEmber42,Rez.Drawables.V5GameEmber43,Rez.Drawables.V5GameEmber44,Rez.Drawables.V5GameEmber45],
+            [Rez.Drawables.V5GameEmber50,Rez.Drawables.V5GameEmber51,Rez.Drawables.V5GameEmber52,Rez.Drawables.V5GameEmber53,Rez.Drawables.V5GameEmber54,Rez.Drawables.V5GameEmber55],
+            [Rez.Drawables.V5GameTide30,Rez.Drawables.V5GameTide31,Rez.Drawables.V5GameTide32,Rez.Drawables.V5GameTide33,Rez.Drawables.V5GameTide34,Rez.Drawables.V5GameTide35],
+            [Rez.Drawables.V5GameTide40,Rez.Drawables.V5GameTide41,Rez.Drawables.V5GameTide42,Rez.Drawables.V5GameTide43,Rez.Drawables.V5GameTide44,Rez.Drawables.V5GameTide45],
+            [Rez.Drawables.V5GameTide50,Rez.Drawables.V5GameTide51,Rez.Drawables.V5GameTide52,Rez.Drawables.V5GameTide53,Rez.Drawables.V5GameTide54,Rez.Drawables.V5GameTide55],
+            [Rez.Drawables.V5GameWisp30,Rez.Drawables.V5GameWisp31,Rez.Drawables.V5GameWisp32,Rez.Drawables.V5GameWisp33,Rez.Drawables.V5GameWisp34,Rez.Drawables.V5GameWisp35],
+            [Rez.Drawables.V5GameWisp40,Rez.Drawables.V5GameWisp41,Rez.Drawables.V5GameWisp42,Rez.Drawables.V5GameWisp43,Rez.Drawables.V5GameWisp44,Rez.Drawables.V5GameWisp45],
+            [Rez.Drawables.V5GameWisp50,Rez.Drawables.V5GameWisp51,Rez.Drawables.V5GameWisp52,Rez.Drawables.V5GameWisp53,Rez.Drawables.V5GameWisp54,Rez.Drawables.V5GameWisp55]];
         var selected=ids[index(stage,family)];var result=[];
         for(var i=0;i<6;i++){result.add(WatchUi.loadResource(selected[i]));}return result;
     }

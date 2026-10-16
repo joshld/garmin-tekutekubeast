@@ -57,7 +57,9 @@ the existing ledger. No Garmin clock, step counter or Sleep Focus is modified.
   suppress both channels; no background alerts or system-mute bypass.
 - Glance: cached real creature/growth, current shared mood, curled small sprite
   for sleep/tiredness, growth track and cleanup marker. No state engine, timer,
-  save writes, animation or audio in Glance.
+  save writes, animation or audio in Glance. A bounded read-only care projection
+  avoids stale tiredness after overnight recovery when a wake callback was missed;
+  it does not advance growth or change saved values.
 - DEV adds bedtime, waking, sleepy, happy-roaming and all-needs scenarios alongside
   existing stage/family/needs/items/time/game/animation/audio controls.
 - Settings displays 0.5.0 beta. No Store publication is authorised or performed.

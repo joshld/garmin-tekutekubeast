@@ -14,12 +14,12 @@ class TekuTekuBeastGlanceView extends WatchUi.GlanceView {
         readSummary();
     }
     function readSummary(){
-        snapshot=Storage.getValue("v4") as Lang.Dictionary or Null;
+        snapshot=savedSummary();
         var ids=[Rez.Drawables.V4EggSmall,Rez.Drawables.V4PipSmall,Rez.Drawables.V4NimbleSmall,Rez.Drawables.V4Grove3Small,Rez.Drawables.V4Grove4Small,Rez.Drawables.V4Grove5Small,Rez.Drawables.V4Ember3Small,Rez.Drawables.V4Ember4Small,Rez.Drawables.V4Ember5Small,Rez.Drawables.V4Tide3Small,Rez.Drawables.V4Tide4Small,Rez.Drawables.V4Tide5Small,Rez.Drawables.V4Wisp3Small,Rez.Drawables.V4Wisp4Small,Rez.Drawables.V4Wisp5Small];
         var index=0;
         if(snapshot!=null && snapshot.hasKey("cachedSprite")){index=snapshot["cachedSprite"] as Lang.Number;}
         if(index<0 || index>=ids.size()){index=0;}
-        var sleeping=snapshot!=null && (BeastSleep.sleeping(snapshot,Time.now().value()) || BeastSleep.value(snapshot,"energy",80)<20);
+        var sleeping=snapshot!=null && (BeastSleep.sleeping(snapshot,Time.now().value()) || BeastSleep.forecastEnergy(snapshot,Time.now().value())<20);
         var key=index+(sleeping?100:0);
         if(key!=cachedId){
             if(sleeping){
@@ -28,14 +28,15 @@ class TekuTekuBeastGlanceView extends WatchUi.GlanceView {
             sprite=WatchUi.loadResource(ids[index]);cachedId=key;
         }
     }
+    function savedSummary(){return Storage.getValue("v4") as Lang.Dictionary or Null;}
     function onUpdate(dc){
         readSummary();
         dc.setColor(0xFFFFFF,0x000000);dc.clear();
         if(sprite!=null){dc.drawBitmap(4,(dc.getHeight()-40)/2,sprite);}
         var name="EGG";var mood="OPEN GAME";var progress=0.0;
         if(snapshot!=null && snapshot.hasKey("cachedName")){
-            name=snapshot["cachedName"];mood=BeastSleep.mood(snapshot,Time.now().value());progress=snapshot["cachedProgress"];
-            if(snapshot["poop"]>0 && !BeastSleep.sleeping(snapshot,Time.now().value()) && BeastSleep.value(snapshot,"energy",80)>=20){mood="CLEANUP";}
+            name=snapshot["cachedName"];mood=BeastSleep.previewMood(snapshot,Time.now().value());progress=snapshot["cachedProgress"];
+            if(snapshot["poop"]>0 && !BeastSleep.sleeping(snapshot,Time.now().value()) && BeastSleep.forecastEnergy(snapshot,Time.now().value())>=20){mood="CLEANUP";}
         }
         var font=Graphics.FONT_XTINY;var left=50;var width=dc.getWidth()-left-12;
         var lines=[name];var split=name.find(" ");

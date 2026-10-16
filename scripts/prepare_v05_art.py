@@ -34,6 +34,8 @@ for folder, extent in variants:
                 rgba = source.convert("RGBA")
                 cells.append(rgba.crop(rgba.getbbox()))
         scale = (extent-8) / max(max(c.width,c.height) for c in cells)
+        game_extent = 80 if folder in ("resources","resources-pet144") else (128 if folder=="resources-native144" else 144)
+        game_scale = (game_extent-8) / max(max(c.width,c.height) for c in cells)
         if name == "V4Egg":
             scale *= .72
         asleep = cells[3].copy()
@@ -44,6 +46,12 @@ for folder, extent in variants:
         tile.save(resource/f"drawables/v05/{tile_name}.png",optimize=True)
         ET.SubElement(tree.getroot(),"bitmap",{"id":tile_name,"filename":f"v05/{tile_name}.png","scope":"glance","dithering":"none"})
         for frame, cell in enumerate(cells):
+            game_cell = cell.resize((round(cell.width*game_scale),round(cell.height*game_scale)),Image.Resampling.NEAREST)
+            game_canvas = Image.new("RGBA",(game_extent,game_extent))
+            game_canvas.alpha_composite(game_cell,((game_extent-game_cell.width)//2,game_extent-game_cell.height-4))
+            game_id = "V5Game"+name[2:]+str(frame)
+            game_canvas.save(resource/f"drawables/v05/{game_id}.png",optimize=True)
+            ET.SubElement(tree.getroot(),"bitmap",{"id":game_id,"filename":f"v05/{game_id}.png","dithering":"none"})
             resized = cell.resize((round(cell.width*scale),round(cell.height*scale)),Image.Resampling.NEAREST)
             canvas = Image.new("RGBA", (extent,extent))
             canvas.alpha_composite(resized,((extent-resized.width)//2,extent-resized.height-4))

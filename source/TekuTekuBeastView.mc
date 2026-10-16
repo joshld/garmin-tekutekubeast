@@ -263,17 +263,20 @@ class TekuTekuBeastView extends WatchUi.View {
         if(beast.number("fullness")<45){pixelIcon(dc,dc.getWidth()/2-28,y(dc,0.12),[8,12,54,127,127,62,28],color,2);count++;}
         if(beast.number("happiness")<50){pixelIcon(dc,dc.getWidth()/2-7,y(dc,0.12),[54,127,119,62,28,8],color,2);count++;}
         if(beast.number("energy")<20 && !visualState().equals("sleep")){pixelIcon(dc,dc.getWidth()/2+14,y(dc,0.12),[14,24,48,48,56,30,15],color,2);count++;}
+        devBadge(dc,color);
+        creature(dc);
+        // Poop is a fixed floor object, not attached to the moving creature.
+        if(beast.number("poop")>0){var scale=beast.max(2,(dc.getWidth()/140).toNumber());pixelIcon(dc,dc.getWidth()*0.73,y(dc,0.73),[8,28,30,62,127,127],0xAA5500,scale);}
+        bar(dc,y(dc,0.80),beast.progress(),dc.getWidth()/2);
+        label(dc,y(dc,0.83),notice!=null?notice:todayLabel(),Graphics.FONT_XTINY);
+    }
+    function devBadge(dc,color){
         if(beast.dev){
             var scale=beast.max(2,(dc.getWidth()/140).toNumber());var x=dc.getWidth()/2-5.5*scale;
             pixelIcon(dc,x,y(dc,0.07),[96,80,80,80,96],color,scale);
             pixelIcon(dc,x+4*scale,y(dc,0.07),[112,64,96,64,112],color,scale);
             pixelIcon(dc,x+8*scale,y(dc,0.07),[80,80,80,80,32],color,scale);
         }
-        creature(dc);
-        // Poop is a fixed floor object, not attached to the moving creature.
-        if(beast.number("poop")>0){var scale=beast.max(2,(dc.getWidth()/140).toNumber());pixelIcon(dc,dc.getWidth()*0.73,y(dc,0.73),[8,28,30,62,127,127],0xAA5500,scale);}
-        bar(dc,y(dc,0.80),beast.progress(),dc.getWidth()/2);
-        label(dc,y(dc,0.83),notice!=null?notice:todayLabel(),Graphics.FONT_XTINY);
     }
     function drawCare(dc){
         label(dc,y(dc,0.10),beast.dev?"CARE  DEV":"CARE",Graphics.FONT_SMALL);

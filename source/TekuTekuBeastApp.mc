@@ -33,8 +33,9 @@ class TekuTekuBeastApp extends Application.AppBase {
         if(activeView != null && !activeView.beast.dev){
             activeView.beast.data=null;
             activeView.beast.syncHistory();
-            WatchUi.requestUpdate();
         }
+        // Glance has no active game view; let its read-only summary refresh too.
+        WatchUi.requestUpdate();
     }
     function getServiceDelegate() {
         return [new TekuTekuBeastService()];

@@ -109,138 +109,228 @@
     <bitmap id="V4Wisp54" filename="../../resources/drawables/v04/V4Wisp54.png" dithering="none" />
     <bitmap id="V4Wisp55" filename="../../resources/drawables/v04/V4Wisp55.png" dithering="none" />
     <bitmap id="V5EggSleepSmall" filename="v05/V5EggSleepSmall.png" scope="glance" dithering="none" />
+    <bitmap id="V5GameEgg0" filename="v05/V5GameEgg0.png" dithering="none" />
     <bitmap id="V5Egg0" filename="v05/V5Egg0.png" dithering="none" />
     <bitmap id="V5Egg0Left" filename="v05/V5Egg0Left.png" dithering="none" />
+    <bitmap id="V5GameEgg1" filename="v05/V5GameEgg1.png" dithering="none" />
     <bitmap id="V5Egg1" filename="v05/V5Egg1.png" dithering="none" />
     <bitmap id="V5Egg1Left" filename="v05/V5Egg1Left.png" dithering="none" />
+    <bitmap id="V5GameEgg2" filename="v05/V5GameEgg2.png" dithering="none" />
     <bitmap id="V5Egg2" filename="v05/V5Egg2.png" dithering="none" />
+    <bitmap id="V5GameEgg3" filename="v05/V5GameEgg3.png" dithering="none" />
     <bitmap id="V5Egg3" filename="v05/V5Egg3.png" dithering="none" />
+    <bitmap id="V5GameEgg4" filename="v05/V5GameEgg4.png" dithering="none" />
     <bitmap id="V5Egg4" filename="v05/V5Egg4.png" dithering="none" />
+    <bitmap id="V5GameEgg5" filename="v05/V5GameEgg5.png" dithering="none" />
     <bitmap id="V5Egg5" filename="v05/V5Egg5.png" dithering="none" />
     <bitmap id="V5Ember3SleepSmall" filename="v05/V5Ember3SleepSmall.png" scope="glance" dithering="none" />
+    <bitmap id="V5GameEmber30" filename="v05/V5GameEmber30.png" dithering="none" />
     <bitmap id="V5Ember30" filename="v05/V5Ember30.png" dithering="none" />
     <bitmap id="V5Ember30Left" filename="v05/V5Ember30Left.png" dithering="none" />
+    <bitmap id="V5GameEmber31" filename="v05/V5GameEmber31.png" dithering="none" />
     <bitmap id="V5Ember31" filename="v05/V5Ember31.png" dithering="none" />
     <bitmap id="V5Ember31Left" filename="v05/V5Ember31Left.png" dithering="none" />
+    <bitmap id="V5GameEmber32" filename="v05/V5GameEmber32.png" dithering="none" />
     <bitmap id="V5Ember32" filename="v05/V5Ember32.png" dithering="none" />
+    <bitmap id="V5GameEmber33" filename="v05/V5GameEmber33.png" dithering="none" />
     <bitmap id="V5Ember33" filename="v05/V5Ember33.png" dithering="none" />
+    <bitmap id="V5GameEmber34" filename="v05/V5GameEmber34.png" dithering="none" />
     <bitmap id="V5Ember34" filename="v05/V5Ember34.png" dithering="none" />
+    <bitmap id="V5GameEmber35" filename="v05/V5GameEmber35.png" dithering="none" />
     <bitmap id="V5Ember35" filename="v05/V5Ember35.png" dithering="none" />
     <bitmap id="V5Ember4SleepSmall" filename="v05/V5Ember4SleepSmall.png" scope="glance" dithering="none" />
+    <bitmap id="V5GameEmber40" filename="v05/V5GameEmber40.png" dithering="none" />
     <bitmap id="V5Ember40" filename="v05/V5Ember40.png" dithering="none" />
     <bitmap id="V5Ember40Left" filename="v05/V5Ember40Left.png" dithering="none" />
+    <bitmap id="V5GameEmber41" filename="v05/V5GameEmber41.png" dithering="none" />
     <bitmap id="V5Ember41" filename="v05/V5Ember41.png" dithering="none" />
     <bitmap id="V5Ember41Left" filename="v05/V5Ember41Left.png" dithering="none" />
+    <bitmap id="V5GameEmber42" filename="v05/V5GameEmber42.png" dithering="none" />
     <bitmap id="V5Ember42" filename="v05/V5Ember42.png" dithering="none" />
+    <bitmap id="V5GameEmber43" filename="v05/V5GameEmber43.png" dithering="none" />
     <bitmap id="V5Ember43" filename="v05/V5Ember43.png" dithering="none" />
+    <bitmap id="V5GameEmber44" filename="v05/V5GameEmber44.png" dithering="none" />
     <bitmap id="V5Ember44" filename="v05/V5Ember44.png" dithering="none" />
+    <bitmap id="V5GameEmber45" filename="v05/V5GameEmber45.png" dithering="none" />
     <bitmap id="V5Ember45" filename="v05/V5Ember45.png" dithering="none" />
     <bitmap id="V5Ember5SleepSmall" filename="v05/V5Ember5SleepSmall.png" scope="glance" dithering="none" />
+    <bitmap id="V5GameEmber50" filename="v05/V5GameEmber50.png" dithering="none" />
     <bitmap id="V5Ember50" filename="v05/V5Ember50.png" dithering="none" />
     <bitmap id="V5Ember50Left" filename="v05/V5Ember50Left.png" dithering="none" />
+    <bitmap id="V5GameEmber51" filename="v05/V5GameEmber51.png" dithering="none" />
     <bitmap id="V5Ember51" filename="v05/V5Ember51.png" dithering="none" />
     <bitmap id="V5Ember51Left" filename="v05/V5Ember51Left.png" dithering="none" />
+    <bitmap id="V5GameEmber52" filename="v05/V5GameEmber52.png" dithering="none" />
     <bitmap id="V5Ember52" filename="v05/V5Ember52.png" dithering="none" />
+    <bitmap id="V5GameEmber53" filename="v05/V5GameEmber53.png" dithering="none" />
     <bitmap id="V5Ember53" filename="v05/V5Ember53.png" dithering="none" />
+    <bitmap id="V5GameEmber54" filename="v05/V5GameEmber54.png" dithering="none" />
     <bitmap id="V5Ember54" filename="v05/V5Ember54.png" dithering="none" />
+    <bitmap id="V5GameEmber55" filename="v05/V5GameEmber55.png" dithering="none" />
     <bitmap id="V5Ember55" filename="v05/V5Ember55.png" dithering="none" />
     <bitmap id="V5Grove3SleepSmall" filename="v05/V5Grove3SleepSmall.png" scope="glance" dithering="none" />
+    <bitmap id="V5GameGrove30" filename="v05/V5GameGrove30.png" dithering="none" />
     <bitmap id="V5Grove30" filename="v05/V5Grove30.png" dithering="none" />
     <bitmap id="V5Grove30Left" filename="v05/V5Grove30Left.png" dithering="none" />
+    <bitmap id="V5GameGrove31" filename="v05/V5GameGrove31.png" dithering="none" />
     <bitmap id="V5Grove31" filename="v05/V5Grove31.png" dithering="none" />
     <bitmap id="V5Grove31Left" filename="v05/V5Grove31Left.png" dithering="none" />
+    <bitmap id="V5GameGrove32" filename="v05/V5GameGrove32.png" dithering="none" />
     <bitmap id="V5Grove32" filename="v05/V5Grove32.png" dithering="none" />
+    <bitmap id="V5GameGrove33" filename="v05/V5GameGrove33.png" dithering="none" />
     <bitmap id="V5Grove33" filename="v05/V5Grove33.png" dithering="none" />
+    <bitmap id="V5GameGrove34" filename="v05/V5GameGrove34.png" dithering="none" />
     <bitmap id="V5Grove34" filename="v05/V5Grove34.png" dithering="none" />
+    <bitmap id="V5GameGrove35" filename="v05/V5GameGrove35.png" dithering="none" />
     <bitmap id="V5Grove35" filename="v05/V5Grove35.png" dithering="none" />
     <bitmap id="V5Grove4SleepSmall" filename="v05/V5Grove4SleepSmall.png" scope="glance" dithering="none" />
+    <bitmap id="V5GameGrove40" filename="v05/V5GameGrove40.png" dithering="none" />
     <bitmap id="V5Grove40" filename="v05/V5Grove40.png" dithering="none" />
     <bitmap id="V5Grove40Left" filename="v05/V5Grove40Left.png" dithering="none" />
+    <bitmap id="V5GameGrove41" filename="v05/V5GameGrove41.png" dithering="none" />
     <bitmap id="V5Grove41" filename="v05/V5Grove41.png" dithering="none" />
     <bitmap id="V5Grove41Left" filename="v05/V5Grove41Left.png" dithering="none" />
+    <bitmap id="V5GameGrove42" filename="v05/V5GameGrove42.png" dithering="none" />
     <bitmap id="V5Grove42" filename="v05/V5Grove42.png" dithering="none" />
+    <bitmap id="V5GameGrove43" filename="v05/V5GameGrove43.png" dithering="none" />
     <bitmap id="V5Grove43" filename="v05/V5Grove43.png" dithering="none" />
+    <bitmap id="V5GameGrove44" filename="v05/V5GameGrove44.png" dithering="none" />
     <bitmap id="V5Grove44" filename="v05/V5Grove44.png" dithering="none" />
+    <bitmap id="V5GameGrove45" filename="v05/V5GameGrove45.png" dithering="none" />
     <bitmap id="V5Grove45" filename="v05/V5Grove45.png" dithering="none" />
     <bitmap id="V5Grove5SleepSmall" filename="v05/V5Grove5SleepSmall.png" scope="glance" dithering="none" />
+    <bitmap id="V5GameGrove50" filename="v05/V5GameGrove50.png" dithering="none" />
     <bitmap id="V5Grove50" filename="v05/V5Grove50.png" dithering="none" />
     <bitmap id="V5Grove50Left" filename="v05/V5Grove50Left.png" dithering="none" />
+    <bitmap id="V5GameGrove51" filename="v05/V5GameGrove51.png" dithering="none" />
     <bitmap id="V5Grove51" filename="v05/V5Grove51.png" dithering="none" />
     <bitmap id="V5Grove51Left" filename="v05/V5Grove51Left.png" dithering="none" />
+    <bitmap id="V5GameGrove52" filename="v05/V5GameGrove52.png" dithering="none" />
     <bitmap id="V5Grove52" filename="v05/V5Grove52.png" dithering="none" />
+    <bitmap id="V5GameGrove53" filename="v05/V5GameGrove53.png" dithering="none" />
     <bitmap id="V5Grove53" filename="v05/V5Grove53.png" dithering="none" />
+    <bitmap id="V5GameGrove54" filename="v05/V5GameGrove54.png" dithering="none" />
     <bitmap id="V5Grove54" filename="v05/V5Grove54.png" dithering="none" />
+    <bitmap id="V5GameGrove55" filename="v05/V5GameGrove55.png" dithering="none" />
     <bitmap id="V5Grove55" filename="v05/V5Grove55.png" dithering="none" />
     <bitmap id="V5NimbleSleepSmall" filename="v05/V5NimbleSleepSmall.png" scope="glance" dithering="none" />
+    <bitmap id="V5GameNimble0" filename="v05/V5GameNimble0.png" dithering="none" />
     <bitmap id="V5Nimble0" filename="v05/V5Nimble0.png" dithering="none" />
     <bitmap id="V5Nimble0Left" filename="v05/V5Nimble0Left.png" dithering="none" />
+    <bitmap id="V5GameNimble1" filename="v05/V5GameNimble1.png" dithering="none" />
     <bitmap id="V5Nimble1" filename="v05/V5Nimble1.png" dithering="none" />
     <bitmap id="V5Nimble1Left" filename="v05/V5Nimble1Left.png" dithering="none" />
+    <bitmap id="V5GameNimble2" filename="v05/V5GameNimble2.png" dithering="none" />
     <bitmap id="V5Nimble2" filename="v05/V5Nimble2.png" dithering="none" />
+    <bitmap id="V5GameNimble3" filename="v05/V5GameNimble3.png" dithering="none" />
     <bitmap id="V5Nimble3" filename="v05/V5Nimble3.png" dithering="none" />
+    <bitmap id="V5GameNimble4" filename="v05/V5GameNimble4.png" dithering="none" />
     <bitmap id="V5Nimble4" filename="v05/V5Nimble4.png" dithering="none" />
+    <bitmap id="V5GameNimble5" filename="v05/V5GameNimble5.png" dithering="none" />
     <bitmap id="V5Nimble5" filename="v05/V5Nimble5.png" dithering="none" />
     <bitmap id="V5PipSleepSmall" filename="v05/V5PipSleepSmall.png" scope="glance" dithering="none" />
+    <bitmap id="V5GamePip0" filename="v05/V5GamePip0.png" dithering="none" />
     <bitmap id="V5Pip0" filename="v05/V5Pip0.png" dithering="none" />
     <bitmap id="V5Pip0Left" filename="v05/V5Pip0Left.png" dithering="none" />
+    <bitmap id="V5GamePip1" filename="v05/V5GamePip1.png" dithering="none" />
     <bitmap id="V5Pip1" filename="v05/V5Pip1.png" dithering="none" />
     <bitmap id="V5Pip1Left" filename="v05/V5Pip1Left.png" dithering="none" />
+    <bitmap id="V5GamePip2" filename="v05/V5GamePip2.png" dithering="none" />
     <bitmap id="V5Pip2" filename="v05/V5Pip2.png" dithering="none" />
+    <bitmap id="V5GamePip3" filename="v05/V5GamePip3.png" dithering="none" />
     <bitmap id="V5Pip3" filename="v05/V5Pip3.png" dithering="none" />
+    <bitmap id="V5GamePip4" filename="v05/V5GamePip4.png" dithering="none" />
     <bitmap id="V5Pip4" filename="v05/V5Pip4.png" dithering="none" />
+    <bitmap id="V5GamePip5" filename="v05/V5GamePip5.png" dithering="none" />
     <bitmap id="V5Pip5" filename="v05/V5Pip5.png" dithering="none" />
     <bitmap id="V5Tide3SleepSmall" filename="v05/V5Tide3SleepSmall.png" scope="glance" dithering="none" />
+    <bitmap id="V5GameTide30" filename="v05/V5GameTide30.png" dithering="none" />
     <bitmap id="V5Tide30" filename="v05/V5Tide30.png" dithering="none" />
     <bitmap id="V5Tide30Left" filename="v05/V5Tide30Left.png" dithering="none" />
+    <bitmap id="V5GameTide31" filename="v05/V5GameTide31.png" dithering="none" />
     <bitmap id="V5Tide31" filename="v05/V5Tide31.png" dithering="none" />
     <bitmap id="V5Tide31Left" filename="v05/V5Tide31Left.png" dithering="none" />
+    <bitmap id="V5GameTide32" filename="v05/V5GameTide32.png" dithering="none" />
     <bitmap id="V5Tide32" filename="v05/V5Tide32.png" dithering="none" />
+    <bitmap id="V5GameTide33" filename="v05/V5GameTide33.png" dithering="none" />
     <bitmap id="V5Tide33" filename="v05/V5Tide33.png" dithering="none" />
+    <bitmap id="V5GameTide34" filename="v05/V5GameTide34.png" dithering="none" />
     <bitmap id="V5Tide34" filename="v05/V5Tide34.png" dithering="none" />
+    <bitmap id="V5GameTide35" filename="v05/V5GameTide35.png" dithering="none" />
     <bitmap id="V5Tide35" filename="v05/V5Tide35.png" dithering="none" />
     <bitmap id="V5Tide4SleepSmall" filename="v05/V5Tide4SleepSmall.png" scope="glance" dithering="none" />
+    <bitmap id="V5GameTide40" filename="v05/V5GameTide40.png" dithering="none" />
     <bitmap id="V5Tide40" filename="v05/V5Tide40.png" dithering="none" />
     <bitmap id="V5Tide40Left" filename="v05/V5Tide40Left.png" dithering="none" />
+    <bitmap id="V5GameTide41" filename="v05/V5GameTide41.png" dithering="none" />
     <bitmap id="V5Tide41" filename="v05/V5Tide41.png" dithering="none" />
     <bitmap id="V5Tide41Left" filename="v05/V5Tide41Left.png" dithering="none" />
+    <bitmap id="V5GameTide42" filename="v05/V5GameTide42.png" dithering="none" />
     <bitmap id="V5Tide42" filename="v05/V5Tide42.png" dithering="none" />
+    <bitmap id="V5GameTide43" filename="v05/V5GameTide43.png" dithering="none" />
     <bitmap id="V5Tide43" filename="v05/V5Tide43.png" dithering="none" />
+    <bitmap id="V5GameTide44" filename="v05/V5GameTide44.png" dithering="none" />
     <bitmap id="V5Tide44" filename="v05/V5Tide44.png" dithering="none" />
+    <bitmap id="V5GameTide45" filename="v05/V5GameTide45.png" dithering="none" />
     <bitmap id="V5Tide45" filename="v05/V5Tide45.png" dithering="none" />
     <bitmap id="V5Tide5SleepSmall" filename="v05/V5Tide5SleepSmall.png" scope="glance" dithering="none" />
+    <bitmap id="V5GameTide50" filename="v05/V5GameTide50.png" dithering="none" />
     <bitmap id="V5Tide50" filename="v05/V5Tide50.png" dithering="none" />
     <bitmap id="V5Tide50Left" filename="v05/V5Tide50Left.png" dithering="none" />
+    <bitmap id="V5GameTide51" filename="v05/V5GameTide51.png" dithering="none" />
     <bitmap id="V5Tide51" filename="v05/V5Tide51.png" dithering="none" />
     <bitmap id="V5Tide51Left" filename="v05/V5Tide51Left.png" dithering="none" />
+    <bitmap id="V5GameTide52" filename="v05/V5GameTide52.png" dithering="none" />
     <bitmap id="V5Tide52" filename="v05/V5Tide52.png" dithering="none" />
+    <bitmap id="V5GameTide53" filename="v05/V5GameTide53.png" dithering="none" />
     <bitmap id="V5Tide53" filename="v05/V5Tide53.png" dithering="none" />
+    <bitmap id="V5GameTide54" filename="v05/V5GameTide54.png" dithering="none" />
     <bitmap id="V5Tide54" filename="v05/V5Tide54.png" dithering="none" />
+    <bitmap id="V5GameTide55" filename="v05/V5GameTide55.png" dithering="none" />
     <bitmap id="V5Tide55" filename="v05/V5Tide55.png" dithering="none" />
     <bitmap id="V5Wisp3SleepSmall" filename="v05/V5Wisp3SleepSmall.png" scope="glance" dithering="none" />
+    <bitmap id="V5GameWisp30" filename="v05/V5GameWisp30.png" dithering="none" />
     <bitmap id="V5Wisp30" filename="v05/V5Wisp30.png" dithering="none" />
     <bitmap id="V5Wisp30Left" filename="v05/V5Wisp30Left.png" dithering="none" />
+    <bitmap id="V5GameWisp31" filename="v05/V5GameWisp31.png" dithering="none" />
     <bitmap id="V5Wisp31" filename="v05/V5Wisp31.png" dithering="none" />
     <bitmap id="V5Wisp31Left" filename="v05/V5Wisp31Left.png" dithering="none" />
+    <bitmap id="V5GameWisp32" filename="v05/V5GameWisp32.png" dithering="none" />
     <bitmap id="V5Wisp32" filename="v05/V5Wisp32.png" dithering="none" />
+    <bitmap id="V5GameWisp33" filename="v05/V5GameWisp33.png" dithering="none" />
     <bitmap id="V5Wisp33" filename="v05/V5Wisp33.png" dithering="none" />
+    <bitmap id="V5GameWisp34" filename="v05/V5GameWisp34.png" dithering="none" />
     <bitmap id="V5Wisp34" filename="v05/V5Wisp34.png" dithering="none" />
+    <bitmap id="V5GameWisp35" filename="v05/V5GameWisp35.png" dithering="none" />
     <bitmap id="V5Wisp35" filename="v05/V5Wisp35.png" dithering="none" />
     <bitmap id="V5Wisp4SleepSmall" filename="v05/V5Wisp4SleepSmall.png" scope="glance" dithering="none" />
+    <bitmap id="V5GameWisp40" filename="v05/V5GameWisp40.png" dithering="none" />
     <bitmap id="V5Wisp40" filename="v05/V5Wisp40.png" dithering="none" />
     <bitmap id="V5Wisp40Left" filename="v05/V5Wisp40Left.png" dithering="none" />
+    <bitmap id="V5GameWisp41" filename="v05/V5GameWisp41.png" dithering="none" />
     <bitmap id="V5Wisp41" filename="v05/V5Wisp41.png" dithering="none" />
     <bitmap id="V5Wisp41Left" filename="v05/V5Wisp41Left.png" dithering="none" />
+    <bitmap id="V5GameWisp42" filename="v05/V5GameWisp42.png" dithering="none" />
     <bitmap id="V5Wisp42" filename="v05/V5Wisp42.png" dithering="none" />
+    <bitmap id="V5GameWisp43" filename="v05/V5GameWisp43.png" dithering="none" />
     <bitmap id="V5Wisp43" filename="v05/V5Wisp43.png" dithering="none" />
+    <bitmap id="V5GameWisp44" filename="v05/V5GameWisp44.png" dithering="none" />
     <bitmap id="V5Wisp44" filename="v05/V5Wisp44.png" dithering="none" />
+    <bitmap id="V5GameWisp45" filename="v05/V5GameWisp45.png" dithering="none" />
     <bitmap id="V5Wisp45" filename="v05/V5Wisp45.png" dithering="none" />
     <bitmap id="V5Wisp5SleepSmall" filename="v05/V5Wisp5SleepSmall.png" scope="glance" dithering="none" />
+    <bitmap id="V5GameWisp50" filename="v05/V5GameWisp50.png" dithering="none" />
     <bitmap id="V5Wisp50" filename="v05/V5Wisp50.png" dithering="none" />
     <bitmap id="V5Wisp50Left" filename="v05/V5Wisp50Left.png" dithering="none" />
+    <bitmap id="V5GameWisp51" filename="v05/V5GameWisp51.png" dithering="none" />
     <bitmap id="V5Wisp51" filename="v05/V5Wisp51.png" dithering="none" />
     <bitmap id="V5Wisp51Left" filename="v05/V5Wisp51Left.png" dithering="none" />
+    <bitmap id="V5GameWisp52" filename="v05/V5GameWisp52.png" dithering="none" />
     <bitmap id="V5Wisp52" filename="v05/V5Wisp52.png" dithering="none" />
+    <bitmap id="V5GameWisp53" filename="v05/V5GameWisp53.png" dithering="none" />
     <bitmap id="V5Wisp53" filename="v05/V5Wisp53.png" dithering="none" />
+    <bitmap id="V5GameWisp54" filename="v05/V5GameWisp54.png" dithering="none" />
     <bitmap id="V5Wisp54" filename="v05/V5Wisp54.png" dithering="none" />
+    <bitmap id="V5GameWisp55" filename="v05/V5GameWisp55.png" dithering="none" />
     <bitmap id="V5Wisp55" filename="v05/V5Wisp55.png" dithering="none" />
 </resources>
