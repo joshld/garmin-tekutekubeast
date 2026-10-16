@@ -29,19 +29,28 @@ class TekuTekuBeastGlanceView extends WatchUi.GlanceView {
             name=snapshot["cachedName"];mood=snapshot["cachedMood"];progress=snapshot["cachedProgress"];
             if(snapshot["poop"]>0){mood="CLEANUP";}
         }
-        var font=Graphics.FONT_XTINY;var left=50;var width=dc.getWidth()-left-48;
+        var font=Graphics.FONT_XTINY;var left=50;var width=dc.getWidth()-left-12;
         var lines=[name];var split=name.find(" ");
         if(dc.getTextWidthInPixels(name,font)>width && split!=null){
             lines=[name.substring(0,split),name.substring(split+1,name.length())];
         }
+        var row=dc.getFontHeight(font);
+        // Older Glance tiles are only 63px tall. Keep mood readable rather
+        // than allowing a three-line name/status stack to cross the meter.
+        if(row*(lines.size()+1)>dc.getHeight()-8){lines=[name];}
         for(var i=0;i<lines.size();i++){
-            while(lines[i].length()>0 && dc.getTextWidthInPixels(lines[i],font)>width){lines[i]=lines[i].substring(0,lines[i].length()-1);}
+            if(dc.getTextWidthInPixels(lines[i],font)>width){
+                var shortened=lines[i];
+                while(shortened.length()>0 && dc.getTextWidthInPixels(shortened+"..",font)>width){shortened=shortened.substring(0,shortened.length()-1);}
+                lines[i]=shortened+"..";
+            }
         }
         while(mood.length()>0 && dc.getTextWidthInPixels(mood,font)>width){mood=mood.substring(0,mood.length()-1);}
-        var row=dc.getFontHeight(font);var top=((dc.getHeight()-8-row*(lines.size()+1))/2).toNumber();
+        var top=((dc.getHeight()-8-row*(lines.size()+1))/2).toNumber();
         if(top<0){top=0;}
-        for(var j=0;j<lines.size();j++){dc.drawText(left,top+row*j,font,lines[j],Graphics.TEXT_JUSTIFY_LEFT);}
-        dc.drawText(left,top+row*lines.size(),font,mood,Graphics.TEXT_JUSTIFY_LEFT);
+        for(var j=0;j<lines.size();j++){drawLine(dc,left,top+row*j,font,lines[j]);}
+        drawLine(dc,left,top+row*lines.size(),font,mood);
         dc.setColor(0x55AA55,Graphics.COLOR_TRANSPARENT);dc.fillRectangle(left,dc.getHeight()-8,(width*progress).toNumber(),4);
     }
+    function drawLine(dc,left,top,font,value){dc.drawText(left,top,font,value,Graphics.TEXT_JUSTIFY_LEFT);}
 }

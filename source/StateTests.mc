@@ -132,3 +132,19 @@ function foregroundEvolutionTest(logger){
     Test.assertEqual(s.number("evolutionPending"),0);Test.assert(view.animation.equals("evolve"));
     s.tick();Test.assertEqual(s.number("evolutionPending"),0);Test.assertEqual(s.xp(),0l);return true;
 }
+(:test)
+function foregroundTimerLifecycleTest(logger){
+    var app=Toybox.Application.getApp();var prior=app.activeView;
+    var view=new TekuTekuBeastView();view.beast=TestSupport.fixture();view.onShow();
+    var started=view.refresher!=null;app.onInactive(null);var inactiveStopped=view.refresher==null;
+    app.onActive(null);var resumed=view.refresher!=null;view.onHide();
+    var game=new BeastGameView(view.beast,0);game.onShow();game.onHide();
+    var reconciler=new TekuTekuBeastState();reconciler.store=view.beast.store;
+    reconciler.skipWatch=true;reconciler.testNow=view.beast.testNow;reconciler.start();
+    reconciler.observe(reconciler.today(),5000);reconciler.commit();
+    game.onShow();var caughtUp=game.beast.xp()==5000l;game.onHide();
+    var gameStopped=game.refresher==null;app.activeView=prior;
+    Test.assert(started && inactiveStopped && resumed && view.refresher==null && gameStopped);
+    Test.assert(caughtUp);
+    return true;
+}

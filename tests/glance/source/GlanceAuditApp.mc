@@ -3,6 +3,7 @@ using Toybox.System;
 
 (:glance)
 class GlanceAuditView extends TekuTekuBeastGlanceView {
+    var failures=0;
     function initialize(){TekuTekuBeastGlanceView.initialize();}
     function readSummary(){
         if(snapshot!=null){return;}
@@ -12,10 +13,16 @@ class GlanceAuditView extends TekuTekuBeastGlanceView {
         sprite=WatchUi.loadResource(Rez.Drawables.V4Wisp5Small);
     }
     function onUpdate(dc){
+        failures=0;
         TekuTekuBeastGlanceView.onUpdate(dc);
         var stats=System.getSystemStats();
         System.println("GLANCE_AUDIT: "+dc.getWidth()+"x"+dc.getHeight()+" used="+stats.usedMemory+" total="+stats.totalMemory);
-        System.exit();
+        System.println("GLANCE_LAYOUT: "+failures+" failures");
+        // Keep the Glance resident; the SDK connection wrapper ends capture.
+    }
+    function drawLine(dc,left,top,font,value){
+        if(left<0 || top<0 || left+dc.getTextWidthInPixels(value,font)>dc.getWidth() || top+dc.getFontHeight(font)>dc.getHeight()-8){failures++;}
+        TekuTekuBeastGlanceView.drawLine(dc,left,top,font,value);
     }
 }
 (:background, :glance)

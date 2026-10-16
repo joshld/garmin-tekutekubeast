@@ -24,6 +24,7 @@ class AuditGame extends BeastGameView {
 class ArtLayoutAuditView extends TekuTekuBeastView {
     var boxes=[];var failures=[];var scenes=[];var cursor=0;var audited=false;var showSummary=true;
     var exitWhenDone=false;var exitScheduled=false;
+    var peakMemory=0;var totalMemory=0;
 
     // Generate one scene per callback: bounded RAM and no constructor watchdog.
     var menuNames=["Actions","Feed","Settings","Developer","Discard DEV?","Dev Tools","Clock speed","Advance time","Force stage","Force family","Adjust needs","Set value","Animations","Balance settings","Play","Collection","Archive / new egg","Toys / accessories","Museum","Reset scenario"];
@@ -51,7 +52,7 @@ class ArtLayoutAuditView extends TekuTekuBeastView {
         if(index<messages.size()){return [1,0,0,null,0,"idle",0,messages[index]];}
         index-=messages.size();return [5,1+index/3,index%3,null,0,"idle",0,null,1];
     }
-    function onShow(){loadSprite();refresher=new Toybox.Timer.Timer();refresher.start(method(:refresh),100,true);}
+    function onShow(){loadSprite();refresher=new Toybox.Timer.Timer();refresher.start(method(:refresh),50,true);}
     function refresh() as Void {WatchUi.requestUpdate();}
     function capture(box,value){boxes.add(box);if(!box[4].equals(value)){failures.add("Truncated: "+value);}}
     function label(dc,top,value,font){var box=TekuTekuBeastView.label(dc,top,value,font);capture(box,value);return box;}
@@ -79,9 +80,11 @@ class ArtLayoutAuditView extends TekuTekuBeastView {
             if(scene[3]!=null){openMenu(scene[3]);selection=scene[4];}else{menu=null;}
             loadSprite();boxes=[];TekuTekuBeastView.onUpdate(dc);
         }
+        var stats=System.getSystemStats();if(stats.usedMemory>peakMemory){peakMemory=stats.usedMemory;}totalMemory=stats.totalMemory;
         checkScene(dc);cursor++;
         if(cursor>=sceneCount){
             audited=true;refresher.stop();System.println("LAYOUT_AUDIT: "+cursor+" scenes; "+failures.size()+" failures");
+            System.println("LAYOUT_MEMORY: peak="+peakMemory+" total="+totalMemory);
             for(var i=0;i<failures.size();i++){System.println(failures[i]);}WatchUi.requestUpdate();
         }
     }

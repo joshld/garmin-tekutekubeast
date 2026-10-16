@@ -13,7 +13,12 @@ class BeastGameView extends TekuTekuBeastView {
         if(settings has :inputButtons){scanning=(settings.inputButtons&System.BUTTON_INPUT_UP)==0;}
     }
     var touchWidth=280;
-    function onShow(){Application.getApp().activeView=self;refresher=new Toybox.Timer.Timer();refresher.start(method(:refresh),250,true);}
+    function onShow(){
+        if(refresher!=null){refresher.stop();refresher=null;}
+        Application.getApp().activeView=self;
+        if(!beast.dev){beast.data=null;}beast.syncHistory();
+        refresher=new Toybox.Timer.Timer();refresher.start(method(:refresh),250,true);
+    }
     function touch(point){
         if(kind==1 && phase==2){memoryInput(point[0]<touchWidth/3?0:(point[0]>touchWidth*2/3?2:1));WatchUi.requestUpdate();}
         else{selectAction();}

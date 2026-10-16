@@ -15,7 +15,11 @@ class TekuTekuBeastView extends WatchUi.View {
     var creatureHeaderBottom=0;
     const BG=0xAAFFAA;const INK=0x005500;const LIGHT=0x55AA55;
     function initialize(){View.initialize();beast=new TekuTekuBeastState();}
-    function onShow(){Application.getApp().activeView=self;if(!beast.dev){beast.data=null;}beast.syncHistory();loadSprite();refresher=new Timer.Timer();refresher.start(method(:refresh),250,true);consumeEvolution();}
+    function onShow(){
+        if(refresher!=null){refresher.stop();refresher=null;}
+        Application.getApp().activeView=self;if(!beast.dev){beast.data=null;}
+        beast.syncHistory();loadSprite();refresher=new Timer.Timer();refresher.start(method(:refresh),250,true);consumeEvolution();
+    }
     function onHide(){if(refresher!=null){refresher.stop();refresher=null;}beast.commit();}
     function refresh() as Void {
         var poopBefore=beast.number("poop");
