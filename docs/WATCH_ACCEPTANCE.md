@@ -1,5 +1,14 @@
 # User-reported watch acceptance
 
+## Latest v0.4 hardware feedback / v0.5 boundary
+
+The user subsequently confirmed that vibration works but feels very short, and
+sound works when Garmin system Alert Tones are enabled and is blocked when those
+tones are disabled. These are v0.4 physical Enduro 4 findings, not v0.5 tests.
+The v0.5 changes respect that restriction; they do not bypass system tones or DND.
+New UI, sleep behaviour, games, feedback patterns and save upgrades still require
+the [v0.5 hardware checklist](V0_5_VALIDATION.md#physical-acceptance-still-required).
+
 ## Enduro 4 - v0.4 beta - 16 October 2026
 
 Evidence in this section is the user's report from their physical watch, not
@@ -23,7 +32,8 @@ Still unverified on physical hardware:
 - DEV acceleration, scenario reset, discard/restart isolation and genuine-step
   catch-up on the watch (issue #7).
 - Actual walking, running, supported minutes/pushes and duplicate prevention.
-- Audible tones, vibration and system mute/DND behaviour (issue #5).
+- The changed v0.5 tone/vibration patterns and DND behaviour (issue #5); basic
+  v0.4 sound/vibration and the Alert Tones restriction were subsequently confirmed.
 - Long-running battery use and resource behaviour.
 
 Continue updating the existing installation. Do not uninstall, clear Storage or

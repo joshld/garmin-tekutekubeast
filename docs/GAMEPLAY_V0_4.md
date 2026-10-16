@@ -1,5 +1,12 @@
 # TekuTekuBeast — v0.4 Care, Play, Animation & Sound Specification
 
+**Historical v0.4 specification, not current implementation instructions.**
+The latest v0.5 request and user feedback take precedence, followed by GitHub
+issue descriptions/comments and current redesign documentation. For implemented
+sleep, games, animation, DEV/Glance improvements and actual new tests, use
+[V0_5_VALIDATION.md](V0_5_VALIDATION.md). Do not recreate already implemented
+systems or apply the obsolete one-round-game/small-sprite requirements below.
+
 **Important newer review:** [Inclusive growth, on-watch Developer Mode, evolution pacing and simplified UI](V0_4_REVIEW_AMENDMENTS.md) overrides earlier step-only progression assumptions. Numbers remain provisional.
 
 **Status:** Implemented v0.4 development beta. This preserves the historical

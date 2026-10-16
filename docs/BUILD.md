@@ -15,7 +15,7 @@ import is needed. Passive and care growth are separate from genuine watch XP.
    the Monkey C extension can generate a key. Keep it private, backed up and
    out of version control; local `developer_key` is ignored.
 
-## Windows v0.4 build and regression
+## Windows v0.5 build and regression
 
 The checked-in PowerShell scripts use the SDK selected by Garmin's SDK Manager
 and Java 17. Build outputs and test logs are ignored under `bin/`.
@@ -27,13 +27,29 @@ and Java 17. Build outputs and test logs are ignored under `bin/`.
 # Set simulator Settings > Glance Launch Mode > Glance before this command:
 ./scripts/glance-matrix.ps1
 # Restore Normal launch mode for normal gameplay and unit tests.
-./scripts/build.ps1 -Export -Output bin/TekuTekuBeast-0.4.0.iq
+./scripts/build.ps1 -Release -Output bin/v05-release.prg
+./scripts/build.ps1 -Export -Output bin/TekuTekuBeast-0.5.0.iq
 ```
 
 Internal unit/layout/Glance harnesses have isolated QA IDs and in-memory saves.
 Never upload those QA binaries. The production app contains the actual
 Developer Mode; no second user-facing app is required. See
-[validation](V0_4_VALIDATION.md) for executed tests and hardware limitations.
+[v0.5 validation](V0_5_VALIDATION.md) for executed tests and hardware limitations.
+
+The native background stress fixture has a separate SDK-only application ID:
+
+```powershell
+./scripts/build.ps1 -Device enduro4 -Jungle tests/background/monkey.jungle -Output bin/background-enduro4.prg
+./scripts/run-simulator.ps1 -Device enduro4 -Program bin/background-enduro4.prg
+```
+
+It creates a populated QA save with three paused sessions and 123,456 fixture XP,
+then uses the unchanged production service. Trigger Steps Progress, Sleep and
+Wake through the SDK Background Events dialog, inspect `BACKGROUND_MEMORY`,
+then reopen the fixture and check unchanged XP, three sessions and inventory.
+These are test fixture values, not genuine credited activity. Never install or
+upload the QA program as the real game. Normal and Glance modes have different
+VM budgets; the Glance matrix rejects a full-app budget masquerading as a pass.
 
 ## Command-line build
 

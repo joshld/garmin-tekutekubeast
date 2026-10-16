@@ -1,5 +1,10 @@
 # v0.4 design review — on-watch Developer Mode, inclusive progression, fast testing and clean UI
 
+**Historical review.** For v0.5, the latest user request/feedback, GitHub issue
+descriptions/comments and current redesign documents take precedence. Retain
+the existing save-safe DEV, progression and Glance implementation; do not
+restart it from this old task list. See [v0.5 implementation/evidence](V0_5_VALIDATION.md).
+
 **Status: implemented v0.4 development beta; physical-watch acceptance pending.**
 See [validation](V0_4_VALIDATION.md). These requirements supersede older proposals
 for a separate Developer Lab, step-dependent evolution or ~100-day passive growth.

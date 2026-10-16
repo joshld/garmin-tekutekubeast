@@ -1,5 +1,10 @@
 # Codex execution plan — TekuTekuBeast v0.4
 
+**Historical roadmap.** The v0.5 overhaul supersedes the small pet area, persistent
+species heading and one-round games described below. See
+[current implementation/validation](V0_5_VALIDATION.md); retain this document for
+design history, not as a statement that the new features remain doc-only.
+
 **Read [v0.4 review amendments](V0_4_REVIEW_AMENDMENTS.md) before implementation.** Prior step-only evolution assumptions are superseded. Add Developer Mode **inside the same installed watch app** (not a second Developer Lab application) and make every normal evolution possible at zero steps; activity provides extra items/rewards and only a modest growth advantage. Preserve current saves. Simplify the Pet screen by dropping the app title and shortening other screens.
 
 **Implementation status:** v0.4 gameplay, artwork, games and Glance are now in
@@ -8,7 +13,7 @@ records completed tests and remaining physical-watch checks.
 
 ## Pet screen space and animation overhaul (user-requested priority)
 
-User Enduro 4 v0.4.0 review: the pet occupies too small a region, seems boxed into a tiny animation area, and the text evolution/species name (e.g. `PIP`) at the top of the Pet page is duplicated information. See the high-priority GitHub issue for acceptance criteria. **Actual app view still needs coding + Garmin SDK tests; this is a task, not a completed release.**
+Historical Enduro 4 v0.4.0 feedback: the pet occupied too small a region, seemed boxed into a tiny animation area, and the species name duplicated Details. **The v0.5 Pet view is now implemented; its SDK evidence and remaining hardware acceptance are recorded in V0_5_VALIDATION.md.** The original requirements below are retained for traceability, not instructions to restart completed work.
 
 - On Pet screen **do not draw species/evolution name or its wrap logic**. Its stage already appears on Details; preferably show species name there too. Keep the main screen almost entirely visual.
 - Enlarge the visible critter (nominal runtime sprites are 96×96 transparent PNGs, with smaller occupied pixel bounds). Prefer per-device appropriately scaled **native source resources** for crisp pixel art without runtime scaling overhead, or benchmark supported graphics API before scaling on each frame; preserve 64-colour MIP fidelity.

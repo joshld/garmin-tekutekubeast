@@ -1,5 +1,10 @@
 # Mini-game redesign — character-driven fun and exploration
 
+**v0.5 update:** the latest full-overhaul request supersedes the earlier
+stop-after-one-prototype workflow below. All three character-driven sessions are
+implemented together. [v0.5 validation](V0_5_VALIDATION.md) records the
+actual behaviour/tests; user-tested enjoyment is not claimed from SDK passes.
+
 ## Latest gameplay direction — FUN FIRST (supersedes rigid round designs)
 
 **User preference:** "I'm not sure. I just want it to be fun." Do **not** lock down Star Catch / Memory Steps / Trail Treasure as three generic, mandatory three-round games solely to tick boxes. Earlier detailed mechanics below are *prototype hypotheses*, not final requirements. The objective is an engaging, character-driven game that the user enjoys playing on a physical Garmin Enduro 4.
@@ -11,7 +16,7 @@ Prototype lightweight, immediately playable versions and evaluate **feel** befor
 4. Keep sessions short, replay easy, feedback instant, randomisation meaningful, and both 0-step and active players welcome. Actual enjoyment matters more than exact counts or genre fidelity. Balance three rewarded sessions/day separately from unlimited gameplay.
 5. Preserve v4 saves, watch step ledger, app ID, ability to pause/resume, CPU/memory/time budgets and tested input layouts.
 
-**Acceptance criteria are experiential as well as functional:** user can describe what's happening without instructions, feels involved with the pet, gets varied outcomes, understands the reward, and wants to play again. Have Codex deliver one working prototype + simulator capture/short demonstration, then request real-watch feedback before investing in the other two. Don't claim user-tested fun based solely on successful SDK tests.
+**Acceptance criteria are experiential as well as functional:** user can describe what's happening without instructions, feels involved with the pet, gets varied outcomes, understands the reward, and wants to play again. The former one-prototype-then-wait workflow is superseded by the comprehensive v0.5 request: implement all three connected games and continue the other issues. Don't claim user-tested fun based solely on successful SDK tests.
 
 
 **Status:** Approved direction for next gameplay improvement, **NOT IMPLEMENTED** as of v0.4.0. Current source to refactor: `source/BeastGameView.mc` and `source/TekuTekuBeastState.mc`. Maintain current app ID and persisted genuine pet data.

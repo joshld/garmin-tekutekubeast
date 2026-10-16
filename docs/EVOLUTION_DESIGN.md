@@ -1,5 +1,10 @@
 # TekuTekuBeast evolution — v0.4
 
+The v0.5 overhaul retains these ledgers, thresholds, families and earned rare
+rules. Beast Bounce replaces Star Catch and Follow My Lead replaces Memory Steps
+without changing their Ember/Wisp care-personality roles. See
+[v0.5 validation](V0_5_VALIDATION.md) for additive migration and regression tests.
+
 Native, offline Connect IQ watch app. Activity is a bonus, not a requirement.
 There is no death, XP loss, de-evolution or recovery-day punishment.
 

@@ -1,5 +1,8 @@
 # v0.4 accepted SDK device matrix
 
+This is retained v0.4 evidence. For the v0.5 regression run see
+[V0_5_VALIDATION.md](V0_5_VALIDATION.md); no old pass is counted as a new pass.
+
 Recorded 16 October 2026, Connect IQ SDK 9.2.0, Windows / Java 17.
 These are individually compiled and executed simulator profiles, **not physical
 watch certification**. Production app ID and signing key are unchanged.

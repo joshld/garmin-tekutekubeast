@@ -4,6 +4,16 @@ v0.4 uses the supplied colourful pixel-art family concept as its reference:
 leafy Grove deer, Ember dragons, blue/pink-gilled Tide spirits and violet Wisp
 fox spirits. The geometric higher-stage drawings have been removed.
 
+v0.5 retains those character pixels rather than replacing them with unrelated
+cover art. `scripts/prepare_v05_art.py` trims existing sprite alpha padding,
+exports larger Pet canvases (128/144px MIP; 200/232px AMOLED), adds pre-mirrored
+walking poses and 40px curled Glance sprites. Six-pose V5Game resources use
+80px MIP / 128px or 144px AMOLED canvases, keeping game jumps inside the circle.
+Old V4 small resources remain for ordinary Glance poses. No affine bitmap
+transformations run on the watch.
+Only the current Pet's eight poses (six plus two mirrored) are loaded; the egg
+shares a single bitmap. See [v0.5 evidence](../docs/V0_5_VALIDATION.md).
+
 ## Assets
 
 All 15 normal species have six poses: idle, walking, eating, curled sleep,
@@ -22,7 +32,8 @@ thresholds alpha, snaps colours to supported 0/85/170/255 RGB levels and resizes
 with nearest-neighbour. Source artwork is not loaded by the watch. Native-size
 variants avoid an SDK restriction on affine-transforming palette bitmaps.
 
-Only the current creature's six frames are cached. Foreground animation adds
+Only the current creature's frames are cached (eight Pet / six game poses).
+Foreground animation adds
 wandering, hops, family-specific motion, blink/look, chewing, cleaning puffs,
 sleep and evolution feedback. No animation timer survives view hiding or app
 inactivity. Motion OFF/LOW/NORMAL is available in Settings.
@@ -43,6 +54,6 @@ poses, menus, game phases, large counters and feedback. It uses an isolated QA
 application ID and an in-memory model; it is not the on-watch Developer Mode.
 Developer Mode is inside the production app and uses its normal screens.
 
-See [validation](../docs/V0_4_VALIDATION.md) and the device matrix for actual
+See [v0.5 validation](../docs/V0_5_VALIDATION.md) and the device matrix for actual
 results. Simulator screenshots and generated assets are not physical-watch
 photographs. Battery, display appearance and sound still need hardware checks.

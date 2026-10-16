@@ -1,0 +1,38 @@
+Tiny steps, epic companions.
+
+TekuTekuBeast is a native, offline virtual-beast game for compatible Garmin watches. Hatch an egg, build friendship and raise a creature through time, care, play and optional real-world activity.
+
+YOUR BEAST, YOUR PACE
+Your beast grows even when you take no steps. Feed, pet, clean, rest and play your way through the game. All four families and earned rare forms have routes that do not require exercise. There is no permanent death, lost XP or punishment for recovery days.
+
+CARE AND PERSONALITY
+Look after fullness, happiness, energy and cleanliness. Feed free daily meals and earned snacks, clean up poop and give your beast pats. Larger pixel-art creatures wander, hop, blink, eat and react. Compact attention indicators keep the Pet screen clear; Care and Details show the numbers.
+
+THREE CHARACTER-DRIVEN GAMES
+Beast Bounce: move between platforms and jump into falling stars, build combos and try progressive stages.
+Follow My Lead: watch your beast's movements and repeat growing sequences, with forgiving retries.
+Tiny Adventures: choose a destination, travel a small map, make encounter choices and discover treasure. One Adventure Energy pays for the whole expedition. Care and play earn energy too; no-energy scouting offers practice without loot.
+
+Results offer replay or exit. Interrupted sessions resume safely. The daily reward allowance applies to completed arcade sessions, not individual rounds; practice is unlimited. Games never create artificial Garmin steps or activity XP.
+
+GROW AND EVOLVE
+Eggs hatch naturally after roughly 24 hours; care and activity can reduce that to around eight hours. Progress through Hatchling, Juvenile, Adult, Champion and Legendary stages. Discover Grove, Ember, Tide and Wisp through personality and gameplay, unlock earned rare forms and continue with Legendary mastery.
+
+ACTIVITY ADDS ADVENTURE
+Genuine watch-recorded steps earn lifetime XP and additional growth. Supported activity milestones offer extra adventure opportunities. Equivalent care and game routes keep discoveries accessible without exercise.
+
+REST AND SLEEP
+Follow supported watch bedtime/wake schedule data, use a manual schedule, or disable scheduling. Optional lights change only the virtual pet room, never Garmin's backlight or Sleep Focus. Sleep restores energy, and there are no overnight sound or vibration alerts. Actual watch schedule agreement may vary by model and firmware.
+
+MADE FOR YOUR WATCH
+Use physical buttons, with touchscreen and alternative input support where available. A native Glance previews your cached beast, current mood, growth and cleanup needs. Sound and vibration are independently configurable; sound defaults off and requires Garmin system Alert Tones. Motion OFF, LOW and NORMAL are available.
+
+TEMPORARY DEVELOPER MODE
+Preview time acceleration, evolution stages, care, sleep and game scenarios inside the normal app. Test data stays separate and is discarded when you exit or restart.
+
+Progress stays on the watch. Normal gameplay needs no phone companion, internet connection, cloud account or recorded workout. Open the app to begin, then return periodically for care and recent watch-activity reconciliation.
+
+DEVELOPMENT BETA
+Features and balancing may change. Supported profiles have SDK simulator evidence; physical-watch save upgrades, Glance launch/timeouts, sleep scheduling, new feedback patterns and battery use still require testing. Rare forms currently use a crown overlay rather than separate sprite sets.
+
+When upgrading, update the existing installation - do not uninstall first.

@@ -4,11 +4,12 @@ A native, offline Garmin virtual-beast game. Grow through time, care and play;
 genuine watch activity adds growth and extra adventure opportunities. No phone,
 internet connection, exercise requirement, death or recovery-day punishment.
 
-**v0.4 development beta.** The user has confirmed Developer Mode is visible and
-the Glance now appears on their physical Enduro 4. Full save-upgrade, Glance
-launch/session, audio and battery checks remain open. See the exact
-[validation log](docs/V0_4_VALIDATION.md) and [device matrix](docs/DEVICE_MATRIX.md) before making support
-or hardware-testing claims.
+**v0.5.0 beta candidate in development.** Larger roaming creatures, attention-only
+HUD, scheduled sleep/lights, whole-session mini-games and clearer feedback are
+implemented. See [v0.5 validation](docs/V0_5_VALIDATION.md) for actual SDK results
+and remaining checks. Previous [v0.4 evidence](docs/V0_4_VALIDATION.md) and
+[device matrix](docs/DEVICE_MATRIX.md) are historical, not automatic v0.5 passes.
+No Garmin Store publication has been performed for v0.5.
 
 ## Play
 
@@ -16,8 +17,15 @@ or hardware-testing claims.
 - Actions: Feed, Clean, Play, Pat, Rest, Collection and Settings. BACK returns.
 - Two free daily meals, earned snacks, fullness, joy, energy, cleanliness, poop
   and friendship. Feeding schedules poop; Clean clears it directly.
-- Star Catch: five reaction attempts. Memory Steps: repeat UP/SELECT/DOWN.
-  Trail Treasure: spend Adventure Energy on a family-themed route and discovery.
+- Beast Bounce: move UP/DOWN between platforms and SELECT to hop into falling
+  stars; fifteen targets, three increasing stages, combos and scores.
+- Follow My Lead: copy the beast's hop/smile/look, progressive 3/4/5 sequences,
+  two chances per round, button/touch/timed-SELECT input.
+- Tiny Adventures: choose a destination, travel three stops, make careful/bold
+  choices and discover treasure. One Adventure Energy pays for the whole trip.
+  No-energy scouting is unlimited practice without loot; care/play earns energy.
+- Results offer Play Again / Exit. BACK pauses; checkpoints resume after restart
+  or watch inactivity without repeated energy deductions or rewards.
 - Three rewarded games/day, then unlimited practice. Games never create steps.
 - Collect food, toys and cosmetics; register normal and rare family Legendaries.
   Keep a favourite forever with mastery, or explicitly archive and start an egg.
@@ -50,6 +58,7 @@ remain, with a small DEV indicator and Dev Tools:
 - 1× / 5× / 20× / 100× virtual clock; +1 hour / +1 day / +7 days.
 - Force stage/family; set needs; grant test stock; spawn/clean poop; sleep/evolve.
 - Preview poses, games, sound and vibration; change test balancing values.
+- Bedtime, waking, sleepy, happy-roaming and all-needs scenarios.
 - Reset to the real-pet copy, a fresh egg, a hungry/messy pet or a Legendary.
 
 DEV is an in-memory test branch. Discard is the default and only way back to real
@@ -62,28 +71,39 @@ steps recorded during testing. There is no second Developer Lab app to install.
 All 15 normal species have concept-inspired pixel art and six poses, plus
 wandering, hopping, blinking, looking, eating, sleeping, cleaning and evolution
 reactions. See [art assets and prompts](art/README.md). Only current frames are
-cached; AMOLED variants are pre-sized for crisp, efficient rendering.
+cached; enlarged Pet resources trim transparent padding, add mirrored walking
+poses and use native nearest-neighbour sizes on MIP and AMOLED. Species names
+remain on Details, not the Pet page. Apple/heart needs appear only for attention;
+poop sits on the floor. Sleeping/tired creatures stay curled instead of wandering.
 
 The same watch app implements a read-only native Glance: current sprite/name,
 mood, growth and cleanup status. No Glance-owned animation timer, save mutation
-or audio. The user confirmed availability on their physical Enduro 4 on
+or audio. The user confirmed v0.4 availability on their physical Enduro 4 on
 16 October 2026; selection-to-game and timeout behaviour remain unverified.
 See the [hardware acceptance log](docs/WATCH_ACCEPTANCE.md) for the exact scope.
 
-Sound defaults OFF; gentle vibration ON. Settings are independent and respect
-supported system mute/vibration/DND flags. No background step or poop alerts.
-Motion OFF/LOW/NORMAL is available. Physical audible/haptic behaviour is not yet
-claimed verified.
+Sound defaults OFF; gentle vibration ON, with an optional expressive pattern.
+Settings are independent and respect supported system mute/vibration/DND flags.
+Feedback test shows watch-tones, DND, unsupported and error status; Garmin Alert
+Tones must be enabled for sound. The user verified v0.4 sound/vibration, not the
+new patterns. No background or bedtime alerts. Motion OFF/LOW/NORMAL is retained.
 
-Store-ready [description and What's New text](art/store/v0.4/README.md), the new
-500px family-art cover and genuine simulator captures are versioned together.
-These are store assets, not watch resources or evidence of a completed listing
-submission.
+Settings > Bedtime follows guarded watch upcoming/typical schedule values, with
+a configurable local fallback (22:00-07:00), MANUAL/OFF options and auto lights.
+Sleep restores energy lazily. Lights On/Off overrides only the virtual room for
+one hour; it never changes Garmin backlight or Sleep Focus. Watch schedule/API
+agreement still needs hardware testing; choose MANUAL if the reported source
+does not match the watch's actual schedule.
+
+See the [v0.5 release notes](docs/RELEASE_0_5_0.md) and
+[genuine before/after simulator imagery](art/store/v0.5/README.md).
+The retained v0.4 500px family-art cover is promotional artwork, not a screenshot.
+These files are not evidence of a Garmin submission.
 
 ## Build and test (Windows)
 
 Accepted profiles cover Enduro 4/3, Enduro 2 via Garmin's Fenix 7X definition,
-Fenix 7/7S/7X/7X Pro, Fenix 8 Solar 47/51mm, Forerunner 265/965,
+Fenix 7/7S/7X/7X Pro, Fenix 8 Solar 47/51mm, Forerunner 265/955/965,
 Venu 3 and vivoactive 5. These are simulator-tested profiles, not physical-watch
 certification. Original Enduro is excluded for artwork RAM exhaustion; Fenix
 6X is excluded because its 32KB background budget crashes step reconciliation.
@@ -95,10 +115,11 @@ local and out of Git. With the SDK simulator open:
 ```powershell
 ./scripts/build.ps1
 ./scripts/run-simulator.ps1
-./scripts/build.ps1 -Tests -Output bin/v04-tests.prg
-./scripts/run-simulator.ps1 -Tests -Program bin/v04-tests.prg
+./scripts/build.ps1 -Tests -Output bin/v05-tests.prg
+./scripts/run-simulator.ps1 -Tests -Program bin/v05-tests.prg
 ./scripts/device-matrix.ps1
-./scripts/build.ps1 -Export -Output bin/TekuTekuBeast-0.4.0.iq
+./scripts/build.ps1 -Release -Output bin/v05-release.prg
+./scripts/build.ps1 -Export -Output bin/TekuTekuBeast-0.5.0.iq
 ```
 
 `scripts/check_project.py` is structural preflight, not a compiler. The internal

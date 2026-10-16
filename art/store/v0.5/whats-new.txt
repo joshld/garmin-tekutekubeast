@@ -1,0 +1,19 @@
+v0.5.0 beta - A bigger world for your beast
+
+YOUR BEAST TAKES CENTRE STAGE
+Larger, crisp pixel-art creatures roam, hop, blink and react across more of the screen. Redundant Pet headings are gone. Food and heart icons appear only when attention is needed; full care values remain on Care.
+
+BEDTIME AND LIGHTS
+Curled sleep and tired poses now take priority consistently. Follow supported watch sleep schedules, choose a manual schedule, or turn scheduling off. Optional lights affect only the virtual room. No overnight sound or vibration.
+
+CARE, PLAY AND EXPLORE
+Beast Bounce adds platforms, jumping, falling stars, combos and replay. Follow My Lead adds growing character sequences and forgiving retries. Tiny Adventures adds travelled maps, encounters, contextual choices and treasure. One Adventure Energy pays for a whole trip; no-energy scouting is available without loot.
+
+Interrupted games resume safely. Daily rewards count completed sessions, not individual rounds. Practice remains unlimited and games never create Garmin steps.
+
+WATCH POLISH
+Improved Glance mood/sleep consistency, new temporary DEV scenarios, clearer sound diagnostics and longer optional haptic patterns. Sound still requires Garmin Alert Tones and respects DND.
+
+Existing pet progress and genuine activity data are preserved. Update the existing installation; do not uninstall first.
+
+Development beta: simulator-tested profiles are not hardware certification. Physical-watch save upgrades, sleep scheduling, Glance launch/timeouts, new feedback patterns and battery use still need testing. Rare forms retain a crown overlay.

@@ -1,5 +1,11 @@
 # TekuTekuBeast — Garmin targets, activity rewards and glance design
 
+**v0.5 implementation:** native Glance now shares sleep/mood rules and performs
+a bounded, read-only overnight care projection so missed wake callbacks do not
+leave stale SLEEPY text. Tiny Adventures replaces instant item rotation with
+three-stop, choice-driven whole expeditions. See [v0.5 evidence](V0_5_VALIDATION.md).
+The older design tiers below are retained history, not the current manifest.
+
 **Status: implemented v0.4 development beta.** These are original design tiers;
 see [validation](V0_4_VALIDATION.md) and [accepted profiles](DEVICE_MATRIX.md)
 for actual tests and physical-watch acceptance. Inclusive growth, shared
