@@ -6,6 +6,18 @@
 source. This preserves the original plan; [validation](V0_4_VALIDATION.md)
 records completed tests and remaining physical-watch checks.
 
+## Pet screen space and animation overhaul (user-requested priority)
+
+User Enduro 4 v0.4.0 review: the pet occupies too small a region, seems boxed into a tiny animation area, and the text evolution/species name (e.g. `PIP`) at the top of the Pet page is duplicated information. See the high-priority GitHub issue for acceptance criteria. **Actual app view still needs coding + Garmin SDK tests; this is a task, not a completed release.**
+
+- On Pet screen **do not draw species/evolution name or its wrap logic**. Its stage already appears on Details; preferably show species name there too. Keep the main screen almost entirely visual.
+- Enlarge the visible critter (nominal runtime sprites are 96×96 transparent PNGs, with smaller occupied pixel bounds). Prefer per-device appropriately scaled **native source resources** for crisp pixel art without runtime scaling overhead, or benchmark supported graphics API before scaling on each frame; preserve 64-colour MIP fidelity.
+- Give the pet natural movement across a much broader portion of the circle, using bounded 2D target positions and pauses, rather than the current `x += ((tick%24)-12)` ~24px shuffle. Movements differ between awake, sleepy, excited, idle, egg, etc.; do not make the pet slide as a static bitmap. Preserve animation feedback on feed, pats, cleaning, evolving and games.
+- Reposition the three care icons to a **slim top or edge HUD** and keep only a compact growth/steps footer if needed. No overlays hide creature face, feet, poo or progress text; adaptive round-screen clipping on 240/260/280 MIP and 390–454 AMOLED. Handle vertical/horizontal margin vs rounded screen borders, not merely the rectangular viewport.
+- Poop rests on the 'floor', not stuck to the beast's moving sprite; accessories, rare crown, look and sleep Zs move with the creature and stay within bounds. Make stage/sprite anatomy (large Legendary, small Pip, Egg) all readable and natural, not identical scaled motions.
+- Motion OFF/LOW/NORMAL remain respected. Keep foreground-only updates/battery policy; no animation timers in Glance or after hiding the app. Avoid per-frame allocations, full-resource reloads, and real-save mutation.
+- Record before/after simulator screenshots and test the 12 accepted SDK profiles, especially Enduro 4 and 240px Fenix 7S; inspect actual Enduro 4 for visual sharpness/clipping/performance. Do not mark implemented until verified.
+
 ## Context and contract
 
 Work in `D:\\working\\garmin-tekutekubeast` or `joshld/garmin-tekutekubeast` on `main`. Native Garmin Enduro 4 Connect IQ (Monkey C) watch app. Read `docs/GAMEPLAY_V0_4.md` first, then current `docs/EVOLUTION_DESIGN.md` and `art/README.md`. Already built and simulator-tested according to README. Existing watch user's save should not be destroyed. Do not edit Garmin developer key or commit credentials.
