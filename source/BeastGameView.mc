@@ -26,7 +26,12 @@ class BeastGameView extends TekuTekuBeastView {
         Application.getApp().activeView=self;if(!beast.dev){beast.data=null;}beast.syncHistory();loadSprite();
         var saved=beast.data["sessions"][kind];
         if(saved!=null){restore(saved);}
-        refresher=new Toybox.Timer.Timer();refresher.start(method(:refresh),250,true);
+        refresher=new Toybox.Timer.Timer();timerPeriod=desiredGamePeriod();refresher.start(method(:refresh),timerPeriod,true);
+    }
+    function desiredGamePeriod(){return phase==0 || phase==3?1000:250;}
+    function tuneGameTimer(){
+        var wanted=desiredGamePeriod();
+        if(refresher!=null && timerPeriod!=wanted){timerPeriod=wanted;refresher.stop();refresher.start(method(:refresh),timerPeriod,true);}
     }
     function onHide(){checkpoint();TekuTekuBeastView.onHide();}
     function restore(saved){
@@ -58,14 +63,14 @@ class BeastGameView extends TekuTekuBeastView {
         result="";choice=0;resultChoice=0;travel=0;lane=1;jumpTicks=0;caught=false;
         if(kind==0){target=random(3);}
         if(kind==1){makeSequence();}
-        checkpoint();
+        checkpoint();tuneGameTimer();
     }
     function makeSequence(){
         sequence=[];for(var i=0;i<3+round;i++){sequence.add(random(3));}
         cursor=0;elapsed=0;phase=1;
     }
     function refresh() as Void {
-        tick++;if(phase==1 || phase==2 || phase==4 || phase==5){elapsed++;}
+        var step=timerPeriod/250;tick+=step;if(phase==1 || phase==2 || phase==4 || phase==5){elapsed+=step;}
         if(kind==0 && phase==1){
             if(jumpTicks>0){jumpTicks--;}
             var local=elapsed.toFloat()/period();
@@ -80,7 +85,7 @@ class BeastGameView extends TekuTekuBeastView {
         if(kind==1 && phase==4 && elapsed>=12){continueMemory();}
         if(kind==2 && phase==5){travel++;if(travel>=12){phase=2;elapsed=0;travel=0;choice=0;checkpoint();}}
         if(kind==2 && phase==4 && elapsed>=10){nextTrail();}
-        WatchUi.requestUpdate();
+        tuneGameTimer();WatchUi.requestUpdate();
     }
     function period(){return [20,16,12][round]+(beast.number("easy")==1?4:0);}
     function tempo(){return beast.number("easy")==1?8:6;}
@@ -139,7 +144,7 @@ class BeastGameView extends TekuTekuBeastView {
         else if(kind==1 && phase==4){continueMemory();}
         else if(kind==2 && phase==2){chooseTrail();}
         else if(kind==2 && phase==4){nextTrail();}
-        WatchUi.requestUpdate();
+        tuneGameTimer();WatchUi.requestUpdate();
     }
     function switchPage(delta){
         if(phase==0){
@@ -199,14 +204,14 @@ class BeastGameView extends TekuTekuBeastView {
         label(dc,y(dc,0.12),["BEAST BOUNCE","FOLLOW ME","TINY TRAIL"][kind],Graphics.FONT_XTINY);
         if(phase==0){
             label(dc,y(dc,0.25),kind==2?"< "+["GROVE","EMBER","TIDE","WISP"][trail]+" >":(kind==0?"SELECT: HOP":"COPY YOUR BEAST"),Graphics.FONT_XTINY);
-            drawPlayer(dc,dc.getWidth()/2,y(dc,0.65),tick%12<2?4:0,0);
+            drawPlayer(dc,dc.getWidth()/2,y(dc,0.65),beast.number("motion")>0 && tick%12<2?4:0,0);
             label(dc,y(dc,0.66),kind==2?((tick/8)%2==0?"1 ENERGY = 1 TRIP":"CARE/PLAY EARNS IT"):(kind==0?(scanning?"MENU / TOUCH: MOVE":"UP / DOWN: MOVE"):(scanning?"SELECT: GLOW":"UP / SELECT / DOWN")),Graphics.FONT_XTINY);
             label(dc,y(dc,0.76),kind==2?(beast.number("adventure")>0?"ENERGY "+beast.number("adventure"):"SCOUT: NO LOOT"):(beast.number("games")>=3?"FREE PRACTICE":(beast.number("easy")==1?"< EASY >":"< NORMAL >")),Graphics.FONT_XTINY);
             var paused=beast.data["sessions"][kind]!=null;
             label(dc,y(dc,0.86),paused?"RESUME":"START",Graphics.FONT_XTINY);
         }else if(phase==3){
             label(dc,y(dc,0.25),result,Graphics.FONT_XTINY);
-            drawPlayer(dc,dc.getWidth()/2,y(dc,0.66),tick%2==0?4:1,beast.number("motion")==2 && tick%2==0?5:0);
+            drawPlayer(dc,dc.getWidth()/2,y(dc,0.66),beast.number("motion")==0?0:(tick%8<4?4:1),beast.number("motion")==2 && tick%8<4?5:0);
             label(dc,y(dc,0.65),kind==2?"IN YOUR COLLECTION":"SCORE "+score+"  BEST "+(kind==0?best:hits),Graphics.FONT_XTINY);
             label(dc,y(dc,0.75),(resultChoice==0?"> ":"")+(kind==2?"ANOTHER TRIP":"PLAY AGAIN"),Graphics.FONT_XTINY);
             label(dc,y(dc,0.86),(resultChoice==1?"> ":"")+"EXIT",Graphics.FONT_XTINY);

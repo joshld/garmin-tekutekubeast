@@ -72,7 +72,7 @@ function navigationAndDevTest(logger){
 (:test)
 function miniGamesTest(logger){
     var s=TestSupport.fixture();s.data["haptics"]=0;
-    var star=new BeastGameView(s,0);star.selectAction();
+    var star=new BeastGameView(s,0);Test.assertEqual(star.desiredGamePeriod(),1000);star.selectAction();Test.assertEqual(star.desiredGamePeriod(),250);
     Test.assertEqual(star.resultTouchChoice(220),0);Test.assertEqual(star.resultTouchChoice(255),1);
     for(var attempt=0;attempt<15;attempt++){
         star.lane=star.target;star.elapsed=(star.period()/2).toNumber()-1;star.selectAction();star.refresh();
@@ -80,6 +80,7 @@ function miniGamesTest(logger){
         while(star.phase==1 && star.attempts==attempt){star.refresh();}
     }
     Test.assertEqual(star.phase,3);Test.assertEqual(star.hits,15);Test.assertEqual(s.number("games"),1);
+    Test.assertEqual(star.desiredGamePeriod(),1000);
     var memory=new BeastGameView(s,1);memory.selectAction();
     for(var round=0;round<3;round++){
         memory.phase=2;
