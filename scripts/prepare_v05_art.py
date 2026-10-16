@@ -1,15 +1,16 @@
 """Trim/re-export existing pixel sprites; no generated or redrawn artwork.
 
-Keep v0.4 resources intact for Glance/games. Compile larger native Pet resources
-and two mirrored walking poses, avoiding palette-bitmap transforms at runtime.
+Keep v0.4 resources intact. v0.5.1 Pet poses use the EXACT v0.4 native
+canvases/pixels, including intentional padding; only left-facing copies are new.
+Retain v0.5 game and Glance resource generation unchanged.
 """
 from pathlib import Path
 from PIL import Image, ImageOps
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
-variants = [("resources",128),("resources-pet144",144),
-            ("resources-native144",200),("resources-native192",232)]
+variants = [("resources",96),("resources-pet144",96),
+            ("resources-native144",144),("resources-native192",192)]
 original = ET.parse(ROOT / "resources/drawables/drawables.xml")
 entries = [b for b in original.getroot() if b.get("id", "").startswith("V4") and not b.get("id", "").endswith("Small")]
 species = sorted({b.get("id")[:-1] for b in entries})
@@ -52,9 +53,9 @@ for folder, extent in variants:
             game_id = "V5Game"+name[2:]+str(frame)
             game_canvas.save(resource/f"drawables/v05/{game_id}.png",optimize=True)
             ET.SubElement(tree.getroot(),"bitmap",{"id":game_id,"filename":f"v05/{game_id}.png","dithering":"none"})
-            resized = cell.resize((round(cell.width*scale),round(cell.height*scale)),Image.Resampling.NEAREST)
-            canvas = Image.new("RGBA", (extent,extent))
-            canvas.alpha_composite(resized,((extent-resized.width)//2,extent-resized.height-4))
+            native = "resources" if folder == "resources-pet144" else folder
+            canvas = Image.open(ROOT / native / f"drawables/v04/{name}{frame}.png").convert("RGBA")
+            assert canvas.size == (extent, extent)
             for suffix, image in [(str(frame),canvas)]+([(str(frame)+"Left",ImageOps.mirror(canvas))] if frame<2 else []):
                 identifier="V5"+name[2:]+suffix
                 filename=f"v05/{identifier}.png"
@@ -62,4 +63,4 @@ for folder, extent in variants:
                 ET.SubElement(tree.getroot(),"bitmap",{"id":identifier,"filename":filename,"dithering":"none"})
     ET.indent(tree,space="    ")
     tree.write(resource/"drawables/drawables.xml",encoding="unicode")
-print("Prepared 15 padded-trimmed species, native Pet sizes and mirrored walking poses.")
+print("Restored exact v0.4 Pet pixels for 15 species, six poses and mirrored walks; games/Glance retained.")
