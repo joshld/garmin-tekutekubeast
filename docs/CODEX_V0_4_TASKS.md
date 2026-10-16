@@ -18,6 +18,10 @@ Work in `D:\\working\\garmin-tekutekubeast` or `joshld/garmin-tekutekubeast` on 
 - Foreground-only animations/sounds; no audible background step/poop notifications.
 - Follow safe editing: run simulator tests and layout audit before pushing; note unverified items, don't claim hardware tests without hardware.
 
+## User-reported mini-game redesign priority (post-v0.4.0)
+
+Read [multi-round Star Catch, Memory Steps and Trail Treasure redesign](MINIGAME_REDESIGN.md). Existing games are too brief and Trail Treasure is an immediate reward selector rather than a playable adventure. Add repeatable multi-round sessions, clear results/replay, and three-node meaningful expeditions with one adventure-energy charge per trip and crash-safe state. Implement and test this before treating mini-games as polished. Current source unchanged by this document.
+
 ## Feature roadmap: Garmin Glance and inclusive activity rewards
 
 Read [activity and glance design](ACTIVITY_AND_GLANCE.md). Add a glance **within the same installed watch app** using getGlanceView() for the Enduro 4, and eventually compatible other devices, with low-memory cached pet summary and no background animations. Activity should meaningfully increase adventure opportunities, cosmetics, toys and loot; no nonactive player is denied pet evolution, mini-games or rare creature access. Use active minutes and supported wheelchair push data in addition to steps with null guards and no double rewards. Do not claim functionality until simulator and device checks are done.
