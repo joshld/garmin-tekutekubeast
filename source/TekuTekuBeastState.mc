@@ -247,7 +247,7 @@ class TekuTekuBeastState {
         data["gameSerial"]++;var seed=((realNow()%100000)+number("gameSerial")*719).toNumber();
         var session={"id"=>number("gameSerial"),"kind"=>kind,"round"=>0,"elapsed"=>0,"attempts"=>0,
             "hits"=>0,"score"=>0,"combo"=>0,"best"=>0,"sequence"=>[],"cursor"=>0,"retries"=>0,
-            "phase"=>1,"route"=>0,"node"=>0,"risk"=>0,"finds"=>0,"seed"=>seed,"travel"=>0,"choice"=>0};
+            "phase"=>(kind==2?5:1),"route"=>0,"node"=>0,"risk"=>0,"finds"=>0,"seed"=>seed,"travel"=>0,"choice"=>0};
         session["practice"]=kind==2 && number("adventure")<1;
         if(kind==2 && !session["practice"]){data["adventure"]--;}
         data["sessions"][kind]=session;commit();return store.copy(session);

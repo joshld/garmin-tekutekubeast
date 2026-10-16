@@ -233,7 +233,21 @@ function gameRetryReplayAndSuspendTest(logger){
     var trip=new BeastGameView(s,2);s.data["adventure"]=1;trip.trail=2;trip.selectAction();
     for(var stop=0;stop<3;stop++){for(var t=0;t<12;t++){trip.refresh();}Test.assertEqual(trip.phase,2);trip.choice=stop%2;trip.selectAction();Test.assertEqual(trip.phase,4);trip.nextTrail();}
     Test.assertEqual(trip.phase,3);Test.assertEqual(s.number("adventure"),0);Test.assertEqual(s.number("encounters"),1);
-    Test.assertEqual(s.number("games"),0);Test.assertEqual(s.xp(),0l);return true;
+    Test.assertEqual(s.number("games"),0);Test.assertEqual(s.xp(),0l);
+    // Simulate interruption after the atomic session/debit, before the view's
+    // first sequence/target/travel checkpoint. Reopening must finish setup.
+    var cold=TestSupport.fixture();var initialMemory=cold.beginSession(1);
+    var recoveredMemory=new BeastGameView(cold,1);recoveredMemory.onShow();recoveredMemory.onHide();
+    Test.assertEqual(recoveredMemory.sequence.size(),3);Test.assertEqual(recoveredMemory.session["id"],initialMemory["id"]);
+    cold.data["adventure"]=2;var initialTrip=cold.beginSession(2);Test.assertEqual(initialTrip["phase"],5);
+    initialTrip["phase"]=1;cold.saveSession(initialTrip); // repair an older incomplete start too
+    var recoveredTrip=new BeastGameView(cold,2);recoveredTrip.onShow();recoveredTrip.onHide();
+    Test.assertEqual(recoveredTrip.phase,5);Test.assertEqual(cold.number("adventure"),1);
+    Test.assertEqual(recoveredTrip.session["id"],initialTrip["id"]);
+    var initialBounce=cold.beginSession(0);var recoveredBounce=new BeastGameView(cold,0);
+    recoveredBounce.onShow();recoveredBounce.onHide();Test.assert(cold.data["sessions"][0].hasKey("target"));
+    Test.assertEqual(cold.data["sessions"][0]["seed"],(initialBounce["seed"]*17+11)%65521);
+    Test.assertEqual(cold.number("games"),0);Test.assertEqual(cold.xp(),0l);return true;
 }
 (:test)
 function devNewSystemsIsolationTest(logger){

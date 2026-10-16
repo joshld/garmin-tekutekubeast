@@ -43,6 +43,14 @@ class BeastGameView extends TekuTekuBeastView {
         jumpTicks=session.hasKey("jump")?session["jump"]:0;caught=session.hasKey("caught")?session["caught"]:false;
         replayRound=session.hasKey("retry")?session["retry"]:false;
         hint=session.hasKey("hint")?session["hint"]:"";
+        // Power loss may occur between the model's atomic session/debit and
+        // the first view checkpoint. Complete setup using the SAME ID/seed;
+        // never restart the transaction or charge/grant anything again.
+        var incomplete=false;
+        if(kind==1 && phase==1 && sequence.size()==0){makeSequence();incomplete=true;}
+        if(kind==2 && phase==1){phase=5;incomplete=true;}
+        if(kind==0 && phase==1 && !session.hasKey("target")){target=random(3);incomplete=true;}
+        if(incomplete){checkpoint();}
     }
     function checkpoint(){
         if(session==null || phase==3){return;}
