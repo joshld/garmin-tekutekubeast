@@ -35,7 +35,7 @@ class ArtLayoutAuditView extends TekuTekuBeastView {
     function initialize(){
         TekuTekuBeastView.initialize();beast=new ArtPreviewState();
         for(var i=0;i<menuNames.size();i++){openMenu(menuNames[i]);menuCounts.add(rows.size());menuTotal+=rows.size();}
-        menu=null;sceneCount=165+menuTotal+3+18+messages.size()+12+270;
+        menu=null;sceneCount=165+menuTotal+3+18+messages.size()+12+270+25;
     }
     function sceneAt(index){
         if(index<165){
@@ -51,8 +51,10 @@ class ArtLayoutAuditView extends TekuTekuBeastView {
         if(index<18){return [1,0,index/6,"GAME",index%6,"idle",0];}index-=18;
         if(index<messages.size()){return [1,0,0,null,0,"idle",0,messages[index]];}
         index-=messages.size();if(index<12){return [5,1+index/3,index%3,null,0,"idle",0,null,1];}
-        index-=12;var specimen=(index/18).toNumber();
-        return [specimen<3?specimen:3+(specimen-3)/4,specimen<3?0:1+(specimen-3)%4,0,null,0,"idle",0,null,0,index%18];
+        index-=12;
+        if(index<270){var specimen=(index/18).toNumber();
+            return [specimen<3?specimen:3+(specimen-3)/4,specimen<3?0:1+(specimen-3)%4,0,null,0,"idle",0,null,0,index%18];}
+        return [1,0,2,"TRAIL_CASE",index-270,"idle",0];
     }
     function onShow(){loadSprite();refresher=new Toybox.Timer.Timer();refresher.start(method(:refresh),50,true);}
     function refresh() as Void {WatchUi.requestUpdate();}
@@ -82,7 +84,12 @@ class ArtLayoutAuditView extends TekuTekuBeastView {
             if(pose%6==2){model.simulateSleep(true);}
             if(pose%6==3){model.data["fullness"]=20;model.data["happiness"]=20;model.data["poop"]=2;}
         }
-        if(scene[3]!=null && scene[3].equals("GAME")){
+        if(scene[3]!=null && scene[3].equals("TRAIL_CASE")){
+            var trip=new AuditGame(beast,2,self);var variant=scene[4];trip.tick=12;
+            trip.phase=variant==24?3:2;trip.result="SCOUT COMPLETE";
+            if(variant<24){trip.trail=variant/6;trip.node=(variant/2)%3;trip.choice=variant%2;}
+            boxes=[];trip.onUpdate(dc);checkGraphic(dc,trip.gameBounds,"Adventure creature");
+        }else if(scene[3]!=null && scene[3].equals("GAME")){
             var game=new AuditGame(beast,page,self);game.phase=scene[4];game.sequence=[0,1,2,0,1];game.result="WELL PLAYED!";
             game.hint="GREAT!";game.lane=scene[4]==1?0:2;game.jumpTicks=4;game.tick=12;
             boxes=[];game.onUpdate(dc);
