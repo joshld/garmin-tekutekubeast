@@ -128,8 +128,8 @@ function nonStepActivityAndCollectionTest(logger){
 (:test)
 function foregroundEvolutionTest(logger){
     var s=TestSupport.fixture();s.testNow+=86400;s.syncToday();Test.assertEqual(s.number("evolutionPending"),1);
-    var view=new TekuTekuBeastView();view.beast=s;view.consumeEvolution();
-    Test.assertEqual(s.number("evolutionPending"),0);Test.assert(view.animation.equals("evolve"));
+    var view=new TekuTekuBeastView();view.beast=s;view.page=2;view.consumeEvolution();
+    Test.assertEqual(s.number("evolutionPending"),0);Test.assert(view.animation.equals("evolve"));Test.assertEqual(view.page,0);
     s.tick();Test.assertEqual(s.number("evolutionPending"),0);Test.assertEqual(s.xp(),0l);return true;
 }
 (:test)

@@ -36,7 +36,7 @@ class TekuTekuBeastView extends WatchUi.View {
     function consumeEvolution(){
         if(beast.number("evolutionPending")>0){beast.data["evolutionPending"]=0;beast.commit();toast("EVOLVED!","evolve");}
     }
-    function toast(text,action){notice=text;noticeTicks=12;animation=action;animationTicks=12;loadSprite();if(!action.equals("idle")){new FeedbackManager().cue(beast,action);}WatchUi.requestUpdate();}
+    function toast(text,action){page=0;notice=text;noticeTicks=12;animation=action;animationTicks=12;loadSprite();if(!action.equals("idle")){new FeedbackManager().cue(beast,action);}WatchUi.requestUpdate();}
     function openMenu(name){menu=name;selection=0;updateRows();WatchUi.requestUpdate();}
     function updateRows(){
         if(menu.equals("Actions")){rows=beast.number("poop")>0?["Clean","Feed","Play","Pat","Rest","Collection","Settings"]:["Feed","Clean","Play","Pat","Rest","Collection","Settings"];if(beast.dev){rows.add("Dev Tools");}}
