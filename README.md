@@ -4,10 +4,11 @@ A native, offline Garmin virtual-beast game. Grow through time, care and play;
 genuine watch activity adds growth and extra adventure opportunities. No phone,
 internet connection, exercise requirement, death or recovery-day punishment.
 
-**v0.5.0 beta candidate in development.** Larger roaming creatures, attention-only
+**v0.5.0 beta candidate built and SDK-tested.** Larger roaming creatures, attention-only
 HUD, scheduled sleep/lights, whole-session mini-games and clearer feedback are
-implemented. See [v0.5 validation](docs/V0_5_VALIDATION.md) for actual SDK results
-and remaining checks. Previous [v0.4 evidence](docs/V0_4_VALIDATION.md) and
+implemented. Final tests pass on 13 profiles; physical-watch acceptance remains
+open. See [v0.5 validation](docs/V0_5_VALIDATION.md) and
+[signed artifact hashes](docs/RELEASE_0_5_0_VERIFICATION.md). Previous [v0.4 evidence](docs/V0_4_VALIDATION.md) and
 [device matrix](docs/DEVICE_MATRIX.md) are historical, not automatic v0.5 passes.
 No Garmin Store publication has been performed for v0.5.
 
@@ -107,7 +108,8 @@ Fenix 7/7S/7X/7X Pro, Fenix 8 Solar 47/51mm, Forerunner 265/955/965,
 Venu 3 and vivoactive 5. These are simulator-tested profiles, not physical-watch
 certification. Original Enduro is excluded for artwork RAM exhaustion; Fenix
 6X is excluded because its 32KB background budget crashes step reconciliation.
-See the [exact matrix](docs/DEVICE_MATRIX.md), including memory and SDK aliases.
+See [current v0.5 evidence](docs/V0_5_VALIDATION.md#sdk-results), including memory;
+the [v0.4 matrix](docs/DEVICE_MATRIX.md) retains historical tests and SDK aliases.
 
 Install Garmin Connect IQ SDK/device profiles and Java 17. Keep `developer_key`
 local and out of Git. With the SDK simulator open:
@@ -118,6 +120,7 @@ local and out of Git. With the SDK simulator open:
 ./scripts/build.ps1 -Tests -Output bin/v05-tests.prg
 ./scripts/run-simulator.ps1 -Tests -Program bin/v05-tests.prg
 ./scripts/device-matrix.ps1
+./scripts/unit-matrix.ps1
 ./scripts/build.ps1 -Release -Output bin/v05-release.prg
 ./scripts/build.ps1 -Export -Output bin/TekuTekuBeast-0.5.0.iq
 ```

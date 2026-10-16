@@ -1,7 +1,7 @@
 # v0.5.0 beta candidate - release artifact verification
 
-Source freeze: `059c94c` (runtime code); `514bd97` expands only the isolated QA
-layout harness. Documentation commits do not change the binary. Final builds
+Source freeze: `27ca7f1` (runtime code and interrupted-start recovery);
+`514bd97` expands the isolated QA layout harness. Documentation does not change the binary. Final builds
 17 October 2026, Australia/Brisbane; earlier checkpoints are dated 16 October.
 Connect IQ SDK **9.2.0**, Java **17.0.20**, Windows.
 
@@ -28,10 +28,26 @@ copies are placed in the Codex chat's `outputs` folder; no Store upload occurs.
 
 | File | Bytes | SHA-256 |
 |---|---:|---|
-| `TekuTekuBeast-0.5.0.iq` | 4,873,764 | `B286BA0EBC16D6390138E5814A87609188328D5B01ED1DCFB7E2638A55A48C8A` |
-| `TekuTekuBeast-0.5.0-dev.prg` | 4,196,956 | `1707803E644C006F40303CBA0F2050782898E90F59E9316B89831E740E1021EF` |
-| `TekuTekuBeast-0.5.0-release.prg` | 4,066,572 | `F9402BE63C2B85EAA1340172705E3774BF5BC6F3DFA5AB84CEDB0F40A5544140` |
-| `export-059c94c/006-B5169-00/TekuTekuBeast-0.5.0.prg` | 4,066,572 | `F9402BE63C2B85EAA1340172705E3774BF5BC6F3DFA5AB84CEDB0F40A5544140` |
+| `TekuTekuBeast-0.5.0.iq` | 4,879,028 | `396EA9300176D7D2FC79CBBB9852EC1FD9836C8B9AE79EE2BEBCCC07D0A4F7CA` |
+| `TekuTekuBeast-0.5.0-dev.prg` | 4,197,340 | `94ED0600603D614820C48C876F058369020BD8D5EA10076236DD5EA836FFBB7C` |
+| `TekuTekuBeast-0.5.0-release.prg` | 4,066,748 | `CD2E732AEF52C90DA72552DD03C29624BA8581DDECE03472C3FB4DAA6D96E955` |
+| `export-27ca7f1/006-B5169-00/TekuTekuBeast-0.5.0.prg` | 4,066,748 | `CD2E732AEF52C90DA72552DD03C29624BA8581DDECE03472C3FB4DAA6D96E955` |
+
+## Exact exported-program execution
+
+The `006-B5169-00` PRG above was actually launched in the Enduro 4 simulator.
+In normal mode, a non-DEV scouting expedition was paused at stop two, the app
+was stopped, and the same exported PRG reopened. Selecting Tiny Adventures
+resumed **stop two**, then completed stop three and showed **SCOUT: NO LOOT**.
+Exit returned to normal pages. Pip remained Hatchling/day 1, watch XP **3,000**,
+bond **6**, Adventure Energy **0**, meals **2**, snacks **1**. Passive growth
+advanced with real elapsed time, as intended.
+
+The same PRG was relaunched in the native Glance runtime, displaying Pip /
+ASLEEP / growth at approximately **31.8 KiB of 59.9 KiB** in the SDK status bar.
+START in the SDK preview did not reproduce a watch Glances-list launch, so no
+selection/OS-timeout acceptance is claimed. The simulator was returned to Normal
+launch mode and the app stopped without clearing its save.
 
 ## Validation boundary
 

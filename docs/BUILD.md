@@ -1,7 +1,8 @@
 # Build and simulator instructions
 
 This is a native Garmin Connect IQ **watch app**, primarily tested on **Enduro 4**.
-See [device matrix](DEVICE_MATRIX.md) for individually accepted profiles. Steps
+See [v0.5 validation](V0_5_VALIDATION.md#sdk-results) for current accepted profiles;
+the [v0.4 device matrix](DEVICE_MATRIX.md) is historical evidence. Steps
 come from `Toybox.ActivityMonitor` and background step events; no phone or FIT
 import is needed. Passive and care growth are separate from genuine watch XP.
 
@@ -24,6 +25,7 @@ and Java 17. Build outputs and test logs are ignored under `bin/`.
 ./scripts/build.ps1
 ./scripts/run-simulator.ps1
 ./scripts/device-matrix.ps1
+./scripts/unit-matrix.ps1  # logic-only all-profile rerun; preserves separate logs
 # Set simulator Settings > Glance Launch Mode > Glance before this command:
 ./scripts/glance-matrix.ps1
 # Restore Normal launch mode for normal gameplay and unit tests.

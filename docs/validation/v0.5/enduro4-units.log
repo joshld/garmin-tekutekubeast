@@ -1,0 +1,103 @@
+------------------------------------------------------------------------------
+Executing test migrationTest...
+PASS
+------------------------------------------------------------------------------
+Executing test devIsolationTest...
+PASS
+------------------------------------------------------------------------------
+Executing test passiveGrowthTest...
+PASS
+------------------------------------------------------------------------------
+Executing test hatchTest...
+PASS
+------------------------------------------------------------------------------
+Executing test careAndRewardTest...
+PASS
+------------------------------------------------------------------------------
+Executing test stepsAndAlternativesTest...
+PASS
+------------------------------------------------------------------------------
+Executing test familiesTest...
+PASS
+------------------------------------------------------------------------------
+Executing test navigationAndDevTest...
+PASS
+------------------------------------------------------------------------------
+Executing test miniGamesTest...
+PASS
+------------------------------------------------------------------------------
+Executing test activeBalanceAndArchiveTest...
+PASS
+------------------------------------------------------------------------------
+Executing test devInventoryAndItemsTest...
+PASS
+------------------------------------------------------------------------------
+Executing test earlySaveAgeTest...
+PASS
+------------------------------------------------------------------------------
+Executing test freshEggScenarioTest...
+PASS
+------------------------------------------------------------------------------
+Executing test nonStepActivityAndCollectionTest...
+PASS
+------------------------------------------------------------------------------
+Executing test foregroundEvolutionTest...
+PASS
+------------------------------------------------------------------------------
+Executing test foregroundTimerLifecycleTest...
+PASS
+------------------------------------------------------------------------------
+Executing test v04UpgradePreservationTest...
+PASS
+------------------------------------------------------------------------------
+Executing test scheduledSleepAndLightsTest...
+PASS
+------------------------------------------------------------------------------
+Executing test sleepUpcomingFallbackTest...
+PASS
+------------------------------------------------------------------------------
+Executing test gameSessionAtomicityTest...
+PASS
+------------------------------------------------------------------------------
+Executing test gameRetryReplayAndSuspendTest...
+PASS
+------------------------------------------------------------------------------
+Executing test devNewSystemsIsolationTest...
+PASS
+------------------------------------------------------------------------------
+Executing test sessionMidnightAndPracticeTest...
+PASS
+------------------------------------------------------------------------------
+Executing test quietBedtimeFeedbackTest...
+PASS
+
+==============================================================================
+RESULTS
+Test:                               Status:
+migrationTest                       PASS
+devIsolationTest                    PASS
+passiveGrowthTest                   PASS
+hatchTest                           PASS
+careAndRewardTest                   PASS
+stepsAndAlternativesTest            PASS
+familiesTest                        PASS
+navigationAndDevTest                PASS
+miniGamesTest                       PASS
+activeBalanceAndArchiveTest         PASS
+devInventoryAndItemsTest            PASS
+earlySaveAgeTest                    PASS
+freshEggScenarioTest                PASS
+nonStepActivityAndCollectionTest    PASS
+foregroundEvolutionTest             PASS
+foregroundTimerLifecycleTest        PASS
+v04UpgradePreservationTest          PASS
+scheduledSleepAndLightsTest         PASS
+sleepUpcomingFallbackTest           PASS
+gameSessionAtomicityTest            PASS
+gameRetryReplayAndSuspendTest       PASS
+devNewSystemsIsolationTest          PASS
+sessionMidnightAndPracticeTest      PASS
+quietBedtimeFeedbackTest            PASS
+Ran 24 tests
+
+PASSED (passed=24, failed=0, errors=0)

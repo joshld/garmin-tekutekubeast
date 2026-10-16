@@ -40,9 +40,10 @@ inactivity. Motion OFF/LOW/NORMAL is available in Settings.
 
 ## Store artwork and copy
 
-[store/v0.4/README.md](store/v0.4/README.md) indexes the new four-family cover,
-retained generated original and prompt, current simulator captures, and
-copy-ready description/release notes. The cover is promotional pixel art based
+[store/v0.4/README.md](store/v0.4/README.md) retains the four-family cover,
+generated original/prompt and historical v0.4 captures and copy.
+[store/v0.5/README.md](store/v0.5/README.md) indexes current candidate copy and
+genuine implementation/release checkpoint captures. The cover is promotional pixel art based
 on the game's sprite atlases, not a gameplay screenshot. These assets are not
 loaded by the watch and do not change the signed v0.4.0 binary.
 

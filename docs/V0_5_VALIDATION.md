@@ -1,7 +1,8 @@
 # v0.5.0 beta candidate - implementation and acceptance
 
-Work in progress: this log distinguishes executed checks from outstanding
-checks. v0.4 simulator evidence is not automatically v0.5 evidence.
+Implemented, built and SDK-tested beta candidate; physical acceptance remains
+open. This record distinguishes executed checks from outstanding checks.
+v0.4 simulator evidence is not automatically v0.5 evidence.
 
 ## Authority and current document map
 
@@ -75,6 +76,8 @@ the existing ledger. No Garmin clock, step counter or Sleep Focus is modified.
   Claim, reward/inventory and completed-session removal are one atomic save;
   stale/double completion cannot claim again. Only completed arcade sessions use
   the shared three-rewarded-sessions/day budget; later play is practice.
+  Interrupted initial setup is recovered using the same session ID/seed,
+  including empty first memory sequences and older initial adventure phases.
 - Game intros/results refresh at 1Hz rather than gameplay's 4Hz, and Motion OFF
   disables decorative pose changes there. Hidden views have no running timer.
 - Feedback: distinct short tone patterns, longer gentle 140ms haptic and optional
@@ -103,6 +106,8 @@ the SDK's actual Background Events dialog. No Garmin steps are manufactured.
   completed without runtime errors. Diagnostic used memory **33,040 / 61,344**
   bytes. Reopening retained fixture XP 123,456, three pending sessions and item
   slot 7 quantity 18.
+  Final-source `27ca7f1` repeat of Steps Progress also passed with the populated
+  fixture, using **33,072 / 61,344** bytes at the diagnostic point.
 - Forerunner 955: actual Steps Progress completed without runtime errors;
   **32,872 / 61,344** bytes at the diagnostic point. Reopening retained the same
   fixture XP, session count and inventory quantity.
@@ -133,27 +138,81 @@ resetting retries. A Tiny Adventures scouting trip visibly travelled to themed
 encounters. This exposed generic encounter labels, corrected in `059c94c` with
 new unit assertions and an additional 25 route/choice/scout layout scenes.
 
+The final exported release also completed a normal, non-DEV scouting trip after
+an actual app stop/reopen at stop two. Its corrected result said SCOUT: NO LOOT;
+Exit worked. Details retained Pip / Hatchling / watch XP 3,000 / bond 6 /
+Adventure 0; Care retained meals 2 / snacks 1. This exercises actual simulator
+Storage, not just the in-memory unit store. See the final capture and
+[artifact verification](RELEASE_0_5_0_VERIFICATION.md).
+
 The native Enduro 4 production Glance was visibly rendered with Pip, ASLEEP
 and a growth bar. Its actual small VM was tested by the separate Glance matrix;
 simply toggling preview while a full app is loaded was not counted as a budget
-test. Selection/OS timeout behaviour still requires hardware acceptance.
+test. The final signed PRG ran in the actual Glance VM at about 31.8 KiB /
+59.9 KiB. START in the preview did not emulate a watch Glances-list transition;
+selection/OS timeout behaviour still requires hardware acceptance.
 
 ## SDK results
 
 Enduro 4 implementation checkpoint: 24 tests passed, 0 failures/errors; 608
 layout scenes passed with 0 failures. Peak audit memory 96,224 / 781,976 bytes.
-This is a checkpoint, not the complete matrix/release acceptance. The time-picker
-audit was then expanded by 48 scenes and will be rerun with the full matrix.
+This is a retained checkpoint, not the final matrix. The time-picker audit was
+then expanded by 48 scenes and all route/choice/scout states by another 25.
 Earlier failing layout runs caught clipped footers and overlapping game prompts;
 they are not counted as passes. The SDK also stalled before one test launch
 (no test output); a normal host restart without clearing data enabled the clean
-rerun. Final matrix/release/Glance evidence will be recorded below.
+rerun. Timeouts and expected failing reproductions are never accepted as passes.
 
 Full implementation checkpoint `1365e15`: all 13 accepted profiles passed 24
 tests / 662 layout scenes with no failures. A Venu 3 host launch timeout emitted
 no test output; it was not counted as a pass. Its isolated rerun passed both
-unit/layout audits. The final adventure-wording correction is being rerun with
-687 scenes (including every route/node/choice and the no-loot result).
+unit/layout audits. The adventure-wording correction passed expanded audits
+with 687 scenes, including every route/node/choice and the no-loot result.
+
+### Final accepted evidence / provenance
+
+- **Final runtime `27ca7f1`: 24 tests pass on every one of 13 profiles**
+  (312 passing test executions in this final all-profile unit run).
+- **687 clean layout scenes for each profile** (8,931 latest-profile renders).
+  The all-profile rendering run used runtime `059c94c` and QA `514bd97`;
+  Enduro 4, Fenix 7S, vivoactive 5 and Forerunner 955 were repeated on `27ca7f1`
+  after the recovery-only change. Rendering functions/assets did not change in
+  that guard. Other rows retain their actual earlier layout measurement; they
+  are not falsely labelled as identical-final-binary runs.
+- **60 native Glance scenes on each of 13 profiles** (780 renders), zero bounds
+  failures, all in the actual 61,344-byte available Glance VM. Glance/App/sleep
+  source is unchanged since that audited `4f22b55` checkpoint; final production
+  Enduro 4 export was additionally rendered in its actual Glance runtime.
+- Actual native background callbacks and final production restart trace above.
+- Development/release builds and signed **19/19 hardware-part export** succeed;
+  19 SDK aliases/parts are not 19 independently tested simulator profiles.
+- Static preflight and whitespace checks pass, but are not SDK evidence.
+
+| SDK profile | Display | Final units | Layout scenes | Latest game audit bytes | Native Glance bytes |
+|---|---|---:|---:|---:|---:|
+| enduro4 | 280 MIP | 24 PASS | 687 PASS* | 102,744 / 781,976 | 38,176 / 61,344 |
+| enduro3 | 280 MIP | 24 PASS | 687 PASS | 102,552 / 781,976 | 38,176 / 61,344 |
+| fenix7x (Enduro 2 SDK alias) | 280 MIP | 24 PASS | 687 PASS | 102,392 / 781,976 | 38,016 / 61,344 |
+| fenix7xpro | 280 MIP | 24 PASS | 687 PASS | 102,392 / 781,976 | 38,016 / 61,344 |
+| fenix8solar51mm | 280 MIP | 24 PASS | 687 PASS | 102,552 / 781,976 | 38,176 / 61,344 |
+| fenix8solar47mm | 260 MIP | 24 PASS | 687 PASS | 102,552 / 781,976 | 38,176 / 61,344 |
+| fenix7 | 260 MIP | 24 PASS | 687 PASS | 102,392 / 781,976 | 38,016 / 61,344 |
+| fenix7s | 240 MIP | 24 PASS | 687 PASS* | 102,584 / 781,976 | 38,016 / 61,344 |
+| fr265 | 416 AMOLED | 24 PASS | 687 PASS | 102,456 / 781,976 | 38,080 / 61,344 |
+| fr965 | 454 AMOLED | 24 PASS | 687 PASS | 102,456 / 781,976 | 38,080 / 61,344 |
+| venu3 | 454 AMOLED | 24 PASS | 687 PASS | 102,440 / 781,976 | 38,064 / 61,344 |
+| vivoactive5 | 390 AMOLED | 24 PASS | 687 PASS* | 102,632 / 781,976 | 38,064 / 61,344 |
+| fr955 | 260 MIP | 24 PASS | 687 PASS* | 102,576 / 781,976 | 38,008 / 61,344 |
+
+`*` final recovery-guard layout repeat. Game figures include the QA harness;
+Glance figures include a conservative 1,600-number payload and all 15 sprites
+in awake/tired/nap/night states. These are not battery or physical guarantees.
+Raw passing summaries, JSON, and the intentionally failing/fixed interrupted-start
+reproduction are retained under `docs/validation/v0.5`.
+
+The interrupted-start test first reproduced **23 passed / 1 assertion error**
+before the fix. The same suite then passed 24/24 and was rerun on all profiles.
+No charge, claim or real activity value is reset when setup is repaired.
 
 ## Issue status and remaining limitations
 
@@ -205,3 +264,5 @@ not validate changed v0.5 behaviour. Do not close hardware-dependent issues yet.
 - https://developer.garmin.com/connect-iq/api-docs/Toybox/System/ServiceDelegate.html
 - https://developer.garmin.com/connect-iq/api-docs/Toybox/Attention.html
 - https://developer.garmin.com/connect-iq/api-docs/Toybox/System/DeviceSettings.html
+- https://developer.garmin.com/connect-iq/api-docs/Toybox/Application/AppBase.html
+- https://developer.garmin.com/connect-iq/api-docs/Toybox/WatchUi/GlanceViewDelegate.html

@@ -1,0 +1,93 @@
+[
+  {
+    "dimensions": "216x88",
+    "total": 61344,
+    "device": "enduro4",
+    "used": 38176,
+    "glance": "PASS"
+  },
+  {
+    "used": 38176,
+    "glance": "PASS",
+    "device": "enduro3",
+    "total": 61344,
+    "dimensions": "217x88"
+  },
+  {
+    "used": 38016,
+    "glance": "PASS",
+    "device": "fenix7x",
+    "total": 61344,
+    "dimensions": "191x63"
+  },
+  {
+    "used": 38016,
+    "glance": "PASS",
+    "device": "fenix7xpro",
+    "total": 61344,
+    "dimensions": "191x63"
+  },
+  {
+    "used": 38176,
+    "glance": "PASS",
+    "device": "fenix8solar51mm",
+    "total": 61344,
+    "dimensions": "217x88"
+  },
+  {
+    "used": 38176,
+    "glance": "PASS",
+    "device": "fenix8solar47mm",
+    "total": 61344,
+    "dimensions": "198x81"
+  },
+  {
+    "used": 38016,
+    "glance": "PASS",
+    "device": "fenix7",
+    "total": 61344,
+    "dimensions": "171x63"
+  },
+  {
+    "used": 38016,
+    "glance": "PASS",
+    "device": "fenix7s",
+    "total": 61344,
+    "dimensions": "151x63"
+  },
+  {
+    "used": 38080,
+    "glance": "PASS",
+    "device": "fr265",
+    "total": 61344,
+    "dimensions": "275x120"
+  },
+  {
+    "used": 38080,
+    "glance": "PASS",
+    "device": "fr965",
+    "total": 61344,
+    "dimensions": "299x148"
+  },
+  {
+    "used": 38064,
+    "glance": "PASS",
+    "device": "venu3",
+    "total": 61344,
+    "dimensions": "303x164"
+  },
+  {
+    "used": 38064,
+    "glance": "PASS",
+    "device": "vivoactive5",
+    "total": 61344,
+    "dimensions": "260x141"
+  },
+  {
+    "used": 38008,
+    "glance": "PASS",
+    "device": "fr955",
+    "total": 61344,
+    "dimensions": "176x93"
+  }
+]

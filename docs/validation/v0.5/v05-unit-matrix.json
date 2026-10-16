@@ -1,0 +1,80 @@
+[
+  {
+    "unit": "PASS",
+    "device": "enduro4",
+    "tests": 24,
+    "revision": "27ca7f1"
+  },
+  {
+    "unit": "PASS",
+    "device": "enduro3",
+    "tests": 24,
+    "revision": "27ca7f1"
+  },
+  {
+    "unit": "PASS",
+    "device": "fenix7x",
+    "tests": 24,
+    "revision": "27ca7f1"
+  },
+  {
+    "unit": "PASS",
+    "device": "fenix7xpro",
+    "tests": 24,
+    "revision": "27ca7f1"
+  },
+  {
+    "unit": "PASS",
+    "device": "fenix8solar51mm",
+    "tests": 24,
+    "revision": "27ca7f1"
+  },
+  {
+    "unit": "PASS",
+    "device": "fenix8solar47mm",
+    "tests": 24,
+    "revision": "27ca7f1"
+  },
+  {
+    "unit": "PASS",
+    "device": "fenix7",
+    "tests": 24,
+    "revision": "27ca7f1"
+  },
+  {
+    "unit": "PASS",
+    "device": "fenix7s",
+    "tests": 24,
+    "revision": "27ca7f1"
+  },
+  {
+    "unit": "PASS",
+    "device": "fr265",
+    "tests": 24,
+    "revision": "27ca7f1"
+  },
+  {
+    "unit": "PASS",
+    "device": "fr965",
+    "tests": 24,
+    "revision": "27ca7f1"
+  },
+  {
+    "unit": "PASS",
+    "device": "venu3",
+    "tests": 24,
+    "revision": "27ca7f1"
+  },
+  {
+    "unit": "PASS",
+    "device": "vivoactive5",
+    "tests": 24,
+    "revision": "27ca7f1"
+  },
+  {
+    "unit": "PASS",
+    "device": "fr955",
+    "tests": 24,
+    "revision": "27ca7f1"
+  }
+]

@@ -1,0 +1,106 @@
+[
+  {
+    "layout": "PASS",
+    "total": 781976,
+    "tests": 24,
+    "unit": "PASS",
+    "peak": 102552,
+    "device": "enduro3"
+  },
+  {
+    "layout": "PASS",
+    "total": 781976,
+    "tests": 24,
+    "unit": "PASS",
+    "peak": 102392,
+    "device": "fenix7x"
+  },
+  {
+    "layout": "PASS",
+    "total": 781976,
+    "tests": 24,
+    "unit": "PASS",
+    "peak": 102392,
+    "device": "fenix7xpro"
+  },
+  {
+    "layout": "PASS",
+    "total": 781976,
+    "tests": 24,
+    "unit": "PASS",
+    "peak": 102552,
+    "device": "fenix8solar51mm"
+  },
+  {
+    "layout": "PASS",
+    "total": 781976,
+    "tests": 24,
+    "unit": "PASS",
+    "peak": 102552,
+    "device": "fenix8solar47mm"
+  },
+  {
+    "layout": "PASS",
+    "total": 781976,
+    "tests": 24,
+    "unit": "PASS",
+    "peak": 102392,
+    "device": "fenix7"
+  },
+  {
+    "layout": "PASS",
+    "total": 781976,
+    "tests": 24,
+    "unit": "PASS",
+    "peak": 102456,
+    "device": "fr265"
+  },
+  {
+    "layout": "PASS",
+    "total": 781976,
+    "tests": 24,
+    "unit": "PASS",
+    "peak": 102456,
+    "device": "fr965"
+  },
+  {
+    "layout": "PASS",
+    "total": 781976,
+    "tests": 24,
+    "unit": "PASS",
+    "peak": 102440,
+    "device": "venu3"
+  },
+  {
+    "layout": "PASS",
+    "total": 781976,
+    "peak": 102744,
+    "unit": "PASS",
+    "device": "enduro4",
+    "tests": 24
+  },
+  {
+    "layout": "PASS",
+    "total": 781976,
+    "peak": 102584,
+    "unit": "PASS",
+    "device": "fenix7s",
+    "tests": 24
+  },
+  {
+    "layout": "PASS",
+    "total": 781976,
+    "peak": 102632,
+    "unit": "PASS",
+    "device": "vivoactive5",
+    "tests": 24
+  },
+  {
+    "layout": "PASS",
+    "total": 781976,
+    "peak": 102576,
+    "unit": "PASS",
+    "device": "fr955",
+    "tests": 24
+  }
+]
