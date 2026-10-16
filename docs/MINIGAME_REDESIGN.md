@@ -1,4 +1,18 @@
-# Mini-game redesign — multi-round play and understandable exploration
+# Mini-game redesign — character-driven fun and exploration
+
+## Latest gameplay direction — FUN FIRST (supersedes rigid round designs)
+
+**User preference:** "I'm not sure. I just want it to be fun." Do **not** lock down Star Catch / Memory Steps / Trail Treasure as three generic, mandatory three-round games solely to tick boxes. Earlier detailed mechanics below are *prototype hypotheses*, not final requirements. The objective is an engaging, character-driven game that the user enjoys playing on a physical Garmin Enduro 4.
+
+Prototype lightweight, immediately playable versions and evaluate **feel** before polishing all three:
+1. **First priority: a fun 30–60 second character-action prototype**, working title *Beast Bounce*: the player's actual evolving pet hops between platforms, catches treats/stars, builds streaks, makes expressive mistakes and celebrates. One/two physical buttons, forgiving controls, replay from result screen; variation from species/personality (later). Reuse Star Catch mechanics/resources if sensible.
+2. **Second: pet-centred memory interaction**, working title *Follow My Lead*: copy the pet's expressions or moves rather than anonymous UP/SELECT/DOWN prompts; progressive rounds, retries, distinct personality reactions.
+3. **Third: a genuinely understandable treasure adventure**, working title *Tiny Adventures*: turn Trail Treasure's current immediate item-dispenser into a three-scene route with character travel, meaningful choices, surprises, a clear reward reveal and another-trip button. Make one Adventure Energy pay for a whole expedition, retain alternative nonmovement earning.
+4. Keep sessions short, replay easy, feedback instant, randomisation meaningful, and both 0-step and active players welcome. Actual enjoyment matters more than exact counts or genre fidelity. Balance three rewarded sessions/day separately from unlimited gameplay.
+5. Preserve v4 saves, watch step ledger, app ID, ability to pause/resume, CPU/memory/time budgets and tested input layouts.
+
+**Acceptance criteria are experiential as well as functional:** user can describe what's happening without instructions, feels involved with the pet, gets varied outcomes, understands the reward, and wants to play again. Have Codex deliver one working prototype + simulator capture/short demonstration, then request real-watch feedback before investing in the other two. Don't claim user-tested fun based solely on successful SDK tests.
+
 
 **Status:** Approved direction for next gameplay improvement, **NOT IMPLEMENTED** as of v0.4.0. Current source to refactor: `source/BeastGameView.mc` and `source/TekuTekuBeastState.mc`. Maintain current app ID and persisted genuine pet data.
 
