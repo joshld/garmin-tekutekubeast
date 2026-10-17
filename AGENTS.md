@@ -51,6 +51,27 @@
 - Keep the requested scope first; record unrelated improvement ideas as future issues, not surprise implementation.
 - Never trade correctness, persistence integrity or necessary testing for token savings.
 
+## Deliverable-first workflow
+- Establish the requested deliverable and minimum acceptance criteria; finish them before expanding optional scope.
+- Once essential checks pass, prioritise final verification, commit, push and the requested artifact/path.
+- Do not keep exploring additional watch models, enhancements or refactoring after acceptance without owner approval.
+- Do not turn focused changes into repository-wide audits.
+
+## Milestone checkpoints and interruption recovery
+- Split substantial tasks into independently useful, reviewable milestones; commit and push completed, validated milestones rather than holding everything until the end.
+- Do not push broken or unvalidated intermediate work to the production branch; preserve incomplete changes locally or on a suitable feature branch instead.
+- Keep a concise checkpoint of completed work, remaining validation, blockers and output artifacts for interruption recovery.
+- On resume, inspect Git status, existing generated outputs, latest commits and saved test logs first. Reuse valid passing evidence instead of rerunning it automatically.
+
+## Stop conditions and efficient delivery
+- Stop optional investigation when the defined acceptance criteria are satisfied.
+- After a reasonable diagnostic attempt at a blocked external service, report the blocker instead of retrying indefinitely.
+- Ask before starting a substantial investigation outside the requested scope.
+- When nearing a session usage/time limit, prioritise a safe checkpoint and essential validation over optional polish.
+- Report progress only at meaningful milestones or blockers. Avoid duplicate screenshots, transcripts, comparison sheets and overlapping reports.
+- Maintain one concise current validation summary with links to existing detailed evidence; at completion give exact artifact path, commit SHA, test scope and outstanding limitations.
+- These efficiency rules never override necessary correctness, save integrity, security or meaningful regression testing.
+
 ## Protect existing players
 - Never change production application ID `54A4F9D3B6584CA4B01C232D20438E5B` or signing identity without explicit approval.
 - Preserve real saves, genuine step-XP ledger, evolution, inventory, rewards and collections; keep Developer Mode state isolated.
