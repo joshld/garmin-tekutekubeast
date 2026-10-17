@@ -1,5 +1,20 @@
 # User-reported watch acceptance
 
+## Latest v0.5.0 feedback / v0.5.1 boundary
+
+The owner reports installing v0.5.0 on their physical Enduro 4. The enlarged
+creature was too big: restore the exact v0.4 pixels while expanding roaming
+independently. They also report that consecutive identical memory cues look
+continuous and normal Bounce stars feel slow. These observations drive the
+v0.5.1 changes; they are not physical verification of the resulting candidate.
+
+The [v0.5.1 validation and physical checklist](V0_5_1_VALIDATION.md) records
+current SDK evidence and still-required watch checks, including cached-location
+astronomy, sleep independence, progress preservation and comparable-day battery
+use. No agent-operated physical v0.5.1 test or Store submission is claimed.
+
+The records below remain historical reports, not superseding specifications.
+
 ## Latest v0.4 hardware feedback / v0.5 boundary
 
 The user subsequently confirmed that vibration works but feels very short, and

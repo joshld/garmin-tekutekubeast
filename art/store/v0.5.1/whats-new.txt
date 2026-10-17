@@ -1,0 +1,20 @@
+v0.5.1 beta — A small beast, a bigger world
+
+ORIGINAL SIZE, MORE EXPLORATION
+Restored the exact v0.4.0 creature size while expanding its horizontal and vertical roaming. Expressive walking, hopping, pauses, reactions and attention-only needs remain.
+
+FOUR OUTDOOR WORLDS
+Explore Forest, Meadow, Lakeside and Garden pixel-art scenery. Let your beast's family choose the theme or select another in Settings.
+
+REAL LOCAL SKIES
+Sunrise and sunset use cached or approximate location data, with local offline calculations as a fallback. Enjoy dawn, daylight, dusk, moon and stars. Bedtime remains separate from sunset. No continuous GPS, internet requirement or watch-brightness changes.
+
+CLEARER MEMORY, LIVELIER BOUNCE
+Every Follow My Lead move now has a neutral pause, including repeats. Normal Beast Bounce stars arrive faster across the three stages; Easy Mode retains slower timing. Existing paused sessions resume without resetting rewards or progress.
+
+BATTERY-CONSCIOUS POLISH
+Fewer unchanged screen redraws and save writes, cached sleep-profile reads and a safe duplicate-step shortcut. Hidden/inactive screens stop their animation timers. Genuine new steps and essential care/sleep updates still reconcile.
+
+Your existing pet, evolution, activity history, inventory and collections are retained. Update the existing installation—do not uninstall first.
+
+Development beta: real-watch location availability, outdoor visibility, button comfort, Glance/timeout behaviour and battery life still need acceptance testing. The moon arc is decorative, not a lunar ephemeris.

@@ -4,15 +4,25 @@ v0.4 uses the supplied colourful pixel-art family concept as its reference:
 leafy Grove deer, Ember dragons, blue/pink-gilled Tide spirits and violet Wisp
 fox spirits. The geometric higher-stage drawings have been removed.
 
-v0.5 retains those character pixels rather than replacing them with unrelated
-cover art. `scripts/prepare_v05_art.py` trims existing sprite alpha padding,
-exports larger Pet canvases (128/144px MIP; 200/232px AMOLED), adds pre-mirrored
-walking poses and 40px curled Glance sprites. Six-pose V5Game resources use
+v0.5.1 restores the exact v0.4 character pixels and padding instead of the
+v0.5 enlarged canvases. `scripts/prepare_v05_art.py` retains original Pet
+canvases (96px MIP; 144/192px AMOLED), adds pre-mirrored walking poses and
+retains 40px curled Glance sprites. Six-pose V5Game resources use
 80px MIP / 128px or 144px AMOLED canvases, keeping game jumps inside the circle.
 Old V4 small resources remain for ordinary Glance poses. No affine bitmap
 transformations run on the watch.
 Only the current Pet's eight poses (six plus two mirrored) are loaded; the egg
-shares a single bitmap. See [v0.5 evidence](../docs/V0_5_VALIDATION.md).
+shares a single bitmap. `scripts/verify_v051_art.py` checks 480 Pet variants
+against historical v0.4 pixels and verifies unchanged game/Glance assets.
+See [current evidence](../docs/V0_5_1_VALIDATION.md).
+
+Four original transparent pixel-art landscape layers are in `source/v051`.
+[V0_5_1_PROMPTS.md](V0_5_1_PROMPTS.md) records generation and reference roles.
+`scripts/prepare_v051_world.py` compiles restrained dawn/day/dusk/night variants
+at six native display sizes from a 140px logical grid. Only one foreground
+landscape is cached. Sky/celestial placement is rendered separately; scenery
+does not run in Glance or background tasks. The illustrations are assets, not
+evidence of simulator or hardware operation.
 
 ## Assets
 
@@ -42,19 +52,21 @@ inactivity. Motion OFF/LOW/NORMAL is available in Settings.
 
 [store/v0.4/README.md](store/v0.4/README.md) retains the four-family cover,
 generated original/prompt and historical v0.4 captures and copy.
-[store/v0.5/README.md](store/v0.5/README.md) indexes current candidate copy and
-genuine implementation/release checkpoint captures. The cover is promotional pixel art based
+[store/v0.5/README.md](store/v0.5/README.md) retains historical v0.5 copy and
+genuine implementation/release checkpoint captures.
+[store/v0.5.1/README.md](store/v0.5.1/README.md) indexes current copy and captures.
+The cover is promotional pixel art based
 on the game's sprite atlases, not a gameplay screenshot. These assets are not
 loaded by the watch and do not change the signed v0.4.0 binary.
 
 ## Verification
 
-The internal `tests/art-preview` / `tests/matrix` harness renders one scene per
+The internal `tests/art-preview` / `tests/matrix` harness renders two scenes per
 callback and checks native-font bounds, overlap and truncation across species,
 poses, menus, game phases, large counters and feedback. It uses an isolated QA
 application ID and an in-memory model; it is not the on-watch Developer Mode.
 Developer Mode is inside the production app and uses its normal screens.
 
-See [v0.5 validation](../docs/V0_5_VALIDATION.md) and the device matrix for actual
+See [v0.5.1 validation](../docs/V0_5_1_VALIDATION.md) and the device matrix for actual
 results. Simulator screenshots and generated assets are not physical-watch
 photographs. Battery, display appearance and sound still need hardware checks.

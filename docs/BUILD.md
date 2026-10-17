@@ -1,7 +1,7 @@
 # Build and simulator instructions
 
 This is a native Garmin Connect IQ **watch app**, primarily tested on **Enduro 4**.
-See [v0.5 validation](V0_5_VALIDATION.md#sdk-results) for current accepted profiles;
+See [v0.5.1 validation](V0_5_1_VALIDATION.md) for current work and accepted profiles;
 the [v0.4 device matrix](DEVICE_MATRIX.md) is historical evidence. Steps
 come from `Toybox.ActivityMonitor` and background step events; no phone or FIT
 import is needed. Passive and care growth are separate from genuine watch XP.
@@ -16,7 +16,7 @@ import is needed. Passive and care growth are separate from genuine watch XP.
    the Monkey C extension can generate a key. Keep it private, backed up and
    out of version control; local `developer_key` is ignored.
 
-## Windows v0.5 build and regression
+## Windows v0.5.1 build and regression
 
 The checked-in PowerShell scripts use the SDK selected by Garmin's SDK Manager
 and Java 17. Build outputs and test logs are ignored under `bin/`.
@@ -24,19 +24,39 @@ and Java 17. Build outputs and test logs are ignored under `bin/`.
 ```powershell
 ./scripts/build.ps1
 ./scripts/run-simulator.ps1
-./scripts/device-matrix.ps1
-./scripts/unit-matrix.ps1  # logic-only all-profile rerun; preserves separate logs
+./scripts/device-matrix.ps1 -EvidencePrefix v051
 # Set simulator Settings > Glance Launch Mode > Glance before this command:
-./scripts/glance-matrix.ps1
+./scripts/glance-matrix.ps1 -EvidencePrefix v051
 # Restore Normal launch mode for normal gameplay and unit tests.
-./scripts/build.ps1 -Release -Output bin/v05-release.prg
-./scripts/build.ps1 -Export -Output bin/TekuTekuBeast-0.5.0.iq
+./scripts/build.ps1 -Release -Output bin/TekuTekuBeast-0.5.1-release.prg
+./scripts/build.ps1 -Export -Typecheck 0 -Output bin/TekuTekuBeast-0.5.1.iq
 ```
 
 Internal unit/layout/Glance harnesses have isolated QA IDs and in-memory saves.
 Never upload those QA binaries. The production app contains the actual
 Developer Mode; no second user-facing app is required. See
-[v0.5 validation](V0_5_VALIDATION.md) for executed tests and hardware limitations.
+[v0.5.1 validation](V0_5_1_VALIDATION.md) for executed tests and hardware limitations.
+
+The normal build explicitly uses gradual type checking (`-Typecheck 1`). The
+large all-profile runtime matrix/export may use `-Typecheck 0` to avoid repeating
+the same slow common-code inference per hardware part; it still uses Garmin's
+actual compiler/linker and executes every profile's tests/rendering. A separate
+gradual-checked production build is required in the release record. Historical
+v0.4/v0.5 evidence is not overwritten or renamed to the new version.
+
+Landscape assets are prepared at build time, never on the watch:
+
+```powershell
+python scripts/verify_v051_art.py
+python scripts/prepare_v051_world.py
+python scripts/check_project.py
+```
+
+Only `TekuTekuBeast-0.5.1.iq` from the production manifest is a Store upload.
+Do not upload SDK QA programs or the `.prg`. Update the existing beta at the
+[developer dashboard](https://apps-developer.garmin.com/developer/dashboard),
+not a new app listing. Owner approval is required before submission; do not
+uninstall the existing watch installation.
 
 The native background stress fixture has a separate SDK-only application ID:
 
