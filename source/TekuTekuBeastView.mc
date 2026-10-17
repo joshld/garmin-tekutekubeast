@@ -43,9 +43,14 @@ class TekuTekuBeastView extends WatchUi.View {
         consumeEvolution();
         if(noticeTicks>0){noticeTicks=beast.max(0,noticeTicks-step);if(noticeTicks==0){notice=null;}}
         if(animationTicks>0){animationTicks=beast.max(0,animationTicks-step);if(animationTicks==0){animation="idle";}}
-        // Sleeping/reduced-motion idle only redraws once a second. No hidden timer.
+        // Redraw only changed visible state; no timer survives view hiding.
         var key=visualKey();
         if(lastVisual==null || !lastVisual.equals(key)){lastVisual=key;redrawRequests++;WatchUi.requestUpdate();}
+        tunePetTimer();
+    }
+    function tunePetTimer(){
+        // Navigation must leave the 5s still-screen cadence immediately. Never
+        // create/restart a hidden view's timer; lifecycle remains onShow/onHide.
         var wanted=desiredPeriod();if(refresher!=null && wanted!=timerPeriod){timerPeriod=wanted;refresher.stop();refresher.start(method(:refresh),timerPeriod,true);}
     }
     function desiredPeriod(){
@@ -221,7 +226,7 @@ class TekuTekuBeastView extends WatchUi.View {
     function switchPage(delta){
         if(menu!=null){selection=(selection+delta+rows.size())%rows.size();}
         else{page=(page+delta+3)%3;notice=null;}
-        WatchUi.requestUpdate();
+        tunePetTimer();WatchUi.requestUpdate();
     }
     function touch(point){selectAction();}
     function back(){
@@ -233,9 +238,9 @@ class TekuTekuBeastView extends WatchUi.View {
             if(menu.equals("Bedtime") || menu.equals("Feedback test")){openMenu("Settings");return true;}
             if(menu.equals("Actions")){menu=null;}else if(menu.equals("Settings") || menu.equals("Feed") || menu.equals("Play") || menu.equals("Collection")){openMenu("Actions");}
             else if(menu.equals("Dev Tools")){openMenu("Actions");}else{openMenu(beast.dev?"Dev Tools":"Actions");}
-            WatchUi.requestUpdate();return true;
+            tunePetTimer();WatchUi.requestUpdate();return true;
         }
-        if(page!=0){page=0;WatchUi.requestUpdate();return true;}return false;
+        if(page!=0){page=0;tunePetTimer();WatchUi.requestUpdate();return true;}return false;
     }
     function safeTextWidth(dc,y,font){
         var radius=dc.getWidth()/2-8;var c=dc.getHeight()/2;

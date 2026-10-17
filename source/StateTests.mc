@@ -287,7 +287,14 @@ function foregroundEvolutionTest(logger){
 function foregroundTimerLifecycleTest(logger){
     var app=Toybox.Application.getApp();var prior=app.activeView;
     var view=new TekuTekuBeastView();view.beast=TestSupport.fixture();view.onShow();
-    var started=view.refresher!=null;app.onInactive(null);var inactiveStopped=view.refresher==null;
+    var started=view.refresher!=null;
+    view.beast.data["stageFloor"]=1;view.beast.data["motion"]=2;view.beast.data["energy"]=80;view.beast.data["sleepMode"]=2;
+    view.tick=0;view.switchPage(1);Test.assertEqual(view.timerPeriod,5000);
+    view.back();Test.assertEqual(view.timerPeriod,250);
+    view.openMenu("Actions");view.tunePetTimer();Test.assertEqual(view.timerPeriod,5000);
+    view.back();Test.assertEqual(view.timerPeriod,250);
+    app.onInactive(null);var inactiveStopped=view.refresher==null;
+    view.switchPage(1);view.back();Test.assert(view.refresher==null);
     app.onActive(null);var resumed=view.refresher!=null;view.onHide();
     var game=new BeastGameView(view.beast,0);game.onShow();game.onHide();
     var reconciler=new TekuTekuBeastState();reconciler.store=view.beast.store;
