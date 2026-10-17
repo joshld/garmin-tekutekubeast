@@ -55,12 +55,22 @@ module BeastSky {
         return result;
     }
     function clamp(v){return max(0.0,min(1.0,v));}
+    function chooseDay(now,days){
+        // The selected/cached location may be in a different zone from the
+        // watch (travel, retained fix, or manual coordinates). Choose absolute
+        // events bracketing NOW, not blindly the middle calendar-date tuple.
+        if(days[1][2]!=0){return 1;}
+        for(var i=0;i<3;i++){if(days[i][2]==0 && now>=days[i][0] && now<days[i][1]){return i;}}
+        for(var i=0;i<3;i++){if(days[i][2]==0 && now<days[i][0]){return i;}}return 2;
+    }
     // phase: 0 dawn, 1 day, 2 dusk, 3 night. Moon is decorative night progress.
     function sample(now,events,previous,next){
         if(events[2]!=0){return [events[2]==1?1:3,0.5,events[2]==1];}
         var rise=events[0];var set=events[1];var daylight=now>=rise && now<set;
         var phase=daylight?1:3;
-        if(abs(now-rise)<1800){phase=0;}else if(abs(now-set)<1800){phase=2;}
+        var nearRise=!daylight && now>=set && next[2]==0?next[0]:rise;
+        var nearSet=!daylight && now<rise && previous[2]==0?previous[1]:set;
+        if(abs(now-nearRise)<1800){phase=0;}else if(abs(now-nearSet)<1800){phase=2;}
         var fraction=0.5;
         if(daylight){fraction=clamp((now-rise)/(set-rise).toFloat());}
         else if(now<rise){var last=previous[2]==0?previous[1]:rise-43200;fraction=clamp((now-last)/(rise-last).toFloat());}

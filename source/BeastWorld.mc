@@ -9,7 +9,7 @@ using Toybox.Weather;
 // location payload in the strictly budgeted background or native Glance VM.
 class BeastWorld {
     var prefs;var persisted=null;var store;var dev=false;var theme=-1;var checked=0l;
-    var cacheKey=null;var days=null;var sample=[1,0.5,true];var minute=-1l;
+    var cacheKey=null;var days=null;var sample=[1,0.5,true];var minute=-1l;var activeDay=1;
     var source="FIXED 06-18";var preview=-1;var computations=0;
     function initialize(beast){
         store=beast.store;dev=beast.dev;var saved=store.read("world.v1");
@@ -80,12 +80,14 @@ class BeastWorld {
                 days=[[local-86400+21600,local-86400+64800,0],[local+21600,local+64800,0],[local+86400+21600,local+86400+64800,0]];
             }
         }
-        sample=BeastSky.sample(now,days[1],days[0],days[2]);return sample;
+        activeDay=BeastSky.chooseDay(now,days);
+        var previous=activeDay>0?days[activeDay-1]:[0l,0l,-1];var next=activeDay<2?days[activeDay+1]:[0l,0l,1];
+        sample=BeastSky.sample(now,days[activeDay],previous,next);return sample;
     }
     function eventText(index){
-        if(days==null){return "--:--";}if(days[1][2]!=0){return days[1][2]==1?"POLAR DAY":"POLAR NIGHT";}
-        var t=Gregorian.info(new Time.Moment(days[1][index].toNumber()),Time.FORMAT_SHORT);return t.hour.format("%02d")+":"+t.min.format("%02d");
+        if(days==null){return "--:--";}if(days[activeDay][2]!=0){return days[activeDay][2]==1?"POLAR DAY":"POLAR NIGHT";}
+        var t=Gregorian.info(new Time.Moment(days[activeDay][index].toNumber()),Time.FORMAT_SHORT);return t.hour.format("%02d")+":"+t.min.format("%02d");
     }
-    function engine(){return days!=null && days[1].size()>3 && days[1][3]==1?"GARMIN SOLAR API":"LOCAL SOLAR / FALLBACK";}
+    function engine(){return days!=null && days[activeDay].size()>3 && days[activeDay][3]==1?"GARMIN SOLAR API":"LOCAL SOLAR / FALLBACK";}
     function fixAge(now){return prefs["at"]>0?"FIX AGE: "+BeastSky.max(0,((now-prefs["at"])/86400).toNumber())+" DAYS":"FIX TIME UNKNOWN";}
 }

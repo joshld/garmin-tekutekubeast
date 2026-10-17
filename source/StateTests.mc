@@ -23,6 +23,20 @@ function solarSeasonsTest(logger){
     var leap=BeastSky.calculate(BeastSky.midnight(2028,2,29),0.0,179.9);Test.assert(leap[1]>leap[0]);return true;
 }
 (:test)
+function v051TimeZoneSolarBracketTest(logger){
+    var date=BeastSky.midnight(2026,1,1);var days=[];
+    for(var i=-1;i<=1;i++){days.add(BeastSky.calculate(date+i*86400,0.0,179.9));}
+    var now=date+20*3600;var index=BeastSky.chooseDay(now,days);Test.assertEqual(index,2);
+    Test.assert(BeastSky.sample(now,days[index],days[index-1],[0l,0l,1])[2]);
+    days=[];for(var i=-1;i<=1;i++){days.add(BeastSky.calculate(date+i*86400,0.0,0.0));}
+    now=days[1][1]+300;index=BeastSky.chooseDay(now,days);Test.assertEqual(index,2);
+    Test.assertEqual(BeastSky.sample(now,days[index],days[index-1],[0l,0l,1])[0],2);
+    now=days[2][0]-300;Test.assertEqual(BeastSky.sample(now,days[2],days[1],[0l,0l,1])[0],0);
+    days=[];for(var i=-1;i<=1;i++){days.add(BeastSky.calculate(date+i*86400,0.0,-179.9));}
+    now=date-86400+12*3600;index=BeastSky.chooseDay(now,days);Test.assertEqual(index,0);
+    Test.assert(!BeastSky.sample(now,days[0],[0l,0l,-1],days[1])[2]);return true;
+}
+(:test)
 function skyCycleAndSleepTest(logger){
     var s=TestSupport.fixture();var before=s.store.copy(s.data);var now=s.realNow();
     var w=new BeastWorld(s);w.update(now,false);Test.assertEqual(w.source,"FIXED 06-18");
