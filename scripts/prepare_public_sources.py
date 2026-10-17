@@ -1,6 +1,8 @@
 """Fail-closed build-time removal of owner tools; canonical personal source stays intact."""
 import argparse
+import json
 import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -76,6 +78,17 @@ def main():
     args = p.parse_args()
     out = ROOT/'bin/public-build'
     out.mkdir(parents=True, exist_ok=True)
+    identities = json.loads((ROOT/'config/build-identities.json').read_text())
+    ns = '{http://www.garmin.com/xml/connectiq}'
+    ET.register_namespace('iq', ns[1:-1])
+    manifest = ET.parse(ROOT/'manifest.xml')
+    app = manifest.getroot().find(ns+'application')
+    if app.get('id') != identities['developerBeta'] or identities['public'] == identities['developerBeta']:
+        raise ValueError('Developer Beta identity changed or public identity is not separate')
+    app.set('id', identities['public'])
+    ET.indent(manifest, space='  ')
+    public_manifest = out/'manifest-public.xml'
+    manifest.write(public_manifest, encoding='unicode')
     for folder in ['source', 'legacy-source']:
         destination = out/folder
         destination.mkdir(exist_ok=True)
@@ -103,11 +116,14 @@ def main():
                     resolved = (jungle.parent/relative).resolve()
                     if resolved == ROOT/'source': resolved = out/'source'
                     if resolved == ROOT/'bin/legacy-source': resolved = out/'legacy-source'
+                    if resolved == ROOT/'manifest.xml': resolved = public_manifest
                     paths.append(resolved.as_posix())
                 line = key + '= ' + ';'.join(paths)
         lines.append(line)
     (out/'monkey.jungle').write_text('\n'.join(lines)+'\n')
     print('PUBLIC_INPUT: owner menus, mutations, accelerated clock and sky previews absent')
+    if (ROOT/args.jungle).resolve() == ROOT/'monkey.jungle':
+        print(f'PUBLIC_IDENTITY: {identities["public"]}; Developer Beta unchanged')
 
 
 if __name__ == '__main__':

@@ -1,5 +1,10 @@
 # v0.5.2 public beta release verification
 
+**Historical same-UUID candidate. Do not use `TekuTekuBeast-0.5.2.iq` for a new
+public listing.** The subsequent owner-approved identity separation and correct
+`TekuTekuBeast-Public-0.5.2.iq` are recorded in [PUBLIC_RELEASE_0_5_2.md](PUBLIC_RELEASE_0_5_2.md).
+The earlier results/hashes below are retained as provenance, not current identity instructions.
+
 Release preparation for issues #9 and #18, 17 October 2026. No Garmin upload,
 publication, listing conversion or physical-watch installation was performed.
 The v0.4/v0.5/v0.5.1 verification records are retained unchanged.

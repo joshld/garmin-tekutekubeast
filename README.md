@@ -6,7 +6,7 @@ internet connection, exercise requirement, death or recovery-day punishment.
 
 **v0.5.2 public beta release preparation:** 47 supported SDK profiles, including
 standard Fenix 6S Pro. Public builds exclude Developer Mode; personal builds use
-`-Owner`. See [release verification](docs/RELEASE_0_5_2_VERIFICATION.md),
+`-Owner`. See [public identity and release verification](docs/PUBLIC_RELEASE_0_5_2.md),
 [compatibility evidence](docs/COMPATIBILITY_EXPANSION.md) and
 [Fenix 6S Pro installation](docs/INSTALL_FENIX_6S_PRO.md).
 
@@ -64,9 +64,10 @@ See [evolution rules](docs/EVOLUTION_DESIGN.md) for the actual implemented tree.
 ## Developer Mode - personal builds only
 
 Build explicitly with `-Owner` to retain these tools on the personal Enduro 4.
-Public `.iq` exports exclude them at compilation. Public and personal packages
-update the same installed app; a public update removes DEV until the personal
-program is installed again, without uninstalling or changing the app ID.
+Public `.iq` exports exclude them at compilation and now use a separate public
+UUID. The existing Developer Beta keeps its original UUID and pet; both apps
+can coexist with separate saves. Public starts a new pet, with no automatic
+copy or migration of the developer pet. See the current identity record above.
 
 Personal build: Actions > Settings > Developer > Enable temporary test. The normal screens
 remain, with a small DEV indicator and Dev Tools:
@@ -144,7 +145,7 @@ local and out of Git. With the SDK simulator open:
 ./scripts/run-simulator.ps1 -Tests -Program bin/v052-owner-tests.prg
 ./scripts/unit-matrix.ps1 -Devices enduro4 -EvidencePrefix v052-owner
 ./scripts/build.ps1 -Release -Output bin/v052-public-release.prg
-./scripts/build.ps1 -Export -Output bin/TekuTekuBeast-0.5.2.iq
+./scripts/build.ps1 -Export -Output bin/TekuTekuBeast-Public-0.5.2.iq
 ```
 
 `scripts/check_project.py` is structural preflight, not a compiler. The internal

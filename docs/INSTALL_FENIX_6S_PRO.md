@@ -18,15 +18,17 @@ use an update of that existing installation once the owner approves publication.
 2. Open the watch in File Explorer and find its `GARMIN/APPS` folder. If the
    folder isn't exposed, check the watch's USB/MTP mode or use Garmin's normal
    USB support; do not format/reset the watch.
-3. Copy only the verified signed **TekuTekuBeast-0.5.2-fenix6spro.prg** into
+3. Copy only the verified signed **TekuTekuBeast-Public-0.5.2-fenix6spro.prg** into
    `GARMIN/APPS`. Do not copy the `.iq`, QA programs or signing key.
 4. Safely disconnect. On the watch press START and find TekuTekuBeast in the
    activity/app list; add it to favourites if desired.
 5. Open once to establish the starting step baseline. Existing steps before
    that first open are not retroactively turned into XP for a brand-new beast.
 
-After Store approval, the signed `.iq` updates the existing TekuTekuBeast listing.
-Do not upload this candidate as a new app or publish it without owner approval.
+The separate-UUID public `.iq` is intended for a new public listing; it does not
+update the existing Developer Beta. See `PUBLIC_RELEASE_0_5_2.md`. If the older
+same-UUID candidate was installed, its saved pet stays in that older app; the new
+public app starts a separate pet. Do not uninstall expecting progress to transfer.
 Do not mix a USB copy and Store copy or uninstall to switch methods if there is
 progress to retain; ask for a safe transition check first.
 

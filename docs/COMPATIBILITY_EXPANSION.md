@@ -3,6 +3,10 @@
 Current work record, 17 October 2026. v0.5.1 is complete and its evidence is
 retained unchanged. No Store publication is authorised.
 
+The later owner-approved public/Developer Beta UUID split is recorded in
+[PUBLIC_RELEASE_0_5_2.md](PUBLIC_RELEASE_0_5_2.md). The validated 47-profile set,
+gameplay, resources and compatibility evidence below remain unchanged.
+
 ## Scope and architecture
 
 Primary target: standard Fenix 6S Pro (`fenix6spro`). Garmin uses that same SDK

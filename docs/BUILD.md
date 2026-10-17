@@ -9,7 +9,7 @@ public exclusions. Never use that direct route to prepare a Store upload.
 
 ```powershell
 # Public signed Store package (all advertised hardware parts)
-& scripts/build.ps1 -Export -Release -Output bin/TekuTekuBeast-0.5.2.iq
+& scripts/build.ps1 -Export -Release -Output bin/TekuTekuBeast-Public-0.5.2.iq
 # Personal signed Enduro 4 program with Developer Mode
 & scripts/build.ps1 -Owner -Release -Device enduro4 -Output bin/TekuTekuBeast-0.5.2-owner-enduro4.prg
 # Focused public unit checks; isolated QA identity, RAM-only fixture
@@ -25,11 +25,14 @@ remain required. Level 1 did not finish in the prior focused build window.
 Legacy resource/scope generation runs automatically for exports and constrained
 profiles. Public source generation fails on changed exclusion boundaries.
 
-Public and personal programs retain the same production ID and signing key.
-They update the same installation. A Store update replaces an owner program and
-removes DEV; reinstall the signed personal program as an update to regain it.
-Do not uninstall or introduce a second ID to switch builds. Physical-watch
-switching/save acceptance remains an owner check; no automatic watch install runs.
+Public and personal programs share the original signing key but now have
+different, fixed UUIDs in `config/build-identities.json`. The root manifest is
+the unchanged Developer Beta. Public compilation derives a generated manifest
+with the public UUID and the exact same 47 supported profiles. QA manifests
+retain their isolated test IDs. See [current identity verification](PUBLIC_RELEASE_0_5_2.md).
+The public app starts a separate pet. Keep the existing Developer Beta installed
+to preserve its pet and DEV tools; there is no automatic cross-app migration.
+Physical dual-install acceptance remains an owner check; no watch install runs.
 
 This is a native Garmin Connect IQ **watch app**, primarily tested on **Enduro 4**.
 See [v0.5.1 validation](V0_5_1_VALIDATION.md) for current work and accepted profiles;

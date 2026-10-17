@@ -3,6 +3,7 @@ $ErrorActionPreference='Stop'
 $project=Split-Path $PSScriptRoot -Parent
 if($Export -and $Owner){throw 'Store exports cannot include Developer Mode. Use a signed -Owner program for personal use.'}
 if($Export -and ($Tests -or $Jungle -ne 'monkey.jungle')){throw 'Store exports must use the production manifest and cannot include QA tests.'}
+if($Export -and (Split-Path $Output -Leaf) -ne 'TekuTekuBeast-Public-0.5.2.iq'){throw 'Use the distinct public package filename: TekuTekuBeast-Public-0.5.2.iq'}
 $sdk=(Get-Content -LiteralPath "$env:APPDATA\Garmin\ConnectIQ\current-sdk.cfg" -Raw).Trim()
 $java=(Get-Command java -ErrorAction SilentlyContinue).Source
 if (!$java) {$java='C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot\bin\java.exe'}
