@@ -106,7 +106,12 @@ class TekuTekuBeastState {
     function commit(){if(!dev){
         data["cachedName"]=speciesName();data["cachedMood"]=mood();data["cachedProgress"]=progress();
         var s=stage();data["cachedSprite"]=s<3?s:3+(family()-1)*3+s-3;
-        if(store.changed(data)){store.write("v4",store.copy(data));}}}
+        if(store.changed(data)){store.write("v4",store.copy(data));}
+        // Never load the large inventory/history/session document in a 32KB
+        // Glance VM. This optional read-only cache does not own pet progress.
+        var summary={};var fields=["cachedName","cachedProgress","cachedSprite","poop","energy","fullness","happiness","friendship","lastCare","sleepMode","nextBed","nextWake","scheduleAt","watchBed","watchWake","bedMinute","wakeMinute","sleepUntil"];
+        for(var i=0;i<fields.size();i++){summary[fields[i]]=data[fields[i]];}
+        store.writeGlance(summary);}}
     function xp(){return number("xp");} // genuine lifetime watch steps ONLY
     function growth(){return number("baseGrowth")+number("careGrowth")+number("activityBonus")+max(0l,xp()-number("petXpBaseline"));}
     function ageDays(){return (max(0l,now()-number("birthEpoch"))/86400).toNumber();}

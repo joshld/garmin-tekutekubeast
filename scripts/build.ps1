@@ -6,6 +6,13 @@ $java=(Get-Command java -ErrorAction SilentlyContinue).Source
 if (!$java) {$java='C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot\bin\java.exe'}
 $temp=Join-Path $project 'bin/build-temp'
 New-Item -ItemType Directory -Force -Path $temp | Out-Null
+if($Export -or (Select-String -LiteralPath "$project/monkey.jungle" -SimpleMatch "$Device.sourcePath = bin/legacy-source" -Quiet)){
+    $python="$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
+    if(!(Test-Path $python)){$python=(Get-Command python -ErrorAction Stop).Source}
+    & $python "$PSScriptRoot/prepare_legacy_resources.py"
+    & $python "$PSScriptRoot/prepare_legacy_sources.py"
+    if($LASTEXITCODE -ne 0){throw 'Cannot prepare constrained-device scope variant'}
+}
 $arguments=@('-Xms512m','-Dfile.encoding=UTF-8',"-Djava.io.tmpdir=$temp",'-cp',"$sdk\bin\monkeybrains.jar",'com.garmin.monkeybrains.Monkeybrains','-f',(Join-Path $project $Jungle),'-o',(Join-Path $project $Output),'-y',(Join-Path $project 'developer_key'))
 # Explicit gradual type checking as well as the compiler/linker and SDK tests.
 if($Typecheck -ge 0){$arguments+=@('-l',$Typecheck.ToString())}

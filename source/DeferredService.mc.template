@@ -1,0 +1,17 @@
+using Toybox.Background;
+using Toybox.System;
+
+// Only compiled for deferred profiles; never reads or writes a pet save.
+(:background)
+class TekuTekuBeastService extends System.ServiceDelegate {
+    function initialize(){ServiceDelegate.initialize();}
+    function cleanup(){
+        BeastCompatibility.clearCallbacks();
+        var stats=System.getSystemStats();
+        System.println("BACKGROUND_DEFERRED: used="+stats.usedMemory+" total="+stats.totalMemory);
+        Background.exit(null);
+    }
+    function onSteps(){cleanup();}
+    function onSleepTime(){cleanup();}
+    function onWakeTime(){cleanup();}
+}

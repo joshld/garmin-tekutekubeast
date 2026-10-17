@@ -15,6 +15,7 @@ class TekuTekuBeastApp extends Application.AppBase {
     }
     function getGlanceView() { return [new TekuTekuBeastGlanceView()]; }
     function registerSteps() {
+        if(BeastCompatibility.deferred()){BeastCompatibility.clearCallbacks();return;}
         if (!Background.getStepsEventRegistered()) {
             Background.registerForStepsEvent();
         }

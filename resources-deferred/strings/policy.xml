@@ -1,0 +1,3 @@
+<resources>
+    <string id="DeferredActivity" scope="background">1</string>
+</resources>

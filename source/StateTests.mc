@@ -2,6 +2,24 @@ using Toybox.Test;
 using Toybox.Lang;
 
 (:test)
+function compactGlanceAndDeferredCatchupTest(logger){
+    var s=TestSupport.fixture();s.observe(s.today(),3000);s.data["friendship"]=71;
+    s.data["items"][7]=9;s.beginSession(1);s.commit();
+    var cache=s.store.read("glance.v1");Test.assert(cache!=null);
+    Test.assert(!cache.hasKey("days"));Test.assert(!cache.hasKey("sessions"));
+    Test.assertEqual(cache["friendship"],71);
+    var xp=s.xp();var serial=s.number("gameSerial");s.testNow+=26*86400;
+    s.syncHistory();Test.assertEqual(s.xp(),xp);Test.assertEqual(s.stage(),5);
+    Test.assertEqual(s.number("evolutionPending"),1);Test.assertEqual(s.data["items"][7],9);
+    Test.assertEqual(s.number("gameSerial"),serial);s.data["evolutionPending"]=0;s.commit();
+    var reload=new TekuTekuBeastState();reload.store=s.store;reload.skipWatch=true;reload.testNow=s.testNow;
+    reload.syncHistory();Test.assertEqual(reload.number("evolutionPending"),0);
+    Test.assertEqual(reload.friendship(),71);Test.assertEqual(reload.xp(),xp);
+    var before=reload.store.writes;reload.commit();Test.assertEqual(reload.store.writes,before);
+    return true;
+}
+
+(:test)
 function solarSeasonsTest(logger){
     var june=BeastSky.midnight(2026,6,21);var december=BeastSky.midnight(2026,12,21);
     // Broad 10-minute envelopes for NOAA approximation vs published civil
@@ -115,7 +133,8 @@ function v051DirtySaveAndDuplicateStepTest(logger){
     Test.assertEqual(s.store.writes,0);Test.assert(s.store.skipped>=100);Test.assertEqual(s.xp(),3000l);
     Test.assert(!s.stepNoop(3001,null,null));s.data["minutesBase"]=0;Test.assert(!s.stepNoop(3000,20,null));
     s.data["pushBase"]=0;Test.assert(!s.stepNoop(3000,null,1000));
-    s.data["friendship"]++;s.commit();Test.assertEqual(s.store.writes,1);s.commit();Test.assertEqual(s.store.writes,1);
+    // One canonical write plus its tiny read-only Glance cache, then no-op.
+    s.data["friendship"]++;s.commit();Test.assertEqual(s.store.writes,2);s.commit();Test.assertEqual(s.store.writes,2);
     s.data["poopDue"]=s.now();Test.assert(!s.stepNoop(3000,null,null));s.data["poopDue"]=0l;
     s.testNow+=61;Test.assert(!s.stepNoop(3000,null,null));s.syncToday();
     var after=s.xp();s.observe(s.today(),3001);s.commit();Test.assertEqual(s.xp(),after+1);

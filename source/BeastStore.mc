@@ -5,6 +5,7 @@ using Toybox.Lang;
 class BeastStore {
     var memory = null;
     var canonical=null;var reads=0;var writes=0;var skipped=0;
+    var glanceBaseline=null;var glanceLoaded=false;
     function initialize() {}
     function read(key) {
         reads++;var value=memory!=null?(memory.hasKey(key)?memory[key]:null):Storage.getValue(key);
@@ -23,6 +24,11 @@ class BeastStore {
         if(a instanceof Lang.String){return b instanceof Lang.String && a.equals(b);}return a==b;
     }
     function changed(value){if(same(canonical,value)){skipped++;return false;}return true;}
+    function writeGlance(value){
+        if(!glanceLoaded){glanceBaseline=read("glance.v1");glanceLoaded=true;}
+        if(same(glanceBaseline,value)){skipped++;return;}
+        write("glance.v1",value);glanceBaseline=value;
+    }
     function copy(value) {
         if(value instanceof Lang.Dictionary){
             var result={};var keys=value.keys();

@@ -5,7 +5,7 @@ class BeastArt {
     function petFrames(stage,family){
         if(stage==0){var egg=WatchUi.loadResource(Rez.Drawables.V5Egg0);return [egg,egg,egg,egg,egg,egg,egg,egg];}
         var ids=[
-            [Rez.Drawables.V5Egg0,Rez.Drawables.V5Egg1,Rez.Drawables.V5Egg2,Rez.Drawables.V5Egg3,Rez.Drawables.V5Egg4,Rez.Drawables.V5Egg5,Rez.Drawables.V5Egg0Left,Rez.Drawables.V5Egg1Left],
+            [Rez.Drawables.V5Egg0,Rez.Drawables.V5Egg0,Rez.Drawables.V5Egg0,Rez.Drawables.V5Egg0,Rez.Drawables.V5Egg0,Rez.Drawables.V5Egg0,Rez.Drawables.V5Egg0,Rez.Drawables.V5Egg0Left],
             [Rez.Drawables.V5Pip0,Rez.Drawables.V5Pip1,Rez.Drawables.V5Pip2,Rez.Drawables.V5Pip3,Rez.Drawables.V5Pip4,Rez.Drawables.V5Pip5,Rez.Drawables.V5Pip0Left,Rez.Drawables.V5Pip1Left],
             [Rez.Drawables.V5Nimble0,Rez.Drawables.V5Nimble1,Rez.Drawables.V5Nimble2,Rez.Drawables.V5Nimble3,Rez.Drawables.V5Nimble4,Rez.Drawables.V5Nimble5,Rez.Drawables.V5Nimble0Left,Rez.Drawables.V5Nimble1Left],
             [Rez.Drawables.V5Grove30,Rez.Drawables.V5Grove31,Rez.Drawables.V5Grove32,Rez.Drawables.V5Grove33,Rez.Drawables.V5Grove34,Rez.Drawables.V5Grove35,Rez.Drawables.V5Grove30Left,Rez.Drawables.V5Grove31Left],
@@ -26,7 +26,7 @@ class BeastArt {
     function index(stage,family){return stage<3?stage:3+(family-1)*3+stage-3;}
     function frames(stage,family){
         if(stage==0){var egg=WatchUi.loadResource(Rez.Drawables.V5GameEgg0);return [egg,egg,egg,egg,egg,egg];}
-        var ids=[[Rez.Drawables.V5GameEgg0,Rez.Drawables.V5GameEgg1,Rez.Drawables.V5GameEgg2,Rez.Drawables.V5GameEgg3,Rez.Drawables.V5GameEgg4,Rez.Drawables.V5GameEgg5],
+        var ids=[[Rez.Drawables.V5GameEgg0,Rez.Drawables.V5GameEgg0,Rez.Drawables.V5GameEgg0,Rez.Drawables.V5GameEgg0,Rez.Drawables.V5GameEgg0,Rez.Drawables.V5GameEgg0],
             [Rez.Drawables.V5GamePip0,Rez.Drawables.V5GamePip1,Rez.Drawables.V5GamePip2,Rez.Drawables.V5GamePip3,Rez.Drawables.V5GamePip4,Rez.Drawables.V5GamePip5],
             [Rez.Drawables.V5GameNimble0,Rez.Drawables.V5GameNimble1,Rez.Drawables.V5GameNimble2,Rez.Drawables.V5GameNimble3,Rez.Drawables.V5GameNimble4,Rez.Drawables.V5GameNimble5],
             [Rez.Drawables.V5GameGrove30,Rez.Drawables.V5GameGrove31,Rez.Drawables.V5GameGrove32,Rez.Drawables.V5GameGrove33,Rez.Drawables.V5GameGrove34,Rez.Drawables.V5GameGrove35],

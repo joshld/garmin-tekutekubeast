@@ -27,7 +27,9 @@ class TekuTekuBeastGlanceView extends WatchUi.GlanceView {
             sprite=WatchUi.loadResource(ids[index]);cachedId=key;
         }
     }
-    function savedSummary(){return Storage.getValue("v4") as Lang.Dictionary or Null;}
+    // Missing cache after an upgrade means OPEN GAME, never a full-save load
+    // that can exhaust older devices before the foreground performs migration.
+    function savedSummary(){return Storage.getValue("glance.v1") as Lang.Dictionary or Null;}
     function onUpdate(dc){
         readSummary();
         dc.setColor(0xFFFFFF,0x000000);dc.clear();
