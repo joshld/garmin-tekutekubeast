@@ -1,0 +1,18 @@
+<resources>
+    <bitmap id="ForestDawn" filename="drawables/ForestDawn.png" dithering="none" />
+    <bitmap id="ForestDay" filename="drawables/ForestDay.png" dithering="none" />
+    <bitmap id="ForestDusk" filename="drawables/ForestDusk.png" dithering="none" />
+    <bitmap id="ForestNight" filename="drawables/ForestNight.png" dithering="none" />
+    <bitmap id="MeadowDawn" filename="drawables/MeadowDawn.png" dithering="none" />
+    <bitmap id="MeadowDay" filename="drawables/MeadowDay.png" dithering="none" />
+    <bitmap id="MeadowDusk" filename="drawables/MeadowDusk.png" dithering="none" />
+    <bitmap id="MeadowNight" filename="drawables/MeadowNight.png" dithering="none" />
+    <bitmap id="LakesideDawn" filename="drawables/LakesideDawn.png" dithering="none" />
+    <bitmap id="LakesideDay" filename="drawables/LakesideDay.png" dithering="none" />
+    <bitmap id="LakesideDusk" filename="drawables/LakesideDusk.png" dithering="none" />
+    <bitmap id="LakesideNight" filename="drawables/LakesideNight.png" dithering="none" />
+    <bitmap id="GardenDawn" filename="drawables/GardenDawn.png" dithering="none" />
+    <bitmap id="GardenDay" filename="drawables/GardenDay.png" dithering="none" />
+    <bitmap id="GardenDusk" filename="drawables/GardenDusk.png" dithering="none" />
+    <bitmap id="GardenNight" filename="drawables/GardenNight.png" dithering="none" />
+</resources>

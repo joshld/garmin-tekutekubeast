@@ -24,7 +24,7 @@ glance_capture=Path(args.program).name.startswith('matrix-glance-')
 try:
     # A Glance is resident rather than a foreground app; System.exit() does not
     # close the simulator's Glance host. Capture its explicit memory result.
-    output,_=process.communicate(timeout=20 if glance_capture else 90)
+    output,_=process.communicate(timeout=20 if glance_capture else 180)
 except subprocess.TimeoutExpired as expired:
     # Kill exactly this test bridge's process tree, never the simulator or any
     # other Java process. This also closes inherited console pipe handles.

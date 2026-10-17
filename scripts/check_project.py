@@ -96,7 +96,7 @@ for native_size in (144, 192):
             check(struct.unpack(">II", header[16:24]) == (native_size, native_size),
                   "Wrong native sprite size: " + resource_id)
 
-for directory, size in (("resources",128),("resources-pet144",144),("resources-native144",200),("resources-native192",232)):
+for directory, size in (("resources",96),("resources-pet144",96),("resources-native144",144),("resources-native192",192)):
     catalog = ROOT / directory / "drawables/drawables.xml"
     check(catalog.is_file(), "Missing v0.5 resource catalog: " + directory)
     if not catalog.is_file():
@@ -115,6 +115,21 @@ for directory, size in (("resources",128),("resources-pet144",144),("resources-n
             check(struct.unpack(">II",header[16:24]) == (expected,expected), "Wrong v0.5 bitmap size: " + resource_id)
             if resource_id.endswith("Small"):
                 check(bitmap.get("scope") == "glance", "Sleeping Glance sprite lacks glance scope")
+
+for size in (240,260,280,390,416,454):
+    catalog = ROOT / f"resources-world{size}/drawables.xml"
+    check(catalog.is_file(), f"Missing {size}px world catalog")
+    if catalog.is_file():
+        entries = list(ET.parse(catalog).getroot().iter("bitmap"))
+        check(len(entries) == 16, "Expected four themes x four palettes")
+        for bitmap in entries:
+            image = catalog.parent / bitmap.get("filename", "")
+            check(image.is_file(), "Missing landscape: " + str(image))
+            if image.is_file():
+                check(struct.unpack(">II", image.read_bytes()[16:24]) == (size,size), "Wrong native landscape dimensions")
+world = (SRC / "BeastWorld.mc").read_text(encoding="utf-8")
+check("enableLocationEvents(" not in world, "Scenery must not activate GPS")
+check('"Positioning"' in MANIFEST.read_text(encoding="utf-8"), "Missing cached-location permission")
 
 if errors:
     print("Preflight FAILED (structural checks only):")

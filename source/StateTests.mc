@@ -2,10 +2,130 @@ using Toybox.Test;
 using Toybox.Lang;
 
 (:test)
+function solarSeasonsTest(logger){
+    var june=BeastSky.midnight(2026,6,21);var december=BeastSky.midnight(2026,12,21);
+    // Broad 10-minute envelopes for NOAA approximation vs published civil
+    // sunrise tables; never assert second-level astronomical precision.
+    var london=BeastSky.calculate(june,51.5074,-0.1278);
+    Test.assert(BeastSky.abs(london[0]-(june+3*3600+43*60))<600);
+    Test.assert(BeastSky.abs(london[1]-(june+20*3600+21*60))<600);
+    var winter=BeastSky.calculate(december,51.5074,-0.1278);
+    Test.assert(BeastSky.abs(winter[0]-(december+8*3600+4*60))<600);
+    Test.assert(BeastSky.abs(winter[1]-(december+15*3600+54*60))<600);
+    var brisbane=BeastSky.calculate(december,-27.47,153.03);
+    Test.assert(BeastSky.abs(brisbane[0]-(december-5*3600-11*60))<600);
+    Test.assert(BeastSky.abs(brisbane[1]-(december+8*3600+42*60))<600);
+    var north=BeastSky.calculate(june,78.2,15.6);Test.assertEqual(north[2],1);
+    Test.assertEqual(BeastSky.calculate(december,78.2,15.6)[2],-1);
+    Test.assertEqual(BeastSky.calculate(june,-89.99,0.0)[2],-1);
+    Test.assertEqual(BeastSky.calculate(december,-89.99,0.0)[2],1);
+    Test.assert(BeastSky.valid(0,0));Test.assert(!BeastSky.valid(91,0));Test.assert(!BeastSky.valid(0,181));
+    var leap=BeastSky.calculate(BeastSky.midnight(2028,2,29),0.0,179.9);Test.assert(leap[1]>leap[0]);return true;
+}
+(:test)
+function skyCycleAndSleepTest(logger){
+    var s=TestSupport.fixture();var before=s.store.copy(s.data);var now=s.realNow();
+    var w=new BeastWorld(s);w.update(now,false);Test.assertEqual(w.source,"FIXED 06-18");
+    var count=w.computations;w.update(now+1,false);Test.assertEqual(w.computations,count);
+    Test.assert(w.accept(-27.47,153.03,now));Test.assert(!w.accept(95,0,now));
+    w.update(now,false);Test.assertEqual(w.source,"SAVED LOCATION");
+    var today=w.days[1];var dawn=BeastSky.sample(today[0],today,w.days[0],w.days[2]);Test.assertEqual(dawn[0],0);Test.assert(dawn[2]);
+    var noon=BeastSky.sample((today[0]+today[1])/2,today,w.days[0],w.days[2]);Test.assertEqual(noon[0],1);Test.assert(BeastSky.abs(noon[1]-0.5)<0.001);
+    Test.assertEqual(BeastSky.sample(today[1],today,w.days[0],w.days[2])[0],2);
+    var night=BeastSky.sample(today[1]+3600,today,w.days[0],w.days[2]);Test.assertEqual(night[0],3);Test.assert(!night[2]);
+    // Changing astronomical phase cannot modify any sleep flag or pet ledger.
+    Test.assertEqual(s.number("sleepMode"),before["sleepMode"]);Test.assertEqual(s.number("sleepUntil"),before["sleepUntil"]);
+    Test.assertEqual(s.xp(),before["xp"]);Test.assertEqual(s.number("baseGrowth"),before["baseGrowth"]);
+    var reopened=new BeastWorld(s);reopened.update(now,false);Test.assertEqual(reopened.days[1][0],today[0]);
+    var chosen=w.choose(1,0);Test.assertEqual(w.choose(4,5),chosen);w.setTheme(4);Test.assertEqual(w.choose(1,0),3);
+    var d=s.enableDev();var dw=new BeastWorld(d);dw.setTheme(2);dw.accept(40,-74,now);dw.preview=3;dw.update(now,false);
+    Test.assertEqual(dw.sample[0],3);var real=new BeastWorld(s);Test.assertEqual(real.prefs["environment"],4);Test.assertEqual(real.prefs["lat"],-27.47);
+    Test.assertEqual(s.store.read("v4")["xp"],before["xp"]);return true;
+}
+
+(:test)
 module TestSupport {
+    function same(a,b){
+        if(a instanceof Lang.Dictionary){if(!(b instanceof Lang.Dictionary) || a.size()!=b.size()){return false;}var keys=a.keys();for(var i=0;i<keys.size();i++){if(!b.hasKey(keys[i]) || !same(a[keys[i]],b[keys[i]])){return false;}}return true;}
+        if(a instanceof Lang.Array){if(!(b instanceof Lang.Array) || a.size()!=b.size()){return false;}for(var i=0;i<a.size();i++){if(!same(a[i],b[i])){return false;}}return true;}
+        return a==b;
+    }
     function fixture(){
         var s=new TekuTekuBeastState();s.store.memory={};s.skipWatch=true;s.testNow=1792108800l;s.start();return s;
     }
+}
+(:test)
+function v05WorldSaveAndDateTest(logger){
+    var s=TestSupport.fixture();s.observe(s.today(),123456);s.data["items"]=[2,3,4,5,6,7,8,9];s.data["collection"]=15;s.data["rareCollection"]=3;
+    s.data["friendship"]=71;s.data["snacks"]=12;s.commit();var before=s.store.copy(s.store.read("v4"));
+    var w=new BeastWorld(s);w.setTheme(3);w.accept(51.5,-0.1,s.realNow());w.update(s.realNow(),false);
+    w.update(s.realNow()+86400,false);Test.assertEqual(w.computations,2);
+    Test.assert(TestSupport.same(before,s.store.read("v4")));
+    var reload=new TekuTekuBeastState();reload.store=s.store;reload.skipWatch=true;reload.testNow=s.testNow;reload.start();
+    Test.assert(TestSupport.same(before,reload.data));
+    var d=s.enableDev();var devBefore=s.store.copy(s.store.read("v4"));var dw=new BeastWorld(d);var prefs=s.store.copy(s.store.read("world.v1"));
+    dw.prefs["locationMode"]=2;dw.prefs["manualSet"]=1;dw.prefs["manualLat"]=-40.0;dw.update(s.realNow(),false);dw.save();
+    Test.assert(TestSupport.same(prefs,s.store.read("world.v1")));
+    // Enabling DEV reconciles real elapsed care/growth first, as in v0.5.
+    // Only changes made AFTER that boundary must leave this snapshot identical.
+    Test.assert(TestSupport.same(devBefore,s.store.read("v4")));
+    s.data["sleepMode"]=2;s.data["sleepUntil"]=0l;var asleep=s.isSleeping();
+    w.update(s.realNow()+43200,false);Test.assertEqual(s.isSleeping(),asleep);
+    return true;
+}
+(:test)
+function v051MemoryAndStarTimingTest(logger){
+    var s=TestSupport.fixture();var m=new BeastGameView(s,1);m.begin();m.sequence=[0,0,2];
+    m.elapsed=m.tempo()-1;Test.assertEqual(m.displayedMove(),0);m.elapsed=m.tempo();Test.assertEqual(m.displayedMove(),-1);
+    m.elapsed=m.tempo()+m.cueGap();Test.assertEqual(m.displayedMove(),0);
+    m.elapsed=2*(m.tempo()+m.cueGap())-1;Test.assertEqual(m.displayedMove(),-1);
+    m.checkpoint();var old=s.store.copy(m.session);old.remove("timingV051");old["elapsed"]=6;
+    var resumed=new BeastGameView(s,1);resumed.restore(old);Test.assertEqual(resumed.elapsed,7);Test.assertEqual(resumed.sequence[0],0);
+    var star=new BeastGameView(s,0);Test.assertEqual(star.period(),16);star.round=1;Test.assertEqual(star.period(),12);
+    star.round=2;Test.assertEqual(star.period(),9);Test.assertEqual(star.jumpDuration(),5);
+    star.begin();star.elapsed=10;star.hits=2;star.checkpoint();var prior=s.store.copy(star.session);prior.remove("timingV051");
+    var again=new BeastGameView(s,0);again.restore(prior);Test.assertEqual(again.elapsed,8);Test.assertEqual(again.hits,2);Test.assertEqual(again.session["id"],prior["id"]);
+    s.data["easy"]=1;star.round=0;Test.assertEqual(star.period(),24);star.round=1;Test.assertEqual(star.period(),20);star.round=2;Test.assertEqual(star.period(),16);
+    Test.assertEqual(m.tempo(),8);Test.assertEqual(m.cueGap(),1);Test.assertEqual(s.xp(),0l);return true;
+}
+(:test)
+function v051DirtySaveAndDuplicateStepTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;s.observe(s.today(),3000);s.activityRewards(s.today(),3000,null,null);s.commit();
+    s.store.writes=0;s.store.skipped=0;
+    for(var i=0;i<100;i++){s.commit();Test.assert(s.stepNoop(3000,null,null));}
+    Test.assertEqual(s.store.writes,0);Test.assert(s.store.skipped>=100);Test.assertEqual(s.xp(),3000l);
+    Test.assert(!s.stepNoop(3001,null,null));s.data["minutesBase"]=0;Test.assert(!s.stepNoop(3000,20,null));
+    s.data["pushBase"]=0;Test.assert(!s.stepNoop(3000,null,1000));
+    s.data["friendship"]++;s.commit();Test.assertEqual(s.store.writes,1);s.commit();Test.assertEqual(s.store.writes,1);
+    s.data["poopDue"]=s.now();Test.assert(!s.stepNoop(3000,null,null));s.data["poopDue"]=0l;
+    s.testNow+=61;Test.assert(!s.stepNoop(3000,null,null));s.syncToday();
+    var after=s.xp();s.observe(s.today(),3001);s.commit();Test.assertEqual(s.xp(),after+1);
+    logger.debug("BATTERY_AUDIT: 100 identical commits -> 0 writes; duplicate-step preflight=100/100; new step persisted");return true;
+}
+(:test)
+function v051RoamingBoundsTest(logger){
+    var v=new TekuTekuBeastView();v.beast=TestSupport.fixture();var profiles=[[240,96],[260,96],[280,96],[390,144],[416,144],[454,192]];
+    for(var p=0;p<profiles.size();p++){
+        var width=profiles[p][0];var size=profiles[p][1];var minX=10000;var maxX=0;var minY=10000;var maxY=0;var radius=width/2-8;
+        for(var i=0;i<v.roamX.size();i++){
+            v.positionCreature(width,width,size,width*(0.5+v.roamX[i]),width*v.roamY[i]);var box=v.petBounds;
+            minX=v.beast.min(minX,box[0]);maxX=v.beast.max(maxX,box[0]);minY=v.beast.min(minY,box[1]);maxY=v.beast.max(maxY,box[1]);
+            for(var corner=0;corner<4;corner++){var x=box[0]+(corner%2==0?0:box[2])-width/2;var y=box[1]+(corner<2?0:box[3])-width/2;Test.assert(x*x+y*y<=radius*radius);}
+            Test.assert(box[1]>=width*0.18-1);Test.assert(box[1]+box[3]<=width*0.745);
+        }
+        Test.assert(maxX-minX>=width*0.30);Test.assert(maxY-minY>=width*0.14);
+        logger.debug("ROAM_AUDIT: "+width+"px canvas="+size+" horizontal="+(maxX-minX)+" vertical="+(maxY-minY));
+    }return true;
+}
+(:test)
+function v051RedrawAndTimerAuditTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;s.data["motion"]=0;var v=new TekuTekuBeastView();v.beast=s;
+    Test.assertEqual(v.desiredPeriod(),5000);v.timerPeriod=5000;
+    for(var i=0;i<40;i++){v.refresh();}Test.assertEqual(v.redrawRequests,1);Test.assert(v.refresher==null);
+    s.data["motion"]=2;s.data["energy"]=0;Test.assertEqual(v.desiredPeriod(),5000);s.data["energy"]=80;
+    var m=new BeastGameView(s,1);m.begin();m.sequence=[0,0,2];m.timerPeriod=250;
+    for(var i=0;i<21;i++){m.refresh();}Test.assertEqual(m.phase,2);Test.assert(m.gameRedraws<=8);
+    logger.debug("REDRAW_AUDIT: 40 unchanged Pet callbacks -> "+v.redrawRequests+" redraw; 21 memory cue ticks -> "+m.gameRedraws+" redraws");return true;
 }
 (:test)
 function migrationTest(logger){

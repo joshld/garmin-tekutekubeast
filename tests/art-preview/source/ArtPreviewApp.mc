@@ -24,18 +24,19 @@ class AuditGame extends BeastGameView {
 class ArtLayoutAuditView extends TekuTekuBeastView {
     var boxes=[];var failures=[];var scenes=[];var cursor=0;var audited=false;var showSummary=true;
     var exitWhenDone=false;var exitScheduled=false;
-    var peakMemory=0;var totalMemory=0;
+    var peakMemory=0;var totalMemory=0;var sceneBuildMs=0;var sceneCachedMs=0;
 
     // Generate one scene per callback: bounded RAM and no constructor watchdog.
-    var menuNames=["Actions","Feed","Settings","Developer","Discard DEV?","Dev Tools","Clock speed","Advance time","Force stage","Force family","Adjust needs","Set value","Animations","Balance settings","Play","Collection","Archive / new egg","Toys / accessories","Museum","Reset scenario","Bedtime","Feedback test","Set time"];
+    var menuNames=["Actions","Feed","Settings","Developer","Discard DEV?","Dev Tools","Clock speed","Advance time","Force stage","Force family","Adjust needs","Set value","Animations","Balance settings","Play","Collection","Archive / new egg","Toys / accessories","Museum","Reset scenario","Bedtime","Feedback test","Set time","Outdoor world","Environment","Sun / location","Approx latitude","Approx longitude","Sky preview"];
     var animationNames=["wander","hop","eat","sleep","clean","evolve","blink","look"];
     var messages=["HAPPY BEAST!","PATS: 3/3","ALL CLEAN!","ALL CLEAN","RESTING","FULL / NONE","REAL BEAST","TEST ITEMS","POOP TEST","CLEAN TEST","REST TEST","EVOLVE TEST","TEST RESET","TIME +","STAGE SET","FAMILY TEST","CUE TEST","RARE FORM!","BE A LEGEND","TRY TRAIL","NEW JOURNEY","BEAST KEPT","BOND: 70","NEED CHARM"];
     var menuCounts=[];var menuTotal=0;var sceneCount=0;
     function finishExit() as Void {System.exit();}
     function initialize(){
         TekuTekuBeastView.initialize();beast=new ArtPreviewState();
+        ensureWorld();scenery.audit=true;
         for(var i=0;i<menuNames.size();i++){openMenu(menuNames[i]);menuCounts.add(rows.size());menuTotal+=rows.size();}
-        menu=null;sceneCount=165+menuTotal+3+18+messages.size()+12+270+25;
+        menu=null;sceneCount=165+menuTotal+3+18+messages.size()+12+270+25+256;
     }
     function sceneAt(index){
         if(index<165){
@@ -54,7 +55,8 @@ class ArtLayoutAuditView extends TekuTekuBeastView {
         index-=12;
         if(index<270){var specimen=(index/18).toNumber();
             return [specimen<3?specimen:3+(specimen-3)/4,specimen<3?0:1+(specimen-3)%4,0,null,0,"idle",0,null,0,index%18];}
-        return [1,0,2,"TRAIL_CASE",index-270,"idle",0];
+        index-=270;if(index<25){return [1,0,2,"TRAIL_CASE",index,"idle",0];}
+        return [1+(index-25)/64,1+(index-25)/64,0,"WORLD_CASE",(index-25)%64,"idle",0];
     }
     function onShow(){loadSprite();refresher=new Toybox.Timer.Timer();refresher.start(method(:refresh),50,true);}
     function refresh() as Void {WatchUi.requestUpdate();}
@@ -72,6 +74,7 @@ class ArtLayoutAuditView extends TekuTekuBeastView {
     }
     function runAudit(dc){
         var scene=sceneAt(cursor);var model=beast as ArtPreviewState;
+        displayedSteps=null;
         model.previewStage=scene[0];model.previewFamily=scene[1];model.stress=scene[6];
         model.data["rare"]=scene.size()>8?scene[8]:0;
         model.data["xp"]=scene[6]==1?2000000000l:325000l;
@@ -84,7 +87,15 @@ class ArtLayoutAuditView extends TekuTekuBeastView {
             if(pose%6==2){model.simulateSleep(true);}
             if(pose%6==3){model.data["fullness"]=20;model.data["happiness"]=20;model.data["poop"]=2;}
         }
-        if(scene[3]!=null && scene[3].equals("TRAIL_CASE")){
+        roamTicks=tick.toFloat();
+        if(scene[3]!=null && scene[3].equals("WORLD_CASE")){
+            var variant=scene[4];model.previewStage=scene[0]==1?1:5;model.previewFamily=scene[1];
+            ensureWorld();world.setTheme(scene[1]);world.preview=variant/16;world.invalidate();
+            tick=(variant%16)*24;roamTicks=tick.toFloat();model.data["motion"]=variant%3;menu=null;
+            if(variant%16==15){model.simulateSleep(true);}if(variant%16==14){model.data["poop"]=2;model.data["fullness"]=20;model.data["happiness"]=20;}
+            loadSprite();boxes=[];TekuTekuBeastView.onUpdate(dc);checkGraphic(dc,petBounds,"World creature");
+            if(petBounds[1]+petBounds[3]>y(dc,0.76)){failures.add("World footer collision");}
+        }else if(scene[3]!=null && scene[3].equals("TRAIL_CASE")){
             var trip=new AuditGame(beast,2,self);var variant=scene[4];trip.tick=12;
             trip.phase=variant==24?3:2;trip.result="SCOUT COMPLETE";
             if(variant<24){trip.trail=variant/6;trip.node=(variant/2)%3;trip.choice=variant%2;}
@@ -99,6 +110,7 @@ class ArtLayoutAuditView extends TekuTekuBeastView {
             loadSprite();boxes=[];TekuTekuBeastView.onUpdate(dc);
         }
         var stats=System.getSystemStats();if(stats.usedMemory>peakMemory){peakMemory=stats.usedMemory;}totalMemory=stats.totalMemory;
+        if(scenery!=null){if(scenery.buildMs>sceneBuildMs){sceneBuildMs=scenery.buildMs;}if(scenery.cachedDrawMs>sceneCachedMs){sceneCachedMs=scenery.cachedDrawMs;}}
         checkScene(dc);cursor++;
         if(page==0 && scene[3]==null){
             var radius=dc.getWidth()/2-8;var cx=dc.getWidth()/2;var cy=dc.getHeight()/2;
@@ -111,6 +123,7 @@ class ArtLayoutAuditView extends TekuTekuBeastView {
         if(cursor>=sceneCount){
             audited=true;refresher.stop();System.println("LAYOUT_AUDIT: "+cursor+" scenes; "+failures.size()+" failures");
             System.println("LAYOUT_MEMORY: peak="+peakMemory+" total="+totalMemory);
+            System.println("SCENERY_TIMING: loadMax="+sceneBuildMs+"ms renderExcludingLoadMax="+sceneCachedMs+"ms");
             for(var i=0;i<failures.size();i++){System.println(failures[i]);}WatchUi.requestUpdate();
         }
     }

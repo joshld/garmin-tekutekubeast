@@ -67,12 +67,13 @@ class TekuTekuBeastState {
         // intact. A single atomic document also owns resumable game transactions.
         var defaults={"sleepMode"=>0,"bedMinute"=>1320,"wakeMinute"=>420,"watchBed"=>1320,"watchWake"=>420,
             "nextBed"=>0l,"nextWake"=>0l,"scheduleAt"=>0l,"sleepSource"=>"FALLBACK","autoLights"=>1,"lights"=>0,"lightsUntil"=>0l,"vibeStyle"=>0,
-            "gameSerial"=>0,"gameDone"=>0,"session"=>null,"sessions"=>[null,null,null],"gameClaims"=>[0,0,0],"easy"=>0,"v5"=>1};
+            "gameSerial"=>0,"gameDone"=>0,"session"=>null,"sessions"=>[null,null,null],"gameClaims"=>[0,0,0],"easy"=>0,"v5"=>1,"profileZone"=>null};
         var keys=defaults.keys();for(var i=0;i<keys.size();i++){if(!data.hasKey(keys[i])){data[keys[i]]=defaults[keys[i]];}}
     }
     function refreshSleep(){
         if(dev || skipWatch || number("sleepMode")!=0){return;}
         data["nextBed"]=0l;data["nextWake"]=0l;data["scheduleAt"]=now();data["sleepSource"]="FALLBACK";
+        data["profileZone"]=BeastSleep.zoneAt(now());
         data["watchBed"]=number("bedMinute");data["watchWake"]=number("wakeMinute");
         try{
             var p=UserProfile.getProfile();
@@ -90,6 +91,11 @@ class TekuTekuBeastState {
             }
         }catch(e instanceof Lang.Exception){data["sleepSource"]="FALLBACK";}
     }
+    function refreshSleepCached(){
+        // Profile data is not a continuously changing sensor. Explicit Settings,
+        // opening the app, and native sleep/wake events still force a refresh.
+        if(number("sleepMode")==0 && (number("scheduleAt")==0 || now()<number("scheduleAt") || now()-number("scheduleAt")>=900 || number("profileZone")!=BeastSleep.zoneAt(now()))){refreshSleep();}
+    }
     function isNight(){return BeastSleep.night(data,now());}
     function isSleeping(){return BeastSleep.sleeping(data,now());}
     function isDark(){return BeastSleep.dark(data,now());}
@@ -100,7 +106,7 @@ class TekuTekuBeastState {
     function commit(){if(!dev){
         data["cachedName"]=speciesName();data["cachedMood"]=mood();data["cachedProgress"]=progress();
         var s=stage();data["cachedSprite"]=s<3?s:3+(family()-1)*3+s-3;
-        store.write("v4",store.copy(data));}}
+        if(store.changed(data)){store.write("v4",store.copy(data));}}}
     function xp(){return number("xp");} // genuine lifetime watch steps ONLY
     function growth(){return number("baseGrowth")+number("careGrowth")+number("activityBonus")+max(0l,xp()-number("petXpBaseline"));}
     function ageDays(){return (max(0l,now()-number("birthEpoch"))/86400).toNumber();}
@@ -171,9 +177,10 @@ class TekuTekuBeastState {
         data["days"][slot]=day;data["counts"][slot]=eligible;var delta=eligible-previous;data["xp"]+=delta;
         var food=number("snackRemainder")+delta;data["snacks"]=min(12,number("snacks")+food/2500);data["snackRemainder"]=food%2500;
     }
-    function syncToday(){
-        start();refreshSleep();tick();
-        if(!dev && !skipWatch){var info=ActivityMonitor.getInfo();if(info.steps!=null){observe(today(),info.steps);}
+    function syncToday(){syncFromInfo(dev || skipWatch?null:ActivityMonitor.getInfo());}
+    function syncFromInfo(info){
+        start();refreshSleepCached();tick();
+        if(!dev && !skipWatch && info!=null){if(info.steps!=null){observe(today(),info.steps);}
             var minutes=null;var pushes=null;
             if(info has :activeMinutesDay){var a=info.activeMinutesDay;if(a!=null){minutes=a.moderate+a.vigorous;}}
             if(info has :pushes){pushes=info.pushes;}
@@ -183,7 +190,22 @@ class TekuTekuBeastState {
     function syncHistory(){
         start();if(!dev && !skipWatch){var h=ActivityMonitor.getHistory();for(var i=0;i<h.size();i++){
             if(h[i].startOfDay!=null && h[i].steps!=null){observe(dateKey(h[i].startOfDay),h[i].steps);}}}
-        syncToday();
+        refreshSleep();syncToday();
+    }
+    function stepNoop(steps,minutes,pushes){
+        // Never throttle NEW steps, new reward thresholds, date/care/poop
+        // boundaries, or sleep/wake callbacks. Only duplicate step events may
+        // defer sub-minute passive-only catch-up, which remains exactly lazy.
+        var t=now();var day=today();
+        if(steps==null || steps<0 || day!=number("day") || t<number("lastGrowth") || t-number("lastGrowth")>=60 || t-number("lastCare")>=3600){return false;}
+        if(number("poopDue")>0 && t>=number("poopDue")){return false;}
+        if(number("sleepMode")==0 && (number("scheduleAt")==0 || t<number("scheduleAt") || t-number("scheduleAt")>=900)){return false;}
+        var eligible=max(0,steps-(day==number("birth")?number("birthBaseline"):0));var slot=day%32;
+        var prior=data["days"][slot]==day?data["counts"][slot]:0;if(eligible>prior){return false;}
+        var n=prior/max(1,number("target"));
+        if(minutes!=null){if(number("minutesBase")<0){return false;}n=max(n,max(0,minutes-number("minutesBase"))/10);}
+        if(pushes!=null){if(number("pushBase")<0){return false;}n=max(n,max(0,pushes-number("pushBase"))/500);}
+        return min(5,n)<=number("activityMilestone");
     }
     function activityRewards(day,steps,minutes,pushes){
         if(dev || day!=number("day")){return;}var n=0;
@@ -255,7 +277,7 @@ class TekuTekuBeastState {
     function saveSession(session){
         var kind=session["kind"];var current=data["sessions"][kind];
         if(current==null || current["id"]!=session["id"] || data["gameClaims"][kind]>=session["id"]){return false;}
-        data["sessions"][kind]=store.copy(session);commit();return true;
+        if(!store.same(current,session)){data["sessions"][kind]=store.copy(session);commit();}return true;
     }
     function completeSession(session,win){
         tick();var kind=session["kind"];var current=data["sessions"][kind];

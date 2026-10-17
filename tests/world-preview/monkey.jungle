@@ -1,0 +1,5 @@
+project.manifest = ../matrix/manifest.xml
+base.sourcePath = ../../source;../art-preview/source;source
+base.resourcePath = ../../resources;resources;../../resources-world260
+enduro4.resourcePath = ../../resources-pet144;resources;../../resources-world280
+fenix7s.resourcePath = ../../resources;../../resources-world240

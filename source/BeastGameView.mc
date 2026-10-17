@@ -11,6 +11,7 @@ class BeastGameView extends TekuTekuBeastView {
     var session=null;var round=0;var score=0;var combo=0;var best=0;var retries=0;
     var lane=1;var target=1;var jumpTicks=0;var caught=false;var resultChoice=0;
     var node=0;var choice=0;var travel=0;var hint="";var replayRound=false;var gameBounds=[0,0,0,0];
+    var lastGameVisual=null;var gameRedraws=0;
     function initialize(model,game){
         TekuTekuBeastView.initialize();beast=model;kind=game;
         var settings=System.getDeviceSettings();
@@ -28,7 +29,11 @@ class BeastGameView extends TekuTekuBeastView {
         if(saved!=null){restore(saved);}
         refresher=new Toybox.Timer.Timer();timerPeriod=desiredGamePeriod();refresher.start(method(:refresh),timerPeriod,true);
     }
-    function desiredGamePeriod(){return phase==0 || phase==3?1000:250;}
+    function desiredGamePeriod(){
+        if(phase==0 || phase==3){return beast.number("motion")==0 && kind!=2?5000:1000;}
+        if(phase==2 && kind==2){return 5000;}
+        if(phase==2 && kind==1 && !scanning){return 1000;}return 250;
+    }
     function tuneGameTimer(){
         var wanted=desiredGamePeriod();
         if(refresher!=null && timerPeriod!=wanted){timerPeriod=wanted;refresher.stop();refresher.start(method(:refresh),timerPeriod,true);}
@@ -43,6 +48,13 @@ class BeastGameView extends TekuTekuBeastView {
         jumpTicks=session.hasKey("jump")?session["jump"]:0;caught=session.hasKey("caught")?session["caught"]:false;
         replayRound=session.hasKey("retry")?session["retry"]:false;
         hint=session.hasKey("hint")?session["hint"]:"";
+        // Preserve the position within an older saved cue/star; never restart
+        // its round, random seed, attempts, rewards or adventure transaction.
+        if(!session.hasKey("timingV051")){
+            if(kind==1 && phase==1){elapsed=(elapsed/tempo()).toNumber()*(tempo()+cueGap())+elapsed%tempo();}
+            if(kind==0 && phase==1 && beast.number("easy")==0){elapsed=(elapsed*period()/[20.0,16.0,12.0][round]).toNumber();jumpTicks=beast.min(jumpTicks,jumpDuration());}
+            session["timingV051"]=1;
+        }
         // Power loss may occur between the model's atomic session/debit and
         // the first view checkpoint. Complete setup using the SAME ID/seed;
         // never restart the transaction or charge/grant anything again.
@@ -60,6 +72,7 @@ class BeastGameView extends TekuTekuBeastView {
         session["route"]=trail;session["node"]=node;session["choice"]=choice;session["travel"]=travel;
         session["lane"]=lane;session["target"]=target;session["jump"]=jumpTicks;session["caught"]=caught;session["retry"]=replayRound;
         session["hint"]=hint;
+        session["timingV051"]=1;
         beast.saveSession(session);
     }
     function random(limit){session["seed"]=(session["seed"]*17+11)%65521;return session["seed"]%limit;}
@@ -82,26 +95,42 @@ class BeastGameView extends TekuTekuBeastView {
         if(kind==0 && phase==1){
             if(jumpTicks>0){jumpTicks--;}
             var local=elapsed.toFloat()/period();
-            if(!caught && jumpTicks>0 && lane==target && local>=0.45 && local<=0.90){
+            if(!caught && jumpTicks>0 && lane==target && local>=0.40 && local<=(beast.number("easy")==1?0.96:0.94)){
                 caught=true;hits++;combo++;best=beast.max(best,combo);score+=10+beast.min(5,combo)*2;
                 hint=combo>1?"COMBO "+combo:"GOT IT!";new FeedbackManager().cue(beast,"happy");checkpoint();
             }
             if(elapsed>=period()){catchStar(false);}
         }
-        if(kind==1 && phase==1 && elapsed>=sequence.size()*tempo()){phase=2;elapsed=0;cursor=0;checkpoint();}
+        if(kind==1 && phase==1 && elapsed>=sequence.size()*(tempo()+cueGap())){phase=2;elapsed=0;cursor=0;checkpoint();}
         if(kind==1 && phase==2 && elapsed>=120){memoryInput(-1);}
         if(kind==1 && phase==4 && elapsed>=12){continueMemory();}
         if(kind==2 && phase==5){travel++;if(travel>=12){phase=2;elapsed=0;travel=0;choice=0;checkpoint();}}
         if(kind==2 && phase==4 && elapsed>=10){nextTrail();}
-        tuneGameTimer();WatchUi.requestUpdate();
+        tuneGameTimer();var key=gameVisualKey();
+        if(lastGameVisual==null || !lastGameVisual.equals(key)){lastGameVisual=key;gameRedraws++;WatchUi.requestUpdate();}
     }
-    function period(){return [20,16,12][round]+(beast.number("easy")==1?4:0);}
+    function gameVisualKey(){
+        var motion=beast.number("motion");var artTick=0;
+        if(kind==0 && phase==1 || kind==2 && phase==5){artTick=tick;}
+        else if(kind==1 && phase==1){artTick=displayedMove()+10*(elapsed/(tempo()+cueGap())).toNumber();}
+        else if(kind==1 && phase==2 && scanning){artTick=(tick/6)%3;}
+        else if((phase==0 || phase==3) && motion>0){artTick=tick%24;}
+        else if(phase==0 && kind==2){artTick=(tick/8)%2;}
+        return phase+":"+artTick+":"+cursor+":"+round+":"+retries+":"+choice+":"+resultChoice+":"+hint+":"+score+":"+lane;
+    }
+    function period(){return beast.number("easy")==1?[24,20,16][round]:[16,12,9][round];}
     function tempo(){return beast.number("easy")==1?8:6;}
+    function cueGap(){return 1;} // one existing 250ms tick, including UP -> UP
+    function displayedMove(){
+        if(phase!=1 || sequence.size()==0 || elapsed%(tempo()+cueGap())>=tempo()){return -1;}
+        return sequence[beast.min(sequence.size()-1,(elapsed/(tempo()+cueGap())).toNumber())];
+    }
+    function jumpDuration(){return beast.number("easy")==1?7:[7,6,5][round];}
     function starPosition(){return elapsed.toFloat()/period();}
     function catchStar(check){
         // The pet must actually jump into a falling star; input never awards it
         // merely by hitting an invisible timing bar.
-        if(check){if(jumpTicks==0){jumpTicks=7;}return;}
+        if(check){if(jumpTicks==0){jumpTicks=jumpDuration();}return;}
         attempts++;if(!caught){combo=0;hint="NEXT STAR!";}
         if(attempts>=15){finish(hits>=7);return;}
         round=attempts/5;target=random(3);caught=false;jumpTicks=0;elapsed=0;checkpoint();
@@ -237,16 +266,17 @@ class BeastGameView extends TekuTekuBeastView {
             label(dc,y(dc,0.23),"ROUND "+(round+1)+"/3  SCORE "+score,Graphics.FONT_XTINY);
             var ground=y(dc,0.71);var cx=dc.getWidth()*(0.29+lane*0.21);
             for(var i=0;i<3;i++){dc.setColor(i==lane?INK:LIGHT,Graphics.COLOR_TRANSPARENT);dc.fillRectangle(dc.getWidth()*(0.29+i*0.21)-14,ground,28,4);}
-            var lift=jumpTicks>0?[0,8,18,27,27,18,8,0][jumpTicks]*dc.getWidth()/280.0:0;
+            var jumpIndex=beast.min(7,(jumpTicks*7.0/jumpDuration()).toNumber());
+            var lift=jumpTicks>0?[0,8,18,27,27,18,8,0][jumpIndex]*dc.getWidth()/280.0:0;
             drawPlayer(dc,cx,ground,jumpTicks>0?1:(caught?4:0),lift);
             if(!caught){var scale=beast.max(2,(dc.getWidth()/140).toNumber());pixelIcon(dc,dc.getWidth()*(0.29+target*0.21)-3.5*scale,y(dc,0.33)+dc.getHeight()*0.29*starPosition(),[8,8,127,62,28,54,65],INK,scale);}
             label(dc,y(dc,0.74),caught?hint:"SELECT: HOP!",Graphics.FONT_XTINY);
             label(dc,y(dc,0.85),hits+" / "+attempts+" STARS",Graphics.FONT_XTINY);
         }else if(kind==1){
             label(dc,y(dc,0.23),"ROUND "+(round+1)+"/3  "+(phase==1?"WATCH":(scanning?"SELECT":"YOUR TURN")),Graphics.FONT_XTINY);
-            var move=phase==1?sequence[beast.min(sequence.size()-1,(elapsed/tempo()).toNumber())]:(cursor>0?sequence[cursor-1]:1);
+            var move=phase==1?displayedMove():(cursor>0?sequence[cursor-1]:1);
             var lift=move==0?12:(move==2?0:5);
-            drawPlayer(dc,dc.getWidth()/2+(move-1)*12,y(dc,0.66),move==0?1:(move==1?4:5),lift);
+            drawPlayer(dc,dc.getWidth()/2+(move<0?0:(move-1)*12),y(dc,0.66),move<0?0:(move==0?1:(move==1?4:5)),move<0?0:lift);
             for(var i=0;i<3;i++){drawArrow(dc,dc.getWidth()/2+(i-1)*42-7,y(dc,0.70),i,phase==1?move==i:(scanning && (tick/6)%3==i));}
             label(dc,y(dc,0.83),phase==4?hint:(phase==1?"WATCH":cursor+"/"+sequence.size()+"  TRY "+(retries+1)+"/2"),Graphics.FONT_XTINY);
         }else{

@@ -12,19 +12,31 @@ class TekuTekuBeastView extends WatchUi.View {
     var animation="idle";var animationTicks=0;
     var frames=null;var spriteFamily=-1;
     var artScale=1.0;var timerPeriod=250;
-    var roamX=[-0.09,0.09,0.04,-0.09];var roamY=[0.02,-0.06,0.05,0.02];var hopHeights=[0,9,17,9];
+    // World-space destinations, NOT a multiple of creature size. Only final
+    // clipping safety accounts for the sprite's physical extent.
+    var roamX=[-0.39,0.38,-0.25,0.28,-0.02,-0.35,0.36,0.05];
+    var roamY=[0.56,0.70,0.75,0.58,0.53,0.72,0.66,0.77];var hopHeights=[0,5,9,5];
+    var world=null;var scenery=null;var sky=[1,0.5,true];var sceneInk=INK;
+    var lastVisual=null;var redrawRequests=0;var displayedSteps=null;
+    var roamTicks=0.0;var petX=0.5;var petFoot=0.70;var roamOriginX=0.0;var roamOriginY=0.70;var wasSleeping=false;
     var creatureHeaderBottom=0;var petBounds=[0,0,0,0];var petFrame=0;var darkScene=false;
     const BG=0xAAFFAA;const INK=0x005500;const LIGHT=0x55AA55;
     function initialize(){View.initialize();beast=new TekuTekuBeastState();}
     function onShow(){
         if(refresher!=null){refresher.stop();refresher=null;}
         Application.getApp().activeView=self;if(!beast.dev){beast.data=null;}
-        beast.syncHistory();loadSprite();refresher=new Timer.Timer();timerPeriod=desiredPeriod();refresher.start(method(:refresh),timerPeriod,true);consumeEvolution();
+        beast.syncHistory();loadSprite();ensureWorld();world.readWatch(beast.realNow(),beast.skipWatch);refresher=new Timer.Timer();timerPeriod=desiredPeriod();refresher.start(method(:refresh),timerPeriod,true);consumeEvolution();
     }
-    function onHide(){if(refresher!=null){refresher.stop();refresher=null;}beast.commit();}
+    function onHide(){if(refresher!=null){refresher.stop();refresher=null;}if(scenery!=null){scenery.release();}beast.commit();}
+    function ensureWorld(){if(world==null || world.dev!=beast.dev){world=new BeastWorld(beast);}if(scenery==null){scenery=new BeastScenery();}}
     function refresh() as Void {
         var poopBefore=beast.number("poop");
         var step=timerPeriod/250;tick=(tick+step)%8000;
+        var state=visualState();
+        if(menu==null && page==0 && beast.number("motion")>0 && beast.stage()>0 && (state.equals("idle") || state.equals("wander") || state.equals("hop") || state.equals("happy"))){
+            if(wasSleeping){roamTicks=0.0;roamOriginX=petX-0.5;roamOriginY=petFoot;wasSleeping=false;}
+            roamTicks+=step*(beast.number("motion")==1?0.25:1.0);
+        }
         if(tick%80<step){beast.syncToday();loadSprite();}
         if(beast.dev && tick%4<step){beast.tick();loadSprite();}
         if(beast.number("poop")>poopBefore){animation="hop";animationTicks=8;} // silent reaction
@@ -32,19 +44,36 @@ class TekuTekuBeastView extends WatchUi.View {
         if(noticeTicks>0){noticeTicks=beast.max(0,noticeTicks-step);if(noticeTicks==0){notice=null;}}
         if(animationTicks>0){animationTicks=beast.max(0,animationTicks-step);if(animationTicks==0){animation="idle";}}
         // Sleeping/reduced-motion idle only redraws once a second. No hidden timer.
-        if((menu==null && page==0 && beast.number("motion")==2) || tick%4<step || noticeTicks>0){WatchUi.requestUpdate();}
+        var key=visualKey();
+        if(lastVisual==null || !lastVisual.equals(key)){lastVisual=key;redrawRequests++;WatchUi.requestUpdate();}
         var wanted=desiredPeriod();if(refresher!=null && wanted!=timerPeriod){timerPeriod=wanted;refresher.stop();refresher.start(method(:refresh),timerPeriod,true);}
     }
-    function desiredPeriod(){return menu==null && page==0 && beast.number("motion")==2 && !beast.isSleeping() && beast.number("energy")>=20 && (animationTicks>0 || tick%24<16)?250:1000;}
+    function desiredPeriod(){
+        if(animationTicks>0 || noticeTicks>0){return beast.number("motion")==2 && !visualState().equals("sleep")?250:1000;}
+        if(menu!=null || page!=0 || beast.stage()==0 || beast.number("motion")==0 || visualState().equals("sleep")){return 5000;}
+        return beast.number("motion")==2 && tick%24<16?250:1000;
+    }
+    function visualKey(){
+        return page+":"+menu+":"+selection+":"+notice+":"+beast.stage()+":"+beast.family()+":"+(beast.progress()*256).toNumber()+":"+beast.xp()+":"+beast.number("fullness")+":"+beast.number("happiness")+":"+beast.number("energy")+":"+beast.number("cleanliness")+":"+beast.number("poop")+":"+visualState()+":"+beast.isDark()+":"+(beast.realNow()/60).toNumber()+":"+beast.number("meals")+":"+beast.snacks()+":"+motionKey();
+    }
+    function motionKey(){
+        if(menu!=null || page!=0){return 0;}var a=visualState();var m=beast.number("motion");
+        if(a.equals("sleep")){return 0;}if(a.equals("evolve")){return 500+tick%4;}
+        if(m==0){return 0;}if(a.equals("eat")){return 300+(((m==2?tick:(tick/4).toNumber())%4==3)?1:0);}
+        if(a.equals("clean")){return 400+tick%3;}if(a.equals("look") || a.equals("blink") || beast.stage()==0){return 0;}
+        var s=(roamTicks/(beast.family()==1?2:1)).toNumber();var p=s%48;
+        if(p<32 || a.equals("happy") || a.equals("hop")){return 1000+s%384;}
+        return 2000+((s/48).toNumber()%8)*100+(p<42?5:(p==45?4:0))*4+(beast.family()==3 && m==2?(s%8<4?2:1):0);
+    }
     function consumeEvolution(){
         if(beast.number("evolutionPending")>0){beast.data["evolutionPending"]=0;beast.commit();toast("EVOLVED!","evolve");}
     }
-    function toast(text,action){page=0;notice=text;noticeTicks=12;animation=action;animationTicks=12;loadSprite();if(!action.equals("idle")){new FeedbackManager().cue(beast,action);}WatchUi.requestUpdate();}
+    function toast(text,action){page=0;notice=text;noticeTicks=12;animation=action;animationTicks=12;loadSprite();if(!action.equals("idle")){new FeedbackManager().cue(beast,action);}if(refresher!=null){timerPeriod=desiredPeriod();refresher.stop();refresher.start(method(:refresh),timerPeriod,true);}WatchUi.requestUpdate();}
     function openMenu(name){menu=name;selection=0;updateRows();WatchUi.requestUpdate();}
     function updateRows(){
         if(menu.equals("Actions")){rows=beast.number("poop")>0?["Clean","Feed","Play","Pat","Rest","Collection","Settings"]:["Feed","Clean","Play","Pat","Rest","Collection","Settings"];rows.add(beast.isDark()?"Lights On":"Lights Off");if(beast.dev){rows.add("Dev Tools");}}
         else if(menu.equals("Feed")){rows=["Meal: "+beast.number("meals"),"Snack: "+beast.snacks()];}
-        else if(menu.equals("Settings")){rows=["Developer: "+(beast.dev?"ON":"OFF"),"Sound: "+(beast.number("sound")==0?"OFF":"ON"),"Vibration: "+(beast.number("haptics")==0?"OFF":"ON"),"Motion: "+["OFF","LOW","NORMAL"][beast.number("motion")],"Activity target: "+beast.number("target"),"Bedtime","Feedback test","Version 0.5.0 beta","Vibe: "+(beast.number("vibeStyle")==0?"GENTLE":"EXPRESSIVE")];}
+        else if(menu.equals("Settings")){rows=["Developer: "+(beast.dev?"ON":"OFF"),"Sound: "+(beast.number("sound")==0?"OFF":"ON"),"Vibration: "+(beast.number("haptics")==0?"OFF":"ON"),"Motion: "+["OFF","LOW","NORMAL"][beast.number("motion")],"Activity target: "+beast.number("target"),"Bedtime","Feedback test","Version 0.5.1 beta","Vibe: "+(beast.number("vibeStyle")==0?"GENTLE":"EXPRESSIVE"),"Outdoor world"];}
         else if(menu.equals("Bedtime")){rows=["Schedule: "+["WATCH","MANUAL","OFF"][beast.number("sleepMode")],"Bed: "+clockText(beast.number("bedMinute")),"Wake: "+clockText(beast.number("wakeMinute")),"Auto lights: "+(beast.number("autoLights")==1?"ON":"OFF"),beast.number("sleepMode")==0?beast.data["sleepSource"]:"LOCAL SCHEDULE"];}
         else if(menu.equals("Feedback test")){rows=["Tone test","Vibration test",FeedbackManager.lastStatus,"Watch Alert Tones","must be ON for sound"];}
         else if(menu.equals("Set time")){rows=[];for(var hour=0;hour<48;hour++){rows.add(clockText(hour*30));}}
@@ -65,12 +94,22 @@ class TekuTekuBeastView extends WatchUi.View {
         else if(menu.equals("Toys / accessories")){rows=["Berry","Kite","Ribbon","Shell","Lantern","Crown","Crystal","Compass"];}
         else if(menu.equals("Museum")){rows=[];for(var i=0;i<4;i++){rows.add(["Grove","Ember","Tide","Wisp"][i]+": "+((beast.number("collection")&(1<<i))!=0?"FOUND":"...")+" / "+((beast.number("rareCollection")&(1<<i))!=0?"RARE":"..."));}}
         else if(menu.equals("Archive / new egg")){rows=["Cancel","Archive and start egg"];}
+        else{updateWorldRows();}
+    }
+    function updateWorldRows(){
+        ensureWorld();
+        if(menu.equals("Outdoor world")){rows=["Environment: "+["AUTO","FOREST","MEADOW","LAKESIDE","GARDEN"][world.prefs["environment"]],"Sun / location"];if(beast.dev){rows.add("Sky preview");}}
+        else if(menu.equals("Environment")){rows=["Family / neutral AUTO","Forest","Meadow","Lakeside","Garden"];}
+        else if(menu.equals("Sun / location")){world.update(beast.realNow(),!beast.skipWatch);rows=["Location: "+["AUTO","SAVED","MANUAL","FIXED"][world.prefs["locationMode"]],world.source,"Rise "+world.eventText(0)+" Set "+world.eventText(1),"Read watch cache","Approx latitude","Approx longitude","No GPS activation","Moon: decorative arc",world.engine(),world.fixAge(beast.realNow())];}
+        else if(menu.equals("Approx latitude") || menu.equals("Approx longitude")){var coord=world.prefs[menu.equals("Approx latitude")?"manualLat":"manualLon"];rows=[coord.toFloat().format("%.1f")+" degrees","+1 degree","-1 degree","+0.1 degree","-0.1 degree","+10 degrees","-10 degrees","Use this location"];}
+        else if(menu.equals("Sky preview")){rows=["Real local sky","Dawn","Day","Dusk","Night"];}
     }
     function clockText(minute){return (minute/60).format("%02d")+":"+(minute%60).format("%02d");}
     var needKey=null;
     function selectAction(){
         if(menu==null){openMenu("Actions");return;}
         var name=rows[selection];var n=selection;var context=menu;
+        if(worldAction(context,name,n)){return;}
         if(context.equals("Actions")){
             if(name.equals("Lights Off") || name.equals("Lights On")){beast.toggleLights();menu=null;toast("LIGHTS: 1 HOUR","idle");return;}
             if(name.equals("Pat")){menu=null;toast(beast.pat()?"HAPPY BEAST!":"PATS: 3/3","happy");}
@@ -83,6 +122,7 @@ class TekuTekuBeastView extends WatchUi.View {
             if(n==0){openMenu(beast.dev?"Discard DEV?":"Developer");return;}
             if(n==5){openMenu("Bedtime");return;}if(n==6){openMenu("Feedback test");return;}if(n==7){return;}
             if(n==8){beast.data["vibeStyle"]=1-beast.number("vibeStyle");beast.commit();updateRows();WatchUi.requestUpdate();return;}
+            if(n==9){openMenu("Outdoor world");return;}
             var keys=["","sound","haptics","motion","target"];var key=keys[n];
             if(n<3){beast.data[key]=1-beast.number(key);}else if(n==3){beast.data[key]=(beast.number(key)+1)%3;}
             else{beast.data[key]=beast.number(key)==2000?4000:(beast.number(key)==4000?8000:2000);}
@@ -161,6 +201,23 @@ class TekuTekuBeastView extends WatchUi.View {
         if(context.equals("Play")){var game=new BeastGameView(beast,n);WatchUi.pushView(game,new TekuTekuBeastInput(game),WatchUi.SLIDE_LEFT);return;}
         WatchUi.requestUpdate();
     }
+    function worldAction(context,name,n){
+        if(context.equals("Outdoor world")){openMenu(n==0?"Environment":(n==1?"Sun / location":"Sky preview"));return true;}
+        if(context.equals("Environment")){world.setTheme(n);menu=null;toast("WORLD SET","look");return true;}
+        if(context.equals("Sky preview")){world.preview=n-1;world.invalidate();menu=null;toast(n==0?"REAL SKY":"SKY PREVIEW","look");return true;}
+        if(context.equals("Sun / location")){
+            if(n==0){world.prefs["locationMode"]=(world.prefs["locationMode"]+1)%4;world.invalidate();world.save();}
+            if(n==3){world.checked=0l;world.readWatch(beast.realNow(),beast.skipWatch);world.invalidate();}
+            if(n==4 || n==5){openMenu(name);return true;}updateRows();WatchUi.requestUpdate();return true;
+        }
+        if(context.equals("Approx latitude") || context.equals("Approx longitude")){
+            if(n==7){world.prefs["locationMode"]=2;world.prefs["manualSet"]=1;world.invalidate();world.save();openMenu("Sun / location");return true;}
+            if(n>0){var lat=context.equals("Approx latitude");var key=lat?"manualLat":"manualLon";var limit=lat?90:180;
+                world.prefs[key]=beast.max(-limit,beast.min(limit,world.prefs[key]+[0,1,-1,0.1,-0.1,10,-10][n]));}
+            updateRows();WatchUi.requestUpdate();return true;
+        }
+        return false;
+    }
     function switchPage(delta){
         if(menu!=null){selection=(selection+delta+rows.size())%rows.size();}
         else{page=(page+delta+3)%3;notice=null;}
@@ -169,6 +226,9 @@ class TekuTekuBeastView extends WatchUi.View {
     function touch(point){selectAction();}
     function back(){
         if(menu!=null){
+            if(menu.equals("Outdoor world")){openMenu("Settings");return true;}
+            if(menu.equals("Environment") || menu.equals("Sun / location") || menu.equals("Sky preview")){openMenu("Outdoor world");return true;}
+            if(menu.equals("Approx latitude") || menu.equals("Approx longitude")){openMenu("Sun / location");return true;}
             if(menu.equals("Set time")){openMenu("Bedtime");return true;}
             if(menu.equals("Bedtime") || menu.equals("Feedback test")){openMenu("Settings");return true;}
             if(menu.equals("Actions")){menu=null;}else if(menu.equals("Settings") || menu.equals("Feed") || menu.equals("Play") || menu.equals("Collection")){openMenu("Actions");}
@@ -186,7 +246,7 @@ class TekuTekuBeastView extends WatchUi.View {
         if(dc.getTextWidthInPixels(value,font)>safeTextWidth(dc,y,font)){font=Graphics.FONT_XTINY;}
         var shown=value;while(shown.length()>0 && dc.getTextWidthInPixels(shown,font)>safeTextWidth(dc,y,font)){
             shown=shown.substring(0,shown.length()-1);}
-        dc.setColor(darkScene?BG:INK,Graphics.COLOR_TRANSPARENT);dc.drawText(dc.getWidth()/2,y,font,shown,Graphics.TEXT_JUSTIFY_CENTER);
+        dc.setColor(menu==null && page==0?sceneInk:INK,Graphics.COLOR_TRANSPARENT);dc.drawText(dc.getWidth()/2,y,font,shown,Graphics.TEXT_JUSTIFY_CENTER);
         var w=dc.getTextWidthInPixels(shown,font);return [dc.getWidth()/2-w/2,y,w,dc.getFontHeight(font),shown];
     }
     function y(dc,fraction){return (dc.getHeight()*fraction).toNumber();}
@@ -200,48 +260,54 @@ class TekuTekuBeastView extends WatchUi.View {
     function creature(dc){
         if(frames==null){return;}
         var active=visualState();var size=sprite.getWidth();var motion=beast.number("motion");
-        var centerX=dc.getWidth()/2;var centerY=dc.getHeight()*0.49;
-        var frame=0;var stride=motion==2?tick:(tick/4).toNumber();var moving=false;var left=false;
-        var family=beast.family();if(family==1){stride=(stride/2).toNumber();}if(family==4){stride+=32;}
-        if(active.equals("sleep")){frame=3;}
-        else if(active.equals("eat")){frame=motion>0 && stride%4==3?0:2;}
+        var centerX=dc.getWidth()*petX;var centerY=dc.getHeight()*petFoot-size/2;
+        var frame=0;var stride=roamTicks.toNumber();var moving=false;var left=false;
+        var family=beast.family();if(family==1){stride=(stride/2).toNumber();}
+        if(active.equals("sleep")){frame=3;centerX=dc.getWidth()*0.30;centerY=dc.getHeight()*0.69-size/2;wasSleeping=true;}
+        else if(active.equals("eat")){frame=motion>0 && (motion==2?tick:(tick/4).toNumber())%4==3?0:2;}
         else if(active.equals("look")){frame=5;}
         else if(active.equals("blink") || active.equals("clean")){frame=4;}
         else if(motion>0 && beast.stage()>0){
             // Travel between 2-D destinations, pause and look; alternating
             // mirrored foot poses and lift avoid a static sliding sprite.
-            var part=(stride/24).toNumber()%4;var p=stride%24;var fraction=p<16?p/16.0:1.0;
+            var part=(stride/48).toNumber()%8;var p=stride%48;var fraction=p<32?p/32.0:1.0;
             var xs=roamX;var ys=roamY;
-            var before=(part+3)%4;var amplitude=motion==1?0.45:1.0;
-            if(beast.number("fullness")<45){amplitude*=0.55;}
-            centerX+=(xs[before]+(xs[part]-xs[before])*fraction)*dc.getWidth()*amplitude;
-            centerY+=(ys[before]+(ys[part]-ys[before])*fraction)*dc.getHeight()*amplitude;
-            moving=p<16;left=xs[part]<xs[before];
-            frame=moving?(left?6:0)+stride%2:(p<20?5:0);
+            var before=(part+7)%8;
+            var fromX=stride<48?roamOriginX:xs[before];var fromY=stride<48?roamOriginY:ys[before];
+            centerX=dc.getWidth()/2+(fromX+(xs[part]-fromX)*fraction)*dc.getWidth();
+            centerY=(fromY+(ys[part]-fromY)*fraction)*dc.getHeight()-size/2;
+            moving=p<32;left=xs[part]<xs[before];
+            frame=moving?(left?6:0)+stride%2:(p<42?5:0);
             if(moving && motion==2){centerY-=stride%2==0?0:3;}
             if(family==3 && motion==2){centerY+=(stride%8<4?2:-2);}
             if(active.equals("happy") || active.equals("hop") || ((beast.number("happiness")>=85 || family==2) && p<8)){
                 if(motion==2){centerY-=hopHeights[stride%4];}frame=stride%2==0?1:4;
             }
-            if(!moving && p==22){frame=4;}
+            if(!moving && p==45){frame=4;}
         }
         if(active.equals("evolve")){frame=(tick/2)%2==0?1:4;}
-        var top=(centerY-size/2).toNumber();
-        var upper=y(dc,0.18);var lower=y(dc,0.745)-size;
-        if(top<upper){top=upper;}if(top>lower){top=lower;}
-        var r=dc.getWidth()/2-9;
-        var a=top-dc.getHeight()/2;if(a<0){a=-a;}var b=top+size-dc.getHeight()/2;if(b<0){b=-b;}
-        var dy=beast.max(a,b);var half=Math.sqrt(beast.max(0,r*r-dy*dy))-size/2;
-        if(beast.number("poop")>0){centerX=beast.min(centerX,dc.getWidth()*0.66-size/2);}
-        centerX=beast.max(dc.getWidth()/2-half,beast.min(dc.getWidth()/2+half,centerX));
-        var x=(centerX-size/2).toNumber();petFrame=frame;
-        petBounds[0]=x;petBounds[1]=top;petBounds[2]=size;petBounds[3]=size;
-        dc.drawBitmap(x,top,frames[frame]);var color=darkScene?BG:INK;
+        positionCreature(dc.getWidth(),dc.getHeight(),size,centerX,centerY+size/2);
+        var x=petBounds[0];var top=petBounds[1];petFrame=frame;
+        petX=(x+size/2)/dc.getWidth().toFloat();petFoot=(top+size)/dc.getHeight().toFloat();
+        // A tiny ground shadow anchors all standing/walking poses.
+        dc.setColor(sky[0]==3?0xAAAAAA:0xAAAA55,Graphics.COLOR_TRANSPARENT);dc.fillRectangle(x+size/3,top+size-2,size/3,2);
+        dc.drawBitmap(x,top,frames[frame]);var color=sceneInk;
         if(active.equals("sleep")){pixelIcon(dc,x+size/2-7,top+7,[127,2,4,8,16,32,127],color,2);}
         if(active.equals("clean")){dc.setColor(0xFFFFFF,Graphics.COLOR_TRANSPARENT);dc.drawCircle(x+size/4,top+size/2,4+tick%3);}
         if(beast.number("rare")==1){pixelIcon(dc,x+size/2-7,top+2,[65,85,127,62],0xFFFF55,2);}
         if(beast.number("equipped")>=0){pixelIcon(dc,x+size/2+12,top+14,[8,28,62,28,8],0xAA55FF,2);}
         if(active.equals("evolve")){dc.setColor(color,Graphics.COLOR_TRANSPARENT);dc.drawCircle(x+size/2,top+size/2,size/2-2-tick%4);}
+    }
+    function positionCreature(width,height,size,centerX,foot){
+        var top=(foot-size).toNumber();
+        var upper=(height*0.18).toNumber();var lower=(height*0.745).toNumber()-size;
+        if(top<upper){top=upper;}if(top>lower){top=lower;}
+        var r=width/2-9;
+        var a=top-height/2;if(a<0){a=-a;}var b=top+size-height/2;if(b<0){b=-b;}
+        var dy=beast.max(a,b);var half=Math.sqrt(beast.max(0,r*r-dy*dy))-size/2;
+        centerX=beast.max(width/2-half,beast.min(width/2+half,centerX));
+        var x=(centerX-size/2).toNumber();
+        petBounds[0]=x;petBounds[1]=top;petBounds[2]=size;petBounds[3]=size;
     }
     function visualState(){
         // Sleep/tiredness wins over stale celebration or poop reactions.
@@ -256,17 +322,24 @@ class TekuTekuBeastView extends WatchUi.View {
     }
     function bar(dc,top,value,width){var x=dc.getWidth()/2-width/2;dc.setColor(LIGHT,Graphics.COLOR_TRANSPARENT);dc.fillRectangle(x,top,width,5);
         dc.setColor(darkScene?BG:INK,Graphics.COLOR_TRANSPARENT);dc.fillRectangle(x,top,(width*value).toNumber(),5);}
-    function todayLabel(){var n=beast.getTodaySteps();return "STEPS "+(n>=100000?(n/1000).toString()+"K":n.toString());}
+    function todayLabel(){
+        // One system read per reconciliation, not four reads/second while the
+        // pet wanders. This is display-only, never the crediting watermark.
+        if(displayedSteps==null || tick%80<timerPeriod/250){displayedSteps=beast.getTodaySteps();}
+        var n=displayedSteps;return "STEPS "+(n>=100000?(n/1000).toString()+"K":n.toString());
+    }
     function stageLabel(){return ["EGG","HATCHLING","JUVENILE","ADULT","CHAMPION","LEGENDARY"][beast.stage()];}
     function drawPet(dc){
-        var color=darkScene?BG:INK;var scale=beast.max(2,(dc.getWidth()/140).toNumber());
+        ensureWorld();sky=world.update(beast.realNow(),!beast.skipWatch);darkScene=sky[0]==3 || beast.isDark();
+        scenery.draw(dc,world.choose(beast.family(),beast.today()),sky,beast.isDark());sceneInk=scenery.ink;
+        var color=sceneInk;var scale=beast.max(2,(dc.getWidth()/140).toNumber());
         if(beast.number("fullness")<45){pixelIcon(dc,dc.getWidth()/2-10*scale,y(dc,0.12),[8,12,54,127,127,62,28],color,scale);}
         if(beast.number("happiness")<50){pixelIcon(dc,dc.getWidth()/2-2*scale,y(dc,0.12),[54,127,119,62,28,8],color,scale);}
         if(beast.number("energy")<20 && !visualState().equals("sleep")){pixelIcon(dc,dc.getWidth()/2+6*scale,y(dc,0.12),[14,24,48,48,56,30,15],color,scale);}
         devBadge(dc,color);
         creature(dc);
         // Poop is a fixed floor object, not attached to the moving creature.
-        if(beast.number("poop")>0){pixelIcon(dc,dc.getWidth()*0.73,y(dc,0.73),[8,28,30,62,127,127],0xAA5500,scale);}
+        if(beast.number("poop")>0){pixelIcon(dc,dc.getWidth()*0.73,y(dc,0.73),[8,28,30,62,127,127],darkScene?0xFFAA55:0xAA5500,scale);}
         bar(dc,y(dc,0.80),beast.progress(),dc.getWidth()/2);
         label(dc,y(dc,0.83),notice!=null?notice:todayLabel(),Graphics.FONT_XTINY);
     }
@@ -307,7 +380,7 @@ class TekuTekuBeastView extends WatchUi.View {
             label(dc,top,rows[index],Graphics.FONT_XTINY);}
         label(dc,y(dc,0.79),(selection+1)+" / "+rows.size(),Graphics.FONT_XTINY);
     }
-    function pageDots(dc){for(var i=0;i<3;i++){dc.setColor(i==page?INK:LIGHT,Graphics.COLOR_TRANSPARENT);dc.fillCircle(dc.getWidth()/2+(i-1)*14,y(dc,0.92),3);}}
+    function pageDots(dc){for(var i=0;i<3;i++){dc.setColor(i==page?(page==0?sceneInk:INK):LIGHT,Graphics.COLOR_TRANSPARENT);dc.fillCircle(dc.getWidth()/2+(i-1)*14,y(dc,0.92),3);}}
     function onUpdate(dc){darkScene=menu==null && page==0 && beast.isDark();dc.setColor(darkScene?0x000000:BG,darkScene?0x000000:BG);dc.clear();
         if(menu!=null){drawMenu(dc);}else{if(page==0){drawPet(dc);}else if(page==1){drawCare(dc);}else{drawStats(dc);}pageDots(dc);}}
 }

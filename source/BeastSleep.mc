@@ -6,6 +6,10 @@ using Toybox.Time.Gregorian;
 module BeastSleep {
     function value(data,key,fallback){return data.hasKey(key)?data[key]:fallback;}
     function minuteAt(epoch){var d=Gregorian.info(new Time.Moment(epoch.toNumber()),Time.FORMAT_SHORT);return d.hour*60+d.min;}
+    function zoneAt(epoch){
+        var d=Gregorian.info(new Time.Moment(epoch.toNumber()),Time.FORMAT_SHORT);
+        return Gregorian.moment({:year=>d.year,:month=>d.month,:day=>d.day,:hour=>d.hour,:minute=>d.min,:second=>d.sec}).value().toLong()-epoch;
+    }
     function inWindow(minute,bed,wake){return bed==wake?false:(bed<wake?(minute>=bed && minute<wake):(minute>=bed || minute<wake));}
     function validSchedule(bed,wake){return bed>=0 && bed<1440 && wake>=0 && wake<1440 && bed!=wake;}
     function night(data,epoch){

@@ -1,8 +1,9 @@
 project.manifest = manifest.xml
 base.sourcePath = ../../source;source
-base.resourcePath = ../../resources;resources
-enduro4.resourcePath = ../../resources-pet144;resources
-enduro3.resourcePath = ../../resources-pet144;resources
-fenix7x.resourcePath = ../../resources-pet144;resources
-fenix7xpro.resourcePath = ../../resources-pet144;resources
-fenix8solar51mm.resourcePath = ../../resources-pet144;resources
+base.resourcePath = ../../resources;resources;../../resources-world260
+enduro4.resourcePath = ../../resources-pet144;resources;../../resources-world280
+enduro3.resourcePath = ../../resources-pet144;resources;../../resources-world280
+fenix7x.resourcePath = ../../resources-pet144;resources;../../resources-world280
+fenix7xpro.resourcePath = ../../resources-pet144;resources;../../resources-world280
+fenix8solar51mm.resourcePath = ../../resources-pet144;resources;../../resources-world280
+fenix7s.resourcePath = ../../resources;../../resources-world240

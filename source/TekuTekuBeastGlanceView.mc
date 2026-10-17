@@ -10,9 +10,8 @@ using Toybox.Time;
 class TekuTekuBeastGlanceView extends WatchUi.GlanceView {
     var snapshot as Lang.Dictionary or Null=null;var sprite=null;var cachedId=-1;
     function initialize(){GlanceView.initialize();}
-    function onShow(){
-        readSummary();
-    }
+    // onUpdate follows onShow; avoid reading the same save twice on launch.
+    function onShow(){}
     function readSummary(){
         snapshot=savedSummary();
         var ids=[Rez.Drawables.V4EggSmall,Rez.Drawables.V4PipSmall,Rez.Drawables.V4NimbleSmall,Rez.Drawables.V4Grove3Small,Rez.Drawables.V4Grove4Small,Rez.Drawables.V4Grove5Small,Rez.Drawables.V4Ember3Small,Rez.Drawables.V4Ember4Small,Rez.Drawables.V4Ember5Small,Rez.Drawables.V4Tide3Small,Rez.Drawables.V4Tide4Small,Rez.Drawables.V4Tide5Small,Rez.Drawables.V4Wisp3Small,Rez.Drawables.V4Wisp4Small,Rez.Drawables.V4Wisp5Small];
