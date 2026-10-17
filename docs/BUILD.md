@@ -12,6 +12,9 @@ public exclusions. Never use that direct route to prepare a Store upload.
 & scripts/build.ps1 -Export -Release -Output bin/TekuTekuBeast-Public-0.5.2.iq
 # Personal signed Enduro 4 program with Developer Mode
 & scripts/build.ps1 -Owner -Release -Device enduro4 -Output bin/TekuTekuBeast-0.5.2-owner-enduro4.prg
+# Private signed Developer Beta Store package (original Beta UUID, DEV included)
+& scripts/build.ps1 -DeveloperBetaExport
+& scripts/verify_developer_beta_release.ps1
 # Focused public unit checks; isolated QA identity, RAM-only fixture
 & scripts/build.ps1 -Tests -Device enduro4 -Jungle tests/release/monkey.jungle -Output bin/matrix-public-enduro4-tests.prg
 & scripts/run-simulator.ps1 -Tests -Device enduro4 -Program bin/matrix-public-enduro4-tests.prg
@@ -33,6 +36,12 @@ retain their isolated test IDs. See [current identity verification](PUBLIC_RELEA
 The public app starts a separate pet. Keep the existing Developer Beta installed
 to preserve its pet and DEV tools; there is no automatic cross-app migration.
 Physical dual-install acceptance remains an owner check; no watch install runs.
+
+`-DeveloperBetaExport` is an explicit private exception to the public export
+guard. It forces owner input, the original Developer Beta UUID and the distinct
+`TekuTekuBeast-Dev-0.5.2.iq` filename. It rejects QA manifests/tests and a public
+filename. Upload that package only to update the existing Developer Beta listing,
+never to the separate public listing. Keep the binary off public GitHub releases.
 
 This is a native Garmin Connect IQ **watch app**, primarily tested on **Enduro 4**.
 See [v0.5.1 validation](V0_5_1_VALIDATION.md) for current work and accepted profiles;
