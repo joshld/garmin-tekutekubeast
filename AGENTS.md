@@ -8,9 +8,17 @@
 
 ## Exceptions: broaden tests deliberately
 - Run additional profiles when explicitly asked to test compatibility, when adding a device, when fixing a device-specific defect, or when a concrete high-risk API/display/memory change requires a targeted extra check.
-- Reserve the **full supported-device matrix** for an explicitly approved major/public release validation or a dedicated compatibility expansion.
+- Reserve the **full supported-device matrix** for explicit owner approval or a demonstrated major cross-device risk; a routine public release does not automatically require it.
 - Explain the reason and scope *before* an expensive multi-device run; seek user approval before the full matrix.
 - Do not claim devices were revalidated unless they actually passed the relevant tests.
+
+## Risk-based compatibility and release validation
+- Treat previously passing per-device SDK/simulator evidence as reusable when the relevant code, dependencies, device configuration and SDK have not changed. Do not repeat complete device suites merely because a release is being prepared.
+- Routine changes: focused `enduro4` tests only. For Fenix 6-generation changes, test `fenix6spro` (or the exact affected SDK profile) plus `enduro4`. For input/touch, graphics, memory, background or API risks, add only representative affected profiles.
+- Adding advertised watch models requires initial targeted validation of each new SDK product/profile, including appropriate memory, UI/input and background checks. Untested products must not be advertised.
+- Public or minor release: perform the necessary signed Store package export for **all advertised hardware parts**, package identity/signature/integrity checks, and *targeted* regression simulator checks appropriate to changed code. Exporting all parts is not the same as running every simulator/layout test.
+- A complete cross-device simulator matrix is not an automatic release gate. Run it only with explicit owner approval, or when justified by a major architectural/cross-device change; explain scope and ask first. Preserve the full-suite tooling for that occasion.
+- Keep a concise record of validation provenance, profiles actually tested, previously validated profiles reused, and anything not verified. Never claim an unexecuted test passed.
 
 ## Conserve Codex time and context
 - Prefer the smallest meaningful test set; don't repeat already-passing tests when their relevant inputs have not changed.
@@ -51,5 +59,5 @@
 - Simulator tests do not prove physical-watch battery life, OS behaviour or hardware acceptance.
 
 ## Current workflow
-- Do not derail an in-progress v0.5.1 implementation merely to apply this policy. Use these instructions for subsequent tasks.
+- Do not interrupt in-progress compatibility work or release packaging merely to apply this policy. Use these instructions for subsequent tasks.
 - See GitHub issue #9 for the broader compatibility roadmap and release test strategy.
