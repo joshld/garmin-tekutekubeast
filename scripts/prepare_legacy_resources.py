@@ -22,8 +22,12 @@ for original, output in [('resources','resources-legacy'), ('resources-native144
     out = ROOT / output / 'drawables/drawables.xml'
     out.parent.mkdir(parents=True, exist_ok=True)
     ET.indent(tree, space='    ')
-    tree.write(out, encoding='unicode')
+    rendered=ET.tostring(tree.getroot(),encoding='unicode')
+    if not out.exists() or out.read_text()!=rendered:
+        out.write_text(rendered)
     strings = ROOT / output / 'strings/strings.xml'
     strings.parent.mkdir(parents=True, exist_ok=True)
-    strings.write_bytes((ROOT / 'resources/strings/strings.xml').read_bytes())
+    content=(ROOT / 'resources/strings/strings.xml').read_bytes()
+    if not strings.exists() or strings.read_bytes()!=content:
+        strings.write_bytes(content)
     print(f'LEGACY_CATALOG: {output}: {len(tree.getroot())} core IDs + 16 scenery; PNGs unchanged')

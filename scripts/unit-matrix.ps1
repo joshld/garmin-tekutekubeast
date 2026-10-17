@@ -8,7 +8,7 @@ if(Test-Path "$project/bin/$EvidencePrefix-unit-matrix.json"){$results=@(Get-Con
 foreach($device in $Devices){
     $results=@($results | Where-Object {$_.device -ne $device})
     try{
-        & "$PSScriptRoot/build.ps1" -Device $device -Typecheck $Typecheck -Tests -Jungle 'tests/matrix/monkey.jungle' -Output "bin/matrix-unit-$device.prg"
+        & "$PSScriptRoot/build.ps1" -Owner -Device $device -Typecheck $Typecheck -Tests -Jungle 'tests/matrix/monkey.jungle' -Output "bin/matrix-unit-$device.prg"
         $log=& "$PSScriptRoot/run-simulator.ps1" -Device $device -Tests -Program "bin/matrix-unit-$device.prg"
         $log | Set-Content "$project/bin/$EvidencePrefix-final-unit-$device.log"
         if(!($log -contains "PASSED (passed=$expected, failed=0, errors=0)")){throw 'Missing complete passing summary'}

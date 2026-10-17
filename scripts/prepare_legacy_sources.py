@@ -17,5 +17,7 @@ for path in (ROOT/'source').glob('*.mc'):
         text = text.replace('(:background)', '// Foreground-only scope on constrained profiles.', 1)
     if path.name == 'TekuTekuBeastService.mc':
         text = (ROOT/'source/DeferredService.mc.template').read_text()
-    (OUT/path.name).write_text(text)
+    target=OUT/path.name
+    if not target.exists() or target.read_text()!=text:
+        target.write_text(text)
 print('LEGACY_SCOPE: generated from current source; State/Store excluded from background')

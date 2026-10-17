@@ -7,7 +7,7 @@ if(Test-Path "$project/bin/$EvidencePrefix-glance-matrix.json"){$results=@(Get-C
 foreach($device in $Devices){
     $results=@($results | Where-Object {$_.device -ne $device})
     try {
-        & "$PSScriptRoot/build.ps1" -Device $device -Typecheck $Typecheck -Jungle 'tests/glance/monkey.jungle' -Output "bin/matrix-glance-$device.prg"
+        & "$PSScriptRoot/build.ps1" -Owner -Device $device -Typecheck $Typecheck -Jungle 'tests/glance/monkey.jungle' -Output "bin/matrix-glance-$device.prg"
         $log=& "$PSScriptRoot/run-simulator.ps1" -Device $device -Program "bin/matrix-glance-$device.prg"
         $log | Set-Content "$project/bin/$EvidencePrefix-glance-$device.log"
         $measurement=@($log | Select-String '^GLANCE_AUDIT: (\d+x\d+) used=(\d+) total=(\d+)$')

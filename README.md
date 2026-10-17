@@ -4,7 +4,13 @@ A native, offline Garmin virtual-beast game. Grow through time, care and play;
 genuine watch activity adds growth and extra adventure opportunities. No phone,
 internet connection, exercise requirement, death or recovery-day punishment.
 
-**v0.5.1 signed beta candidate; focused Enduro 4 checks passed.** Exact v0.4 creature pixels,
+**v0.5.2 public beta release preparation:** 47 supported SDK profiles, including
+standard Fenix 6S Pro. Public builds exclude Developer Mode; personal builds use
+`-Owner`. See [release verification](docs/RELEASE_0_5_2_VERIFICATION.md),
+[compatibility evidence](docs/COMPATIBILITY_EXPANSION.md) and
+[Fenix 6S Pro installation](docs/INSTALL_FENIX_6S_PRO.md).
+
+v0.5.1 artwork/gameplay is retained. Exact v0.4 creature pixels,
 broader two-dimensional roaming, four outdoor environments, offline local
 sunrise/sunset skies, clearer memory cues and livelier Bounce timing are
 implemented. Battery work skips unchanged saves/redraws without changing real
@@ -55,9 +61,14 @@ identification is not assumed for an unrelated Connect IQ watch app.
 
 See [evolution rules](docs/EVOLUTION_DESIGN.md) for the actual implemented tree.
 
-## Developer Mode — same installed app
+## Developer Mode - personal builds only
 
-Actions > Settings > Developer > Enable temporary test. The normal screens
+Build explicitly with `-Owner` to retain these tools on the personal Enduro 4.
+Public `.iq` exports exclude them at compilation. Public and personal packages
+update the same installed app; a public update removes DEV until the personal
+program is installed again, without uninstalling or changing the app ID.
+
+Personal build: Actions > Settings > Developer > Enable temporary test. The normal screens
 remain, with a small DEV indicator and Dev Tools:
 
 - 1× / 5× / 20× / 100× virtual clock; +1 hour / +1 day / +7 days.
@@ -114,13 +125,14 @@ These files are not evidence of a Garmin submission.
 
 ## Build and test (Windows)
 
-Accepted profiles cover Enduro 4/3, Enduro 2 via Garmin's Fenix 7X definition,
-Fenix 7/7S/7X/7X Pro, Fenix 8 Solar 47/51mm, Forerunner 265/955/965,
-Venu 3 and vivoactive 5. These are simulator-tested profiles, not physical-watch
-certification. Original Enduro is excluded for artwork RAM exhaustion; Fenix
-6X is excluded because its 32KB background budget crashes step reconciliation.
-See [current v0.5.1 evidence](docs/V0_5_1_VALIDATION.md), including memory;
-the [v0.4 matrix](docs/DEVICE_MATRIX.md) retains historical tests and SDK aliases.
+The manifest contains 47 accepted SDK profiles, including Fenix 6S Pro/6 Pro/
+6X Pro, all existing profiles and the accepted additions listed in
+[current results](docs/compatibility/sdk-results.csv). These are SDK/simulator
+results, not physical-watch certification. Older profiles use foreground
+catch-up to avoid the constrained background budget. Non-Pro Fenix 6/6S,
+Fenix 5 Plus variants and Venu 2 variants are excluded from this release for
+the documented failures or unfinished checks. Original Enduro retains its
+historical artwork RAM exclusion. Prior matrices remain historical evidence.
 
 Install Garmin Connect IQ SDK/device profiles and Java 17. Keep `developer_key`
 local and out of Git. With the SDK simulator open:
@@ -128,12 +140,11 @@ local and out of Git. With the SDK simulator open:
 ```powershell
 ./scripts/build.ps1
 ./scripts/run-simulator.ps1
-./scripts/build.ps1 -Tests -Output bin/v051-tests.prg
-./scripts/run-simulator.ps1 -Tests -Program bin/v051-tests.prg
-./scripts/device-matrix.ps1 -EvidencePrefix v051
-./scripts/unit-matrix.ps1 -EvidencePrefix v051
-./scripts/build.ps1 -Release -Output bin/v051-release.prg
-./scripts/build.ps1 -Export -Output bin/TekuTekuBeast-0.5.1.iq
+./scripts/build.ps1 -Owner -Tests -Output bin/v052-owner-tests.prg
+./scripts/run-simulator.ps1 -Tests -Program bin/v052-owner-tests.prg
+./scripts/unit-matrix.ps1 -Devices enduro4 -EvidencePrefix v052-owner
+./scripts/build.ps1 -Release -Output bin/v052-public-release.prg
+./scripts/build.ps1 -Export -Output bin/TekuTekuBeast-0.5.2.iq
 ```
 
 `scripts/check_project.py` is structural preflight, not a compiler. The internal

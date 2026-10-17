@@ -9,12 +9,12 @@ foreach($device in $Devices){
     $results=@($results | Where-Object {$_.device -ne $device})
     try {
         Write-Output "MATRIX UNIT BUILD $device"
-        & "$PSScriptRoot/build.ps1" -Device $device -Tests -Typecheck $Typecheck -Jungle $Jungle -Output "bin/matrix-$device-tests.prg"
+        & "$PSScriptRoot/build.ps1" -Owner -Device $device -Tests -Typecheck $Typecheck -Jungle $Jungle -Output "bin/matrix-$device-tests.prg"
         $unit=& "$PSScriptRoot/run-simulator.ps1" -Device $device -Tests -Program "bin/matrix-$device-tests.prg"
         $unit | Set-Content "$project/bin/$EvidencePrefix-$device-tests.log"
         if(!($unit -contains "PASSED (passed=$expectedTests, failed=0, errors=0)")){throw "Expected $expectedTests passing unit tests"}
         Write-Output "MATRIX LAYOUT BUILD $device"
-        & "$PSScriptRoot/build.ps1" -Device $device -Typecheck $Typecheck -Jungle $Jungle -Output "bin/matrix-$device.prg"
+        & "$PSScriptRoot/build.ps1" -Owner -Device $device -Typecheck $Typecheck -Jungle $Jungle -Output "bin/matrix-$device.prg"
         $layout=& "$PSScriptRoot/run-simulator.ps1" -Device $device -Program "bin/matrix-$device.prg"
         $layout | Set-Content "$project/bin/$EvidencePrefix-$device-layout.log"
         if(!($layout -match '^LAYOUT_AUDIT: \d+ scenes; 0 failures$')){

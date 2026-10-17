@@ -1,0 +1,7 @@
+<iq:manifest xmlns:iq="http://www.garmin.com/xml/connectiq" version="1">
+  <iq:application id="CEF052AC9C4A44198571ACD738AB2150" type="watch-app" name="@Strings.AppName" entry="PublicReleaseQA" launcherIcon="@Drawables.LauncherIcon" minApiLevel="3.2.0">
+    <iq:products><iq:product id="enduro4"/><iq:product id="fenix6spro"/></iq:products>
+    <iq:permissions><iq:uses-permission id="Background"/><iq:uses-permission id="UserProfile"/><iq:uses-permission id="Positioning"/></iq:permissions>
+    <iq:languages><iq:language>eng</iq:language></iq:languages>
+  </iq:application>
+</iq:manifest>

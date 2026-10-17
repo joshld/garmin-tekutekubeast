@@ -1,5 +1,36 @@
 # Build and simulator instructions
 
+## Current v0.5.2 public and personal builds
+
+Use `scripts/build.ps1` for release work. Its default compilation input excludes
+owner tools; `-Export -Owner` fails immediately. The canonical `source` tree is
+the owner implementation; direct compilation of `monkey.jungle` does not apply
+public exclusions. Never use that direct route to prepare a Store upload.
+
+```powershell
+# Public signed Store package (all advertised hardware parts)
+& scripts/build.ps1 -Export -Release -Output bin/TekuTekuBeast-0.5.2.iq
+# Personal signed Enduro 4 program with Developer Mode
+& scripts/build.ps1 -Owner -Release -Device enduro4 -Output bin/TekuTekuBeast-0.5.2-owner-enduro4.prg
+# Focused public unit checks; isolated QA identity, RAM-only fixture
+& scripts/build.ps1 -Tests -Device enduro4 -Jungle tests/release/monkey.jungle -Output bin/matrix-public-enduro4-tests.prg
+& scripts/run-simulator.ps1 -Tests -Device enduro4 -Program bin/matrix-public-enduro4-tests.prg
+```
+
+The historical unit/layout/Glance scripts explicitly select owner/QA input.
+For direct historical QA-harness builds use `-Owner`; `tests/release` is the
+dedicated public-input harness and must omit that switch.
+Default gradual typechecking is level 0; native compilation/linking and tests
+remain required. Level 1 did not finish in the prior focused build window.
+Legacy resource/scope generation runs automatically for exports and constrained
+profiles. Public source generation fails on changed exclusion boundaries.
+
+Public and personal programs retain the same production ID and signing key.
+They update the same installation. A Store update replaces an owner program and
+removes DEV; reinstall the signed personal program as an update to regain it.
+Do not uninstall or introduce a second ID to switch builds. Physical-watch
+switching/save acceptance remains an owner check; no automatic watch install runs.
+
 This is a native Garmin Connect IQ **watch app**, primarily tested on **Enduro 4**.
 See [v0.5.1 validation](V0_5_1_VALIDATION.md) for current work and accepted profiles;
 the [v0.4 device matrix](DEVICE_MATRIX.md) is historical evidence. Steps
@@ -16,7 +47,7 @@ import is needed. Passive and care growth are separate from genuine watch XP.
    the Monkey C extension can generate a key. Keep it private, backed up and
    out of version control; local `developer_key` is ignored.
 
-## Windows v0.5.1 build and regression
+## Historical Windows v0.5.1 workflow
 
 The checked-in PowerShell scripts use the SDK selected by Garmin's SDK Manager
 and Java 17. Build outputs and test logs are ignored under `bin/`.
@@ -33,16 +64,15 @@ and Java 17. Build outputs and test logs are ignored under `bin/`.
 ```
 
 Internal unit/layout/Glance harnesses have isolated QA IDs and in-memory saves.
-Never upload those QA binaries. The production app contains the actual
-Developer Mode; no second user-facing app is required. See
+Never upload those QA binaries. v0.5.1 contained Developer Mode; current public
+builds exclude it, with the same in-app tools retained in personal builds. See
 [v0.5.1 validation](V0_5_1_VALIDATION.md) for executed tests and hardware limitations.
 
-The normal build explicitly uses gradual type checking (`-Typecheck 1`). The
-large all-profile runtime matrix/export may use `-Typecheck 0` to avoid repeating
-the same slow common-code inference per hardware part; it still uses Garmin's
-actual compiler/linker and executes every profile's tests/rendering. A separate
-gradual-checked production build is required in the release record. Historical
-v0.4/v0.5 evidence is not overwritten or renamed to the new version.
+Current builds default to `-Typecheck 0`, using Garmin's actual compiler/linker
+and focused native tests. Optional level 1 did not complete in the focused
+v0.5.2 window and is not claimed as a pass. Historical v0.4/v0.5/v0.5.1 evidence
+is not overwritten or renamed to the new version. Do not reuse the historical
+release filenames below for a current Store upload.
 
 Landscape assets are prepared at build time, never on the watch:
 
