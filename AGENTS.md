@@ -1,84 +1,49 @@
 # TekuTekuBeast — Codex project instructions
 
-## Default testing: Enduro 4 only
-- Treat `enduro4` as the **only default device** for routine development, bug fixes, artwork, animation, gameplay and small updates.
-- Use focused Enduro 4 builds, unit tests, layout tests and simulator checks relevant to changed code.
-- **Do not run multi-device matrices by default.** In particular, do not invoke `scripts/device-matrix.ps1`, `scripts/glance-matrix.ps1` or any equivalent all-profile test in ordinary Codex tasks.
-- Keep full compatibility tooling, existing device entries in `manifest.xml`, and historical validation evidence intact. Not testing other profiles in a routine task does not revoke their compatibility.
+## 1. Scope and delivery
+- Define the requested deliverable and minimum acceptance criteria; make the smallest coherent change that fully meets them.
+- Finish the requested work before exploring optional devices, features, refactors or repository-wide audits. Record worthwhile unrelated ideas as follow-up issues instead.
+- Once acceptance criteria pass, prioritise necessary validation, a safe commit/push and the requested artifact or exact path. Stop optional investigation.
+- Ask before starting substantial out-of-scope work. If blocked by an external service, make a reasonable diagnostic attempt, then report the blocker rather than retrying indefinitely.
+- Do not trade correctness, security, saved progress or meaningful testing for token savings.
 
-## Exceptions: broaden tests deliberately
-- Run additional profiles when explicitly asked to test compatibility, when adding a device, when fixing a device-specific defect, or when a concrete high-risk API/display/memory change requires a targeted extra check.
-- Reserve the **full supported-device matrix** for explicit owner approval or a demonstrated major cross-device risk; a routine public release does not automatically require it.
-- Explain the reason and scope *before* an expensive multi-device run; seek user approval before the full matrix.
-- Do not claim devices were revalidated unless they actually passed the relevant tests.
+## 2. Device testing and compatibility
+- **Default: Enduro 4 (`enduro4`) only** for routine changes. Run focused builds, unit/layout tests and simulator checks relevant to the changed functionality.
+- Do **not** routinely invoke `scripts/device-matrix.ps1`, `scripts/glance-matrix.ps1` or equivalent full multi-device suites.
+- For Fenix 6-generation changes, test `fenix6spro` (or the actually affected SDK profile) plus `enduro4`. For touch/input, display, API, memory or background risks, add only relevant representative affected profiles.
+- Before adding each newly advertised watch SDK product/profile to `manifest.xml`, validate its build, memory, controls, layout and background behavior as applicable. Never advertise an unvalidated model or claim unexecuted tests passed.
+- Reuse previously passing SDK/simulator evidence when relevant implementation, SDK, dependencies and configuration have not changed. Rerun tests when those inputs change or regression risk justifies it. Keep essential coverage; disclose untested areas.
+- **Always ask the owner before running a full cross-device simulator/test matrix**, even for major changes or releases. Explain the risk and proposed scope first. Keep all existing compatibility scripts, manifest entries and historical evidence; skipping tests does not revoke support.
 
-## Risk-based compatibility and release validation
-- Treat previously passing per-device SDK/simulator evidence as reusable when the relevant code, dependencies, device configuration and SDK have not changed. Do not repeat complete device suites merely because a release is being prepared.
-- Routine changes: focused `enduro4` tests only. For Fenix 6-generation changes, test `fenix6spro` (or the exact affected SDK profile) plus `enduro4`. For input/touch, graphics, memory, background or API risks, add only representative affected profiles.
-- Adding advertised watch models requires initial targeted validation of each new SDK product/profile, including appropriate memory, UI/input and background checks. Untested products must not be advertised.
-- Public or minor release: perform the necessary signed Store package export for **all advertised hardware parts**, package identity/signature/integrity checks, and *targeted* regression simulator checks appropriate to changed code. Exporting all parts is not the same as running every simulator/layout test.
-- A complete cross-device simulator matrix is not an automatic release gate. Run it only with explicit owner approval, or when justified by a major architectural/cross-device change; explain scope and ask first. Preserve the full-suite tooling for that occasion.
-- Keep a concise record of validation provenance, profiles actually tested, previously validated profiles reused, and anything not verified. Never claim an unexecuted test passed.
+## 3. Release and validation
+- For a public/minor release, export the signed Store package for **every advertised hardware part**, verify application identity, signing and artifact integrity, and run targeted risk-based regressions. Compiling all parts is **not** the same as running the complete simulator matrix.
+- Preserve the full release-validation tooling for explicitly approved use, without making an exhaustive suite the automatic release gate.
+- Simulators and SDK counters do not establish physical-watch acceptance, battery life or OS behavior; identify real-hardware gaps accurately.
+- Never upload or publish to Garmin Connect IQ without explicit owner approval.
 
-## Conserve Codex time and context
-- Prefer the smallest meaningful test set; don't repeat already-passing tests when their relevant inputs have not changed.
-- Keep verbose compiler/simulator output in local ignored log files; report a concise summary (command, profile, pass/fail, meaningful errors).
-- Avoid huge repetitive matrix transcripts in responses.
-- Tests must not be skipped entirely: run focused Enduro 4 checks where feasible and report unverified areas.
+## 4. Efficient investigation and implementation
+- Inspect directly relevant files first; prefer targeted searches over dumping full source files. Expand only when evidence warrants it.
+- Do not reread unchanged files, rediscover documented build commands or repeat successful investigations without reason.
+- Reuse existing helpers, artwork, scripts and conventions. Avoid unrelated refactoring or rewriting working code without a concrete need.
+- Resolve routine implementation details independently; ask about material ambiguity or player-data risk.
+- Only capture screenshots and perform specialized Glance, background or migration tests when relevant.
 
-## Efficient repository exploration
-- Begin with files directly relevant to the request; use targeted searches instead of dumping whole large files.
-- Avoid rereading unchanged files or rediscovering documented commands during the same task.
-- Broaden investigation only when evidence indicates a wider impact.
+## 5. Milestones and interrupted sessions
+- Split large tasks into reviewable, independently useful milestones. Commit/push **validated and coherent** milestones rather than accumulating large uncommitted changes.
+- Never push broken or unvalidated intermediate work to `main`; keep incomplete changes local or use an appropriate feature branch.
+- Keep a short checkpoint of completed changes, evidence/log paths, unfinished checks and blockers.
+- After interruption, inspect Git status, recent commits, existing outputs, checkpoints and logs **before** restarting work. Reuse valid passing results.
+- As session limits approach, prioritize a safe checkpoint, essential validation and deliverables over optional polish.
 
-## Efficient implementation
-- Make the smallest coherent change that completely addresses the request; avoid unrelated refactors or features.
-- Reuse existing helpers, artwork, scripts and conventions when appropriate.
-- Do not rewrite working solutions without a specific correctness or design reason.
-- Resolve routine details independently; ask only about material ambiguity, safety, or player-data impact.
+## 6. Documentation and reporting
+- Update documentation only where behavior or workflow actually changes; reserve extensive release notes, screenshots, matrices and evidence bundles for release preparation.
+- Keep verbose build/test logs in ignored local files. Avoid repetitive transcripts, duplicate screenshots and overlapping reports.
+- Give progress updates at meaningful milestones or blockers. Completion summary: changed behavior/files, test scope/outcome, exact artifact path, commit SHA and remaining limitations.
+- Maintain one concise current validation record referencing existing detailed evidence; distinguish new results from reused results.
 
-## Focused validation
-- Run only relevant unit, layout and simulator checks for changed functionality, defaulting to Enduro 4.
-- Run unrelated Glance, background or migration suites only if changes could plausibly affect them.
-- Rerun passed tests only when relevant code, inputs or environment changed.
-- Generate screenshots when the change requires visual review, not routinely.
-- Preserve important regression coverage; explicitly identify what was not tested.
-
-## Documentation and communication
-- Update documentation that actually changes; reserve exhaustive release notes, device matrices and evidence bundles for release preparation.
-- Keep final reports short: changed behaviour/files, focused test outcome, and remaining risks.
-- Store verbose logs in ignored local files; include only meaningful failures and concise pass/fail results.
-- Keep the requested scope first; record unrelated improvement ideas as future issues, not surprise implementation.
-- Never trade correctness, persistence integrity or necessary testing for token savings.
-
-## Deliverable-first workflow
-- Establish the requested deliverable and minimum acceptance criteria; finish them before expanding optional scope.
-- Once essential checks pass, prioritise final verification, commit, push and the requested artifact/path.
-- Do not keep exploring additional watch models, enhancements or refactoring after acceptance without owner approval.
-- Do not turn focused changes into repository-wide audits.
-
-## Milestone checkpoints and interruption recovery
-- Split substantial tasks into independently useful, reviewable milestones; commit and push completed, validated milestones rather than holding everything until the end.
-- Do not push broken or unvalidated intermediate work to the production branch; preserve incomplete changes locally or on a suitable feature branch instead.
-- Keep a concise checkpoint of completed work, remaining validation, blockers and output artifacts for interruption recovery.
-- On resume, inspect Git status, existing generated outputs, latest commits and saved test logs first. Reuse valid passing evidence instead of rerunning it automatically.
-
-## Stop conditions and efficient delivery
-- Stop optional investigation when the defined acceptance criteria are satisfied.
-- After a reasonable diagnostic attempt at a blocked external service, report the blocker instead of retrying indefinitely.
-- Ask before starting a substantial investigation outside the requested scope.
-- When nearing a session usage/time limit, prioritise a safe checkpoint and essential validation over optional polish.
-- Report progress only at meaningful milestones or blockers. Avoid duplicate screenshots, transcripts, comparison sheets and overlapping reports.
-- Maintain one concise current validation summary with links to existing detailed evidence; at completion give exact artifact path, commit SHA, test scope and outstanding limitations.
-- These efficiency rules never override necessary correctness, save integrity, security or meaningful regression testing.
-
-## Protect existing players
-- Never change production application ID `54A4F9D3B6584CA4B01C232D20438E5B` or signing identity without explicit approval.
-- Preserve real saves, genuine step-XP ledger, evolution, inventory, rewards and collections; keep Developer Mode state isolated.
-- Never uninstall/reset the production app or clear a player's Garmin Storage as a test shortcut.
-- Never publish/upload to Garmin Connect IQ without explicit user approval.
-- Simulator tests do not prove physical-watch battery life, OS behaviour or hardware acceptance.
-
-## Current workflow
-- Do not interrupt in-progress compatibility work or release packaging merely to apply this policy. Use these instructions for subsequent tasks.
-- See GitHub issue #9 for the broader compatibility roadmap and release test strategy.
+## 7. Application and player-data safety
+- **Never change the production application ID** `54A4F9D3B6584CA4B01C232D20438E5B` **or signing identity** without explicit approval.
+- Preserve real saves, migration compatibility, genuine step-XP and watermarks, evolution, inventory, rewards, collections and native Glance.
+- Keep Developer Mode test changes isolated from the real pet; public-release DEV exclusion is a separate required acceptance item (see issue #18).
+- Never uninstall/reset the production app or clear Garmin Storage to simplify testing.
+- Current compatibility and public-release priorities are tracked in GitHub issues #9 and #18; do not interrupt ongoing local Codex work solely to apply these instructions.
