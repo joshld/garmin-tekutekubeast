@@ -21,7 +21,7 @@ class WorldPreview extends TekuTekuBeastView {
             sceneInk=INK;dc.setColor(BG,BG);dc.clear();
             var bitmap=example==16?WatchUi.loadResource(Rez.Drawables.V4Pip0):WatchUi.loadResource(Rez.Drawables.HistoricalV050Pip);
             dc.drawBitmap(dc.getWidth()/2-bitmap.getWidth()/2,dc.getHeight()*0.70-bitmap.getHeight(),bitmap);
-            label(dc,y(dc,0.83),example==16?"v0.4 ORIGINAL PIXELS":"v0.5 ENLARGED PIXELS",Toybox.Graphics.FONT_XTINY);
+            label(dc,y(dc,0.83),example==16?"v0.4 PIXELS":"v0.5 PIXELS",Toybox.Graphics.FONT_XTINY);
         }
         if(scenery!=null){System.println("WORLD_RENDER: build="+scenery.buildMs+"ms cached="+scenery.cachedDrawMs+"ms memory="+System.getSystemStats().usedMemory);}
     }

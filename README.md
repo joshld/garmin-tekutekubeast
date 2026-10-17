@@ -4,7 +4,7 @@ A native, offline Garmin virtual-beast game. Grow through time, care and play;
 genuine watch activity adds growth and extra adventure opportunities. No phone,
 internet connection, exercise requirement, death or recovery-day punishment.
 
-**v0.5.1 beta candidate in final SDK validation.** Exact v0.4 creature pixels,
+**v0.5.1 signed beta candidate; focused Enduro 4 checks passed.** Exact v0.4 creature pixels,
 broader two-dimensional roaming, four outdoor environments, offline local
 sunrise/sunset skies, clearer memory cues and livelier Bounce timing are
 implemented. Battery work skips unchanged saves/redraws without changing real

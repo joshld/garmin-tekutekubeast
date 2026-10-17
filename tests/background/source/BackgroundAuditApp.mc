@@ -9,7 +9,7 @@ using Toybox.Time;
 // production service under the device's actual background VM budget.
 class BackgroundAuditView extends WatchUi.View {
     var model;
-    function initialize(){View.initialize();model=new TekuTekuBeastState();model.start();
+    function initialize(){View.initialize();System.println("BACKGROUND_LAUNCH: loading fixture");model=new TekuTekuBeastState();model.start();
         if(Storage.getValue("backgroundFixture")!=1){
             model.data["xp"]=123456l;model.data["birthEpoch"]=model.now()-50*86400;
             model.data["birth"]=model.dateKey(new Time.Moment(model.data["birthEpoch"].toNumber()));
@@ -41,5 +41,5 @@ class BackgroundAuditView extends WatchUi.View {
 (:background,:glance)
 class BackgroundAuditApp extends TekuTekuBeastApp {
     function initialize(){TekuTekuBeastApp.initialize();}
-    function getInitialView(){registerSteps();return [new BackgroundAuditView()];}
+    function getInitialView(){System.println("BACKGROUND_LAUNCH: registering callbacks");registerSteps();System.println("BACKGROUND_LAUNCH: registered");return [new BackgroundAuditView()];}
 }

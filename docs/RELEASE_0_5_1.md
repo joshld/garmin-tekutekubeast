@@ -1,7 +1,7 @@
 # TekuTekuBeast v0.5.1 beta
 
-Candidate preparation is in progress; final hashes and executed test coverage
-belong to `V0_5_1_VALIDATION.md` and the final verification record.
+Signed candidate prepared; final hashes and executed Enduro 4 test coverage
+are in `V0_5_1_VALIDATION.md` and `RELEASE_0_5_1_VERIFICATION.md`.
 No Garmin Store submission is performed without the owner's approval.
 
 ## What's changed
@@ -35,6 +35,8 @@ No Garmin Store submission is performed without the owner's approval.
 4. Set version **0.5.1**, retain beta/testing status, and paste the prepared
    What's New text. Review the additional Positioning permission: it is used for
    cached/approximate solar location only, with no GPS activation or transmission.
+   Review the listing's privacy disclosure too: rounded coordinates are now
+   retained locally on the watch. Prepared copy is in `art/store/v0.5.1/`.
 5. Submit only when the owner approves. After Garmin makes the beta update
    available, update the existing app through Connect IQ and sync the watch.
 6. Open it and check Settings > Version 0.5.1 beta, your pet/evolution, lifetime

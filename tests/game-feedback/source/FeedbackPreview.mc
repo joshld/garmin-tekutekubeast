@@ -10,6 +10,8 @@ class RepeatedMemory extends BeastGameView {
     function makeSequence(){BeastGameView.makeSequence();sequence[0]=0;sequence[1]=0;}
     function refresh() as Void {
         BeastGameView.refresh();var move=displayedMove();
+        // A player's input/retry wait is not an inter-cue blank interval.
+        if(phase!=1){lastMove=-99;gapAt=0;return;}
         if(phase==1 && move!=lastMove){
             var t=System.getTimer();if(move==-1){gapAt=t;}
             if(lastMove==-1 && move>=0){System.println("MEMORY_NEUTRAL_GAP: "+(t-gapAt)+"ms");}
