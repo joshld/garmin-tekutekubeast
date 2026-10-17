@@ -11,12 +11,14 @@ class BeastWorld {
     var prefs;var persisted=null;var store;var dev=false;var theme=-1;var checked=0l;
     var cacheKey=null;var days=null;var sample=[1,0.5,true];var minute=-1l;var activeDay=1;
     var source="FIXED 06-18";var preview=-1;var computations=0;
+    var draftLat=0.0;var draftLon=0.0;
     function initialize(beast){
         store=beast.store;dev=beast.dev;var saved=store.read("world.v1");
         prefs=saved==null?{}:store.copy(saved);
         var defaults={"environment"=>0,"locationMode"=>0,"lat"=>null,"lon"=>null,"at"=>0l,"manualLat"=>0.0,"manualLon"=>0.0,"manualSet"=>0};
         var keys=defaults.keys();for(var i=0;i<keys.size();i++){if(!prefs.hasKey(keys[i])){prefs[keys[i]]=defaults[keys[i]];}}
         persisted=store.copy(saved);
+        draftLat=prefs["manualLat"];draftLon=prefs["manualLon"];
     }
     function save(){if(!dev && !store.same(persisted,prefs)){var document=store.copy(prefs);store.write("world.v1",document);persisted=document;}}
     function invalidate(){cacheKey=null;minute=-1l;}
@@ -25,6 +27,13 @@ class BeastWorld {
         if(theme<0){theme=prefs["environment"]>0?prefs["environment"]-1:(family>0?family-1:day%4);}return theme;
     }
     function setTheme(value){prefs["environment"]=value;theme=-1;save();}
+    function confirmManual(){
+        // Editing is a foreground-only draft. Changing another setting or
+        // waiting for a sky refresh must not apply/save unconfirmed coordinates.
+        if(!BeastSky.valid(draftLat,draftLon)){return false;}
+        prefs["manualLat"]=draftLat;prefs["manualLon"]=draftLon;
+        prefs["locationMode"]=2;prefs["manualSet"]=1;invalidate();save();return true;
+    }
     function accept(lat,lon,at){
         if(!BeastSky.valid(lat,lon)){return false;}
         var roundedLat=Math.round(lat*100)/100.0;var roundedLon=Math.round(lon*100)/100.0;

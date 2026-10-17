@@ -77,6 +77,11 @@ function v05WorldSaveAndDateTest(logger){
     Test.assert(TestSupport.same(before,s.store.read("v4")));
     var reload=new TekuTekuBeastState();reload.store=s.store;reload.skipWatch=true;reload.testNow=s.testNow;reload.start();
     Test.assert(TestSupport.same(before,reload.data));
+    var confirmed=w.prefs["manualLat"];w.draftLat=-40.0;w.draftLon=-74.0;w.setTheme(2);
+    Test.assertEqual(s.store.read("world.v1")["manualLat"],confirmed);
+    var unconfirmed=new BeastWorld(s);Test.assertEqual(unconfirmed.draftLat,confirmed);
+    Test.assert(w.confirmManual());Test.assertEqual(s.store.read("world.v1")["manualLat"],-40.0);
+    Test.assert(TestSupport.same(before,s.store.read("v4")));
     var d=s.enableDev();var devBefore=s.store.copy(s.store.read("v4"));var dw=new BeastWorld(d);var prefs=s.store.copy(s.store.read("world.v1"));
     dw.prefs["locationMode"]=2;dw.prefs["manualSet"]=1;dw.prefs["manualLat"]=-40.0;dw.update(s.realNow(),false);dw.save();
     Test.assert(TestSupport.same(prefs,s.store.read("world.v1")));

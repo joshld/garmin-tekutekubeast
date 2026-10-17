@@ -106,7 +106,7 @@ class TekuTekuBeastView extends WatchUi.View {
         if(menu.equals("Outdoor world")){rows=["Environment: "+["AUTO","FOREST","MEADOW","LAKESIDE","GARDEN"][world.prefs["environment"]],"Sun / location"];if(beast.dev){rows.add("Sky preview");}}
         else if(menu.equals("Environment")){rows=["Family / neutral AUTO","Forest","Meadow","Lakeside","Garden"];}
         else if(menu.equals("Sun / location")){world.update(beast.realNow(),!beast.skipWatch);rows=["Location: "+["AUTO","SAVED","MANUAL","FIXED"][world.prefs["locationMode"]],world.source,"Rise "+world.eventText(0)+" Set "+world.eventText(1),"Read watch cache","Approx latitude","Approx longitude","No GPS activation","Moon: decorative arc",world.engine(),world.fixAge(beast.realNow())];}
-        else if(menu.equals("Approx latitude") || menu.equals("Approx longitude")){var coord=world.prefs[menu.equals("Approx latitude")?"manualLat":"manualLon"];rows=[coord.toFloat().format("%.1f")+" degrees","+1 degree","-1 degree","+0.1 degree","-0.1 degree","+10 degrees","-10 degrees","Use this location"];}
+        else if(menu.equals("Approx latitude") || menu.equals("Approx longitude")){var coord=menu.equals("Approx latitude")?world.draftLat:world.draftLon;rows=[coord.toFloat().format("%.1f")+" degrees","+1 degree","-1 degree","+0.1 degree","-0.1 degree","+10 degrees","-10 degrees","Use this location"];}
         else if(menu.equals("Sky preview")){rows=["Real local sky","Dawn","Day","Dusk","Night"];}
     }
     function clockText(minute){return (minute/60).format("%02d")+":"+(minute%60).format("%02d");}
@@ -216,9 +216,10 @@ class TekuTekuBeastView extends WatchUi.View {
             if(n==4 || n==5){openMenu(name);return true;}updateRows();WatchUi.requestUpdate();return true;
         }
         if(context.equals("Approx latitude") || context.equals("Approx longitude")){
-            if(n==7){world.prefs["locationMode"]=2;world.prefs["manualSet"]=1;world.invalidate();world.save();openMenu("Sun / location");return true;}
+            if(n==7){world.confirmManual();openMenu("Sun / location");return true;}
             if(n>0){var lat=context.equals("Approx latitude");var key=lat?"manualLat":"manualLon";var limit=lat?90:180;
-                world.prefs[key]=beast.max(-limit,beast.min(limit,world.prefs[key]+[0,1,-1,0.1,-0.1,10,-10][n]));}
+                var value=beast.max(-limit,beast.min(limit,(lat?world.draftLat:world.draftLon)+[0,1,-1,0.1,-0.1,10,-10][n]));
+                if(lat){world.draftLat=value;}else{world.draftLon=value;}}
             updateRows();WatchUi.requestUpdate();return true;
         }
         return false;
