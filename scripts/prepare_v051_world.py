@@ -8,7 +8,10 @@ from PIL import Image
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
-sizes = (240, 260, 280, 390, 416, 454)
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('--sizes', type=int, nargs='+', default=[240,260,280,390,416,454])
+sizes = parser.parse_args().sizes
 phases = ('Dawn', 'Day', 'Dusk', 'Night')
 themes = ('Forest', 'Meadow', 'Lakeside', 'Garden')
 def mip(v):
@@ -52,4 +55,4 @@ for size in sizes:
             ET.SubElement(tree.getroot(), 'bitmap', id=name, filename=f'drawables/{name}.png', dithering='none')
     ET.indent(tree, space='    ')
     tree.write(ROOT / f'resources-world{size}/drawables.xml', encoding='unicode')
-print('Prepared 4 original landscapes x 4 stepped palettes x 6 native display sizes, with transparent skies.')
+print(f'Prepared 4 landscapes x 4 palettes x {len(sizes)} native sizes; transparent skies.')

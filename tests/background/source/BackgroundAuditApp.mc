@@ -41,5 +41,11 @@ class BackgroundAuditView extends WatchUi.View {
 (:background,:glance)
 class BackgroundAuditApp extends TekuTekuBeastApp {
     function initialize(){TekuTekuBeastApp.initialize();}
-    function getInitialView(){System.println("BACKGROUND_LAUNCH: registering callbacks");registerSteps();System.println("BACKGROUND_LAUNCH: registered");return [new BackgroundAuditView()];}
+    function getInitialView(){
+        registerSteps();
+        System.println("CALLBACK_POLICY: deferred="+BeastCompatibility.deferred()+" steps="+Toybox.Background.getStepsEventRegistered());
+        // QA only: recreate an old registration to test its safe upgrade exit.
+        if(BeastCompatibility.deferred()){Toybox.Background.registerForStepsEvent();}
+        return [new BackgroundAuditView()];
+    }
 }

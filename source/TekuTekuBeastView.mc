@@ -78,7 +78,7 @@ class TekuTekuBeastView extends WatchUi.View {
     function updateRows(){
         if(menu.equals("Actions")){rows=beast.number("poop")>0?["Clean","Feed","Play","Pat","Rest","Collection","Settings"]:["Feed","Clean","Play","Pat","Rest","Collection","Settings"];rows.add(beast.isDark()?"Lights On":"Lights Off");if(beast.dev){rows.add("Dev Tools");}}
         else if(menu.equals("Feed")){rows=["Meal: "+beast.number("meals"),"Snack: "+beast.snacks()];}
-        else if(menu.equals("Settings")){rows=["Developer: "+(beast.dev?"ON":"OFF"),"Sound: "+(beast.number("sound")==0?"OFF":"ON"),"Vibration: "+(beast.number("haptics")==0?"OFF":"ON"),"Motion: "+["OFF","LOW","NORMAL"][beast.number("motion")],"Activity target: "+beast.number("target"),"Bedtime","Feedback test","Version 0.5.1 beta","Vibe: "+(beast.number("vibeStyle")==0?"GENTLE":"EXPRESSIVE"),"Outdoor world"];}
+        else if(menu.equals("Settings")){rows=["Developer: "+(beast.dev?"ON":"OFF"),"Sound: "+(beast.number("sound")==0?"OFF":"ON"),"Vibration: "+(beast.number("haptics")==0?"OFF":"ON"),"Motion: "+["OFF","LOW","NORMAL"][beast.number("motion")],"Activity target: "+beast.number("target"),"Bedtime","Feedback test","Version 0.5.2 beta","Vibe: "+(beast.number("vibeStyle")==0?"GENTLE":"EXPRESSIVE"),"Outdoor world"];}
         else if(menu.equals("Bedtime")){rows=["Schedule: "+["WATCH","MANUAL","OFF"][beast.number("sleepMode")],"Bed: "+clockText(beast.number("bedMinute")),"Wake: "+clockText(beast.number("wakeMinute")),"Auto lights: "+(beast.number("autoLights")==1?"ON":"OFF"),beast.number("sleepMode")==0?beast.data["sleepSource"]:"LOCAL SCHEDULE"];}
         else if(menu.equals("Feedback test")){rows=["Tone test","Vibration test",FeedbackManager.lastStatus,"Watch Alert Tones","must be ON for sound"];}
         else if(menu.equals("Set time")){rows=[];for(var hour=0;hour<48;hour++){rows.add(clockText(hour*30));}}
@@ -255,7 +255,13 @@ class TekuTekuBeastView extends WatchUi.View {
         dc.setColor(menu==null && page==0?sceneInk:INK,Graphics.COLOR_TRANSPARENT);dc.drawText(dc.getWidth()/2,y,font,shown,Graphics.TEXT_JUSTIFY_CENTER);
         var w=dc.getTextWidthInPixels(shown,font);return [dc.getWidth()/2-w/2,y,w,dc.getFontHeight(font),shown];
     }
-    function y(dc,fraction){return (dc.getHeight()*fraction).toNumber();}
+    function y(dc,fraction){
+        // 218px round displays need bottom text slightly higher: font height
+        // does not shrink with the screen, so the old chord clipped footers.
+        // Keep all existing 240px+ layouts exactly unchanged.
+        if(dc.getWidth()<240 && fraction>0.70){fraction=0.70+(fraction-0.70)*0.85;}
+        return (dc.getHeight()*fraction).toNumber();
+    }
     function loadSprite(){
         var s=beast.stage();var f=beast.family();if(s==spriteStage && f==spriteFamily){return;}spriteStage=s;spriteFamily=f;
         // Release the previous species before allocating its replacement. This

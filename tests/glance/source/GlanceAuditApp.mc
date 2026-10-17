@@ -10,9 +10,8 @@ class GlanceAuditView extends TekuTekuBeastGlanceView {
     function initialize(){TekuTekuBeastGlanceView.initialize();}
     function savedSummary(){
         if(payload==null){
-            var padding=new [1600];for(var i=0;i<padding.size();i++){padding[i]=0;}
             payload={"cachedName"=>"ECLIPSE EIDOLON","cachedMood"=>"STALE","cachedProgress"=>0.8,
-                "cachedSprite"=>0,"poop"=>0,"energy"=>80,"fullness"=>80,"happiness"=>90,"friendship"=>80,"padding"=>padding};
+                "cachedSprite"=>0,"poop"=>0,"energy"=>80,"fullness"=>80,"happiness"=>90,"friendship"=>80};
         }
         payload["cachedSprite"]=(scene/4).toNumber();payload["sleepMode"]=2;payload["energy"]=80;
         payload["poop"]=scene%2;payload["sleepUntil"]=0l;payload["lastCare"]=Time.now().value();

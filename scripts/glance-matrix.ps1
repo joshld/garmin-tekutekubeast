@@ -1,4 +1,5 @@
-param([string[]]$Devices=@('enduro4','enduro3','fenix7x','fenix7xpro','fenix8solar51mm','fenix8solar47mm','fenix7','fenix7s','fr265','fr965','venu3','vivoactive5','fr955'),[string]$EvidencePrefix='v05',[int]$Typecheck=0)
+# Quick/default: Enduro 4 only. Affected/full sets require explicit -Devices.
+param([string[]]$Devices=@('enduro4'),[string]$EvidencePrefix='v05',[int]$Typecheck=0)
 # Set the simulator's Settings > Glance Launch Mode to Glance before running.
 $project=Split-Path $PSScriptRoot -Parent
 $results=@()

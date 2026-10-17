@@ -30,17 +30,17 @@ class TimedBounce extends BeastGameView {
 }
 class FeedbackMenu extends WatchUi.View {
     var beast;var selection=0;var refresher=null;
-    function initialize(){View.initialize();beast=new ArtPreviewState();beast.previewStage=1;beast.data["sleepMode"]=2;beast.data["sound"]=0;beast.data["haptics"]=0;}
+    function initialize(){View.initialize();beast=new ArtPreviewState();beast.previewStage=1;beast.data["sleepMode"]=2;beast.data["sound"]=0;beast.data["haptics"]=0;beast.data["adventure"]=3;}
     function onShow(){Application.getApp().activeView=self;}
     function onHide(){}
     function onUpdate(dc){dc.setColor(0x005500,0xAAFFAA);dc.clear();
         dc.drawText(dc.getWidth()/2,dc.getHeight()*.20,Graphics.FONT_XTINY,"GAME TIMING QA",Graphics.TEXT_JUSTIFY_CENTER);
-        dc.drawText(dc.getWidth()/2,dc.getHeight()*.47,Graphics.FONT_XTINY,["REPEAT UP / UP","BOUNCE NORMAL","BOUNCE EASY"][selection],Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(dc.getWidth()/2,dc.getHeight()*.47,Graphics.FONT_XTINY,["REPEAT UP / UP","BOUNCE NORMAL","BOUNCE EASY","TINY ADVENTURES"][selection],Graphics.TEXT_JUSTIFY_CENTER);
         dc.drawText(dc.getWidth()/2,dc.getHeight()*.72,Graphics.FONT_XTINY,"SELECT TO OPEN",Graphics.TEXT_JUSTIFY_CENTER);}
     function selectAction(){beast.data["easy"]=selection==2?1:0;
-        var v=selection==0?new RepeatedMemory(beast):new TimedBounce(beast);
+        var v=selection==0?new RepeatedMemory(beast):(selection==3?new BeastGameView(beast,2):new TimedBounce(beast));
         WatchUi.pushView(v,new TekuTekuBeastInput(v),WatchUi.SLIDE_LEFT);}
-    function switchPage(delta){selection=(selection+delta+3)%3;WatchUi.requestUpdate();}
+    function switchPage(delta){selection=(selection+delta+4)%4;WatchUi.requestUpdate();}
     function back(){return false;}function touch(point){selectAction();}
 }
 (:background,:glance)
