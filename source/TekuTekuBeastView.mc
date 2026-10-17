@@ -217,7 +217,7 @@ class TekuTekuBeastView extends WatchUi.View {
         }
         if(context.equals("Approx latitude") || context.equals("Approx longitude")){
             if(n==7){world.confirmManual();openMenu("Sun / location");return true;}
-            if(n>0){var lat=context.equals("Approx latitude");var key=lat?"manualLat":"manualLon";var limit=lat?90:180;
+            if(n>0){var lat=context.equals("Approx latitude");var limit=lat?90:180;
                 var value=beast.max(-limit,beast.min(limit,(lat?world.draftLat:world.draftLon)+[0,1,-1,0.1,-0.1,10,-10][n]));
                 if(lat){world.draftLat=value;}else{world.draftLon=value;}}
             updateRows();WatchUi.requestUpdate();return true;

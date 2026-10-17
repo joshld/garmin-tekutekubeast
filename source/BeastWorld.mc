@@ -97,6 +97,6 @@ class BeastWorld {
         if(days==null){return "--:--";}if(days[activeDay][2]!=0){return days[activeDay][2]==1?"POLAR DAY":"POLAR NIGHT";}
         var t=Gregorian.info(new Time.Moment(days[activeDay][index].toNumber()),Time.FORMAT_SHORT);return t.hour.format("%02d")+":"+t.min.format("%02d");
     }
-    function engine(){return days!=null && days[activeDay].size()>3 && days[activeDay][3]==1?"GARMIN SOLAR API":"LOCAL SOLAR / FALLBACK";}
+    function engine(){return days!=null && days[activeDay].size()>3 && days[activeDay][3]==1?"GARMIN SOLAR API":"OFFLINE SOLAR";}
     function fixAge(now){return prefs["at"]>0?"FIX AGE: "+BeastSky.max(0,((now-prefs["at"])/86400).toNumber())+" DAYS":"FIX TIME UNKNOWN";}
 }
