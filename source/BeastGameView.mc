@@ -115,8 +115,13 @@ class BeastGameView extends TekuTekuBeastView {
         if(kind==0 && phase==1 || kind==2 && phase==5){artTick=tick;}
         else if(kind==1 && phase==1){artTick=displayedMove()+10*(elapsed/(tempo()+cueGap())).toNumber();}
         else if(kind==1 && phase==2 && scanning){artTick=(tick/6)%3;}
-        else if((phase==0 || phase==3) && motion>0){artTick=tick%24;}
-        else if(phase==0 && kind==2){artTick=(tick/8)%2;}
+        else if(phase==0){
+            // Match the actual idle pose/caption, not every timer tick. Keep
+            // advancing time normally; active games/results are unchanged.
+            artTick=motion>0 && tick%12<2?1:0;
+            if(kind==2){artTick+=2*((tick/8)%2);}
+        }
+        else if(phase==3 && motion>0){artTick=tick%24;}
         return phase+":"+artTick+":"+cursor+":"+round+":"+retries+":"+choice+":"+resultChoice+":"+hint+":"+score+":"+lane;
     }
     function period(){return BeastGameRules.period(beast.number("easy")==1,round);}

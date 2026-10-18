@@ -2,6 +2,51 @@ using Toybox.Test;
 using Toybox.Lang;
 
 (:test)
+class FailingBattleStore extends BeastStore {
+    var fail=false;
+    function initialize(){BeastStore.initialize();memory={};}
+    function write(key,value){
+        if(fail && key.equals("battle.v1")){throw new Lang.InvalidValueException("QA write failure");}
+        return BeastStore.write(key,value);
+    }
+}
+
+(:test)
+function battleSnapshotIsolationAndRetryTest(logger){
+    var s=TestSupport.fixture();s.data["stageFloor"]=1;s.data["sleepMode"]=2;s.store=new FailingBattleStore();
+    var fight=new BeastBattle(s);fight.beginBattle();var disk=s.store.copy(s.store.read("battle.v1"));
+    fight.data["xp"]=12;fight.data["active"]["actors"][0]["hp"]--;
+    Test.assert(TestSupport.same(disk,s.store.read("battle.v1")));
+    s.store.fail=true;var caught=false;
+    try{fight.commit();}catch(e instanceof Lang.InvalidValueException){caught=true;}
+    Test.assert(caught);Test.assert(TestSupport.same(disk,s.store.read("battle.v1")));
+    Test.assert(TestSupport.same(disk,fight.baseline));s.store.fail=false;fight.commit();
+    var saved=s.store.copy(s.store.read("battle.v1"));var writes=s.store.writes;fight.commit();Test.assertEqual(s.store.writes,writes);
+    fight.data["mastery"][0]=999;fight.data["active"]["actors"][0]["hp"]--;
+    Test.assert(TestSupport.same(saved,s.store.read("battle.v1")));Test.assert(TestSupport.same(saved,fight.baseline));
+    s.battleData=null;var restored=new BeastBattle(s);Test.assertEqual(restored.battleXp(),12);
+    Test.assertEqual(restored.data["mastery"][0],0);return true;
+}
+
+(:test)
+function idleGameVisualChangeTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;s.data["motion"]=2;
+    for(var kind=0;kind<3;kind++){
+        var game=new BeastGameView(s,kind);var previous=null;var expected=0;
+        for(var tick=4;tick<=120;tick+=4){
+            var visible=(tick%12<2?1:0)+(kind==2?2*((tick/8)%2):0);
+            if(previous==null || visible!=previous){expected++;}previous=visible;
+            game.timerPeriod=1000;game.refresh();Test.assertEqual(game.tick,tick);
+        }
+        Test.assertEqual(game.gameRedraws,expected);Test.assert(game.refresher==null);
+        if(kind<2){Test.assertEqual(game.gameRedraws,20);} // same visible pose sequence, fewer redraws
+        game.phase=3;game.tick=4;var first=game.gameVisualKey();game.tick=8;Test.assert(!first.equals(game.gameVisualKey()));
+    }
+    var still=new BeastGameView(s,0);s.data["motion"]=0;still.timerPeriod=5000;
+    for(var i=0;i<10;i++){still.refresh();}Test.assertEqual(still.gameRedraws,1);return true;
+}
+
+(:test)
 function battlePortableRewardGoldenTest(logger){
     var rows=RuleVectors.battle_rewards();
     for(var i=0;i<rows.size();i++){

@@ -18,8 +18,11 @@ class BeastBattle {
     }
     function commit(){
         if(!beast.store.same(baseline,data)){
-            if(!beast.dev){beast.store.write("battle.v1",beast.store.copy(data));}
-            baseline=beast.store.copy(data);
+            // One independent snapshot serves both persistence and comparison.
+            // Live data remains separate; failed writes leave baseline intact.
+            var snapshot=beast.store.copy(data);
+            if(!beast.dev){beast.store.write("battle.v1",snapshot);}
+            baseline=snapshot;
         }
         beast.battleData=data;
     }

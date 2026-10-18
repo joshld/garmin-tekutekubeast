@@ -113,6 +113,15 @@ only `qa.fixture` / `qa.battle.0` through `.5` persist under the isolated matrix
 UUID, never either real app. The harness supplies encounters for playtesting;
 native tests, not this fixture supply, verify genuine discovery limits.
 
+`tests/runtime/monkey.jungle` is the bounded, RAM-only resource audit. Build with
+`-Owner -Device enduro4` to an ignored `bin/matrix-resource*.prg`, use Normal
+launch mode, then run it to completion. It samples five production renderers,
+counts deep-copy roots/containers and save writes, and advances idle-game
+callbacks without starting their timers. Heap samples include QA overhead and
+are lower bounds, not allocator-wide peaks; elapsed times are coarse SDK-host
+measurements. Use the SDK Active Memory report for compiled code/data and VM
+peak/object counters. Never publish this isolated matrix-identity harness.
+
 ## Static checks and fixtures
 
 ```powershell

@@ -1,6 +1,69 @@
 # Current source validation checkpoint
 
-Latest source work: Issue #20 battles, following Issue #17 `74b98a6`.
+Latest source work: Issue #23 resource audit, following Issue #20 `b6c3d6c`.
+
+## Issue #23 - resource efficiency and simplicity
+
+Baseline `b6c3d6c`, Enduro 4 / SDK 9.2 only. The isolated, RAM-only runtime
+audit uses production render/commit/refresh paths; one transaction per callback
+avoids measuring an unrealistic batch under the UI watchdog. Initial QA batching
+tripped that watchdog, not a production path. Five scenes render twelve times
+each; all retain their sprite references. Heap samples include instrumentation
+and are lower bounds, not allocator-wide peaks or physical power measurements.
+
+| Matched QA work | Baseline | Improved |
+| --- | ---: | ---: |
+| 30 changed battle commits: root deep copies | 60 | 30 |
+| Deep-copied dictionaries/arrays | 660 | 330 |
+| Necessary battle save writes | 30 | 30 |
+| Sampled transaction peak, bytes | 141,896 | 139,760 |
+| 100 unchanged commits: copies / writes | 0 / 0 | 0 / 0 |
+| Bounce / Memory idle redraws per 30 callbacks | 30 / 30 | 20 / 20 |
+| Trail idle redraws per 30 callbacks | 30 | 25 |
+| Battle renderer sampled peak, bytes | 150,208 | 150,224 |
+| Public-input compiled code / data, bytes | 67,466 / 27,976 | 67,475 / 27,976 |
+
+Battle commits now use one independent snapshot for Storage and comparison;
+mutable live data remains separate. Failure retains the previous baseline and
+disk record for retry. Mini-game start dirty keys follow actual pose/caption
+changes; timer cadence (1s), elapsed ticks, all animations, active games and
+results stay unchanged. No generic cache/framework, save schema or rule change.
+
+Pet/game renderer samples are effectively flat (+16 bytes): Pet 145,184 ->
+145,200; game starts 142,856 -> 142,872, of 781,976 usable bytes. Coarse changed
+commit work totaled 207 -> 106 ms in these SDK-host samples; render timings
+varied in both directions. Neither is a physical-watch CPU/battery benchmark.
+SDK Active Memory, separate public-input production-entry QA runs: observed
+foreground peak 131.5 -> 131.7 KiB, peak objects 334 -> 340, and zero new resource
+allocations on the last steady Pet update in both. These live saved-pet runs
+have different time/GC histories, not controlled whole-app peak comparisons.
+The compiled code/data rows above are exact SDK report values; `.prg` file size
+also includes assets and is not runtime RAM. No overall heap reduction claimed.
+
+Final checks: **67 native tests + 5 public tests pass**, including snapshot
+nested isolation, failed-write retry, unchanged commits, exact idle pose/caption
+transitions, reward/step integrity, save migrations, DEV and battle-v1 goldens.
+Signed public/owner foreground builds pass; public symbols exclude DEV, native
+tests/vectors and resource harnesses, while owner retains DEV. Fixture/data drift
+checks pass. Prior layout, Glance and background evidence is reused: rendering,
+geometry, resources and those VM scopes are unchanged. No Fenix 6S Pro rerun was
+warranted by these two foreground call-site changes; no matrix was run.
+
+Review found existing timer hide/inactive stops, dirty saves, one-layer scenery,
+sprite caches, minute/date/location astronomy cache and no-GPS policy sensible.
+Portable rule/data boundaries remain intact; no broad refactor was justified.
+Deferred, not assumed defects: hidden-parent sprite-handle retention, occasional
+full ID-catalog arrays, redundant Pet clear and maintenance-sensitive fail-closed
+public source transforms. Pet rendering / Issue #22 was not modified. Physical
+battery/callback frequency remains unmeasured (hardware acceptance in Issue #9).
+
+Logs: `bin/resource23-baseline.log`, `resource23-improved.log`,
+`resource23-final-unit-enduro4.log`, `resource23-public-tests.log`,
+`resource23-public-build.log`, `resource23-owner-build.log`. Compiled/peak/object
+figures were inspected in SDK Active Memory for the public-input QA programs.
+Both UUIDs/key configuration, all 72 names, v1 definitions/replay vectors, pet
+saves and existing public/private Store IQ hashes are unchanged. No release
+export, upload, publication, multiplayer or phone/firmware work occurred.
 
 ## Issue #20 - offline playtesting and polish
 
