@@ -18,6 +18,11 @@ check into a pass. Physical checks remain open unless explicitly confirmed.
   check location source/age, saved/manual/offline fallback and watch time-zone
   changes. Sunset must not force bedtime. Verify scheduled sleep/wake, morning
   reopening and virtual lights without changing the hardware backlight.
+- **Issue #21 lighting:** compare ON/OFF at night in each theme; beast, needs and
+  menus must remain readable in real MIP lighting. Check AUTO/selected/applied
+  labels, one-hour countdown, reopen persistence and expiry back to bedtime
+  behavior. ON must not wake a sleeping pet; OFF must not force sleep. Sun/moon
+  positions and the real sky must not change. No physical Issue #21 pass yet.
 - **Games and recovery:** distinguish repeated UP cues; judge normal/Easy Bounce
   fairness and button/touch response. Complete a three-stop adventure. Pause,
   suspend, reopen and replay without duplicate energy charges or rewards.

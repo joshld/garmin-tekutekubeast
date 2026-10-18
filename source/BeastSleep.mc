@@ -27,8 +27,18 @@ module BeastSleep {
         return inWindow(minuteAt(epoch),value(data,mode==0?"watchBed":"bedMinute",1320),value(data,mode==0?"watchWake":"wakeMinute",420));
     }
     function sleeping(data,epoch){return night(data,epoch) || value(data,"sleepUntil",0l)>epoch;}
+    // Existing save keys: lights=0 ON / 1 OFF, lightsUntil is absolute expiry.
+    // A clock rollback must not turn a one-hour override into a multi-day one.
+    function lightingMode(data,epoch){
+        var remaining=value(data,"lightsUntil",0l)-epoch;
+        if(remaining>0 && remaining<=3600){return value(data,"lights",0)==1?2:1;}
+        return 0; // AUTO; expiry is lazy/read-only, never a background save write.
+    }
+    function lightingMinutes(data,epoch){
+        return lightingMode(data,epoch)==0?0:((value(data,"lightsUntil",0l)-epoch+59)/60).toNumber();
+    }
     function dark(data,epoch){
-        if(value(data,"lightsUntil",0l)>epoch){return value(data,"lights",0)==1;}
+        var mode=lightingMode(data,epoch);if(mode!=0){return mode==2;}
         return value(data,"autoLights",1)==1 && night(data,epoch);
     }
     function mood(data,epoch){

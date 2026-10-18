@@ -98,7 +98,13 @@ class TekuTekuBeastState {
     function isNight(){return BeastSleep.night(data,now());}
     function isSleeping(){return BeastSleep.sleeping(data,now());}
     function isDark(){return BeastSleep.dark(data,now());}
-    function toggleLights(){data["lights"]=isDark()?0:1;data["lightsUntil"]=now()+3600;commit();}
+    function lightingMode(){return BeastSleep.lightingMode(data,now());}
+    function lightingMinutes(){return BeastSleep.lightingMinutes(data,now());}
+    function setLighting(mode){
+        if(mode<0 || mode>2){return;}
+        data["lights"]=mode==2?1:0;data["lightsUntil"]=mode==0?0l:now()+3600;commit();
+    }
+    function toggleLights(){setLighting(isDark()?1:2);}
     function calendarMoment(key){
         return Gregorian.moment({:year=>(key/10000).toNumber(),:month=>((key/100)%100).toNumber(),:day=>key%100,:hour=>0,:minute=>0,:second=>0}).value().toLong();
     }

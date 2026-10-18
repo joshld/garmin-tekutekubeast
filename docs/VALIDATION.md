@@ -1,6 +1,44 @@
 # Current source validation checkpoint
 
-Latest source: architectural milestones `3e75e22`, `6554747`, `386379b`.
+Latest source change: Issue #21 night lighting, after cleanup `bb35726`.
+
+## Issue #21 — night lighting
+
+- Explicit AUTO / ON / OFF, selected/applied labels, remaining minutes and silent
+  one-hour manual overrides. Existing save keys and bedtime preference retain
+  their meanings; no migration, fake activity or sleep-state mutation.
+- Native sprite dimming is capability-guarded; ON adds three local drawing
+  primitives. No new assets/buffers/resource loads for night ON/OFF, background
+  work, GPS, astronomy invalidations or timers. Cached tint options avoid
+  per-frame option allocation. Normal motion/lifecycle redraw cadence is retained.
+- Enduro 4 SDK 9.2: 39 native tests passed, including exact expiry, reopen, legacy
+  settings, clock rollback, no-op reads, DEV isolation and day/night independence.
+- Focused production-renderer QA: 70 scenes, zero layout failures; 32 cover all
+  four environments x four sky phases x ON/OFF, plus 38 menu rows. Sun/moon
+  coordinates stay unchanged and night toggles retain the terrain resource.
+  Peak foreground heap 124,384 / 781,976 bytes. Recorded scenery-pass timing
+  max 31 ms excludes local-light/sprite drawing; not a full-frame/battery benchmark.
+- Visually inspected actual simulator ON/OFF in all four nighttime environments
+  using the computer-use skill. Creature tint, unchanged sky and readable needs/
+  cleanup indicators were observed, not inferred from structural checks alone.
+- Structural preflight passed after correcting its stale pre-Issue-19 activity
+  lookups to the extracted modules. No runtime behavior changed for that repair.
+- Four public-input tests and signed Enduro 4 owner/public release-mode builds
+  passed. Symbol inspection confirms public DEV/test exclusion and retained
+  personal DEV. New local foreground programs are `bin/lighting21-owner-enduro4.prg`
+  and `bin/lighting21-public-enduro4.prg`; these are not Store exports.
+- Logs: `bin/lighting21-final-final-unit-enduro4.log`,
+  `lighting21-audit-final.log`, `lighting21-public-tests.log`,
+  `lighting21-owner-build.log`, `lighting21-release-build.log`.
+- Public/private UUIDs, key, version, manifest and both existing Store IQs are
+  unchanged; both recorded IQ SHA256 hashes were rechecked. No export, upload,
+  physical-watch test or other-device matrix.
+  Real-watch contrast and battery behavior still need owner acceptance; older
+  rendering fallback is guarded but was not simulator-tested in this scope.
+
+## Prior Issue #19 source checkpoint
+
+Architectural milestones `3e75e22`, `6554747`, `386379b`:
 Enduro 4 only: 37 native tests, four public tests, 473 layout scenes and signed
 foreground builds passed; native background callback results are below.
 These are prior executed checks, not reruns for documentation consolidation.

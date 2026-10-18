@@ -17,6 +17,15 @@ designs only when a specific historical decision is relevant.
 | Views/delegates | Drawing, artwork, input, timers and feedback. Glance uses its existing compact read-only cache. |
 | `BeastSleep` / `BeastSky` | Existing sleep/calendar and astronomy helpers. Sleep still depends on Garmin calendar/time APIs. |
 
+Lighting mode/expiry is read-only in `BeastSleep`, using the existing `lights`,
+`lightsUntil` and `autoLights` keys; State owns explicit setting commits. The
+view displays mode versus applied state; Scenery draws only a local light pool.
+Sprite tint options are cached per view and capability-guarded. Neither lighting
+rules nor rendering mutate `BeastWorld` astronomy caches or sleep settings.
+Garmin's [bitmap tint API](https://developer.garmin.com/connect-iq/api-docs/Toybox/Graphics/Dc.html#drawBitmap2-instance_function)
+is guarded by `has`; unsupported renderers keep the native sprite. No alpha
+framebuffer or GPU-only blending is required.
+
 ## Rule contracts
 
 - Epochs are integer Unix seconds; calendar days remain local `YYYYMMDD` keys.

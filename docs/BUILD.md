@@ -84,6 +84,12 @@ inspect memory/writes and reopen persistence. Fixture XP is not real activity.
 Never clear production Storage. Native Glance checks must use its restricted VM,
 not a full-app budget.
 
+For Issue #21 only, build `tests/lighting/monkey.jungle` with `-Owner -Device
+enduro4` to a separate QA `.prg`. Its 70-scene audit uses the isolated matrix ID
+and RAM saves. After PASS, tap previews/toggles lights, UP/DOWN changes themes
+and BACK changes sky phase; stop the QA VM to flush its runner log. These are
+fixture controls, not altered production button mappings.
+
 ## Static checks and fixtures
 
 ```powershell

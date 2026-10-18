@@ -18,6 +18,15 @@ class BeastScenery {
     function initialize(){}
     function release(){layer=null;layerKey=-1;}
     function pixel(dc,x,y,w,h,color){var u=dc.getWidth()/140.0;dc.setColor(color,Graphics.COLOR_TRANSPARENT);dc.fillRectangle((x*u).toNumber(),(y*u).toNumber(),Math.ceil(w*u).toNumber(),Math.ceil(h*u).toNumber());}
+    function clearing(dc,x,top,size,phase,lightsOff){
+        // Three static pixel-stepped pools, behind the unchanged native sprite.
+        // No alpha buffers, new assets, resource loads, timers or sky modification.
+        if(lightsOff || phase==1){return;}
+        var cx=x+size/2;var foot=top+size;var unit=(dc.getWidth()/140).toNumber();if(unit<1){unit=1;}
+        dc.setColor(0x005555,Graphics.COLOR_TRANSPARENT);dc.fillEllipse(cx-size*0.48,foot-size*0.24,size*0.96,size*0.30);
+        dc.setColor(0x555555,Graphics.COLOR_TRANSPARENT);dc.fillEllipse(cx-size*0.38,foot-size*0.18,size*0.76,size*0.22);
+        dc.setColor(0xAAAA55,Graphics.COLOR_TRANSPARENT);dc.fillRectangle(cx-size*0.27,foot-size*0.10,size*0.54,3*unit);
+    }
     function draw(dc,theme,sky,lightsOff){
         var started=audit?System.getTimer():0;var phase=sky[0];var terrain=lightsOff?3:phase;
         var key=theme*4+terrain;

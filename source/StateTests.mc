@@ -2,6 +2,49 @@ using Toybox.Test;
 using Toybox.Lang;
 
 (:test)
+function lightingModesPersistenceTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=1;s.data["bedMinute"]=1320;s.data["wakeMinute"]=420;
+    s.testNow+=((1320-BeastSleep.minuteAt(s.now())+1440)%1440)*60;s.data["lastCare"]=s.now();
+    s.commit();var original=s.store.copy(s.data);var xp=s.xp();
+    Test.assertEqual(s.lightingMode(),0);Test.assert(s.isDark());Test.assert(s.isSleeping());
+    s.setLighting(1);Test.assert(!s.isDark());Test.assert(s.isSleeping());Test.assertEqual(s.lightingMode(),1);
+    Test.assertEqual(s.lightingMinutes(),60);var until=s.number("lightsUntil");
+    var reload=new TekuTekuBeastState();reload.store=s.store;reload.skipWatch=true;reload.testNow=s.testNow+1800;reload.start();
+    Test.assertEqual(reload.lightingMode(),1);Test.assertEqual(reload.lightingMinutes(),30);Test.assert(!reload.isDark());
+    reload.testNow=until-1;Test.assertEqual(reload.lightingMinutes(),1);Test.assert(!reload.isDark());
+    var writes=s.store.writes;reload.testNow=until;
+    for(var i=0;i<100;i++){Test.assertEqual(reload.lightingMode(),0);Test.assert(reload.isDark());}
+    Test.assertEqual(s.store.writes,writes);Test.assertEqual(reload.xp(),xp);
+    reload.setLighting(2);Test.assert(reload.isDark());reload.setLighting(0);Test.assert(reload.isDark());
+    Test.assertEqual(reload.number("lightsUntil"),0l);Test.assertEqual(reload.data["items"].size(),original["items"].size());
+    // AUTO retains the existing bedtime-dimming preference, including disabled.
+    reload.data["autoLights"]=0;Test.assert(!reload.isDark());Test.assert(reload.isSleeping());
+    reload.setLighting(2);Test.assert(reload.isDark());reload.testNow-=7200;Test.assertEqual(reload.lightingMode(),0);
+    Test.assert(!reload.isDark());return true;
+}
+(:test)
+function lightingSkyAndMenusTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;s.commit();
+    var world=new BeastWorld(s);world.prefs["locationMode"]=3;var real=s.realNow();
+    real+=((720-BeastSleep.minuteAt(real)+1440)%1440)*60;
+    var sample=s.store.copy(world.update(real,false));var calculations=world.computations;
+    Test.assertEqual(sample[0],1);
+    var v=new TekuTekuBeastView();v.beast=s;v.openMenu("Actions");
+    Test.assert(v.rows[7].equals("Lights: AUTO"));v.selection=7;v.selectAction();Test.assert(v.menu.equals("Lighting"));
+    v.selection=2;v.selectAction();Test.assertEqual(s.lightingMode(),2);Test.assert(s.isDark());Test.assert(!s.isSleeping());
+    Test.assert(TestSupport.same(sample,world.update(real,false)));Test.assertEqual(world.computations,calculations);
+    var night=s.store.copy(world.update(real+43200,false));Test.assertEqual(night[0],3);
+    s.setLighting(1);Test.assert(TestSupport.same(night,world.update(real+43200,false)));s.setLighting(2);
+    v.openMenu("Lighting");Test.assert(v.rows[2].equals("* OFF: 1 hour"));Test.assert(v.rows[3].equals("Applied: OFF"));
+    var key=v.visualKey();s.testNow+=3600;v.refresh();Test.assertEqual(s.lightingMode(),0);
+    Test.assert(v.rows[0].equals("* AUTO"));Test.assert(v.rows[3].equals("Applied: ON"));Test.assert(!key.equals(v.visualKey()));
+    Test.assert(v.refresher==null);Test.assert(v.back());Test.assert(v.menu.equals("Actions"));
+    var d=s.enableDev();var saved=s.store.copy(s.store.read("v4"));d.setLighting(2);d.jump(1800);
+    Test.assertEqual(d.lightingMode(),2);Test.assert(TestSupport.same(saved,s.store.read("v4")));
+    return true;
+}
+
+(:test)
 function gameGoldenVectorsTest(logger){
     var rows=RuleVectors.games();
     for(var i=0;i<rows.size();i++){

@@ -1,6 +1,6 @@
 # Current gameplay and features
 
-Implemented behavior retained through v0.5.2 and the Issue #19 refactor.
+Implemented behavior through v0.5.2, the Issue #19 refactor and Issue #21 lighting.
 This is the current gameplay guide, not an implementation wishlist. Normal play
 is native and offline; activity is optional, with no death, lost XP, de-evolution
 or recovery-day punishment. See [current validation](VALIDATION.md) for tested
@@ -160,8 +160,22 @@ Tones must be enabled for sound. No background or bedtime alerts. Motion OFF/LOW
 
 Settings > Bedtime follows guarded watch upcoming/typical schedule values, with
 a configurable local fallback (22:00-07:00), MANUAL/OFF options and auto lights.
-Sleep restores energy lazily. Lights On/Off overrides only the virtual world for
-one hour; it never changes Garmin backlight or Sleep Focus. Watch schedule/API
+Sleep restores energy lazily. Actions > Lights shows the selected AUTO / ON / OFF
+mode, not an inverted suggestion based on current darkness. AUTO follows the
+existing Bedtime dim preference (renamed from Auto lights); disabling that
+preference leaves AUTO lighting on. ON and OFF are temporary one-hour overrides;
+the Lighting menu marks the selected mode and shows the applied state and minutes
+until AUTO. Choosing AUTO cancels an override immediately. Overrides survive
+closing/reopening and expire at their saved absolute deadline, without a timer
+or save write just for expiry. A clock rollback outside the one-hour window
+falls back to AUTO rather than extending the override indefinitely.
+
+At night ON keeps the native creature bright over a soft local pool; OFF removes
+the pool and dims the creature on tint-capable renderers, keeping needs/menus
+readable. Older renderers retain the original sprite with the same local-light
+distinction. No artwork is replaced. In daylight OFF dims foreground terrain,
+not the actual sky. Neither lighting mode changes sunrise/sunset, sun/moon
+positions, scheduled sleep, Garmin backlight or Sleep Focus. Watch schedule/API
 agreement still needs hardware testing; choose MANUAL if the reported source
 does not match the watch's actual schedule.
 

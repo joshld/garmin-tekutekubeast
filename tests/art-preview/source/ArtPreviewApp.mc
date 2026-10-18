@@ -27,7 +27,7 @@ class ArtLayoutAuditView extends TekuTekuBeastView {
     var peakMemory=0;var totalMemory=0;var sceneBuildMs=0;var sceneCachedMs=0;
 
     // Two bounded scenes per callback; no giant constructor or scene list.
-    var menuNames=["Actions","Feed","Settings","Developer","Discard DEV?","Dev Tools","Clock speed","Advance time","Force stage","Force family","Adjust needs","Set value","Animations","Balance settings","Play","Collection","Archive / new egg","Toys / accessories","Museum","Reset scenario","Bedtime","Feedback test","Set time","Outdoor world","Environment","Sun / location","Approx latitude","Approx longitude","Sky preview"];
+    var menuNames=["Actions","Feed","Settings","Developer","Discard DEV?","Dev Tools","Clock speed","Advance time","Force stage","Force family","Adjust needs","Set value","Animations","Balance settings","Play","Collection","Archive / new egg","Toys / accessories","Museum","Reset scenario","Bedtime","Feedback test","Set time","Outdoor world","Environment","Sun / location","Approx latitude","Approx longitude","Sky preview","Lighting"];
     var animationNames=["wander","hop","eat","sleep","clean","evolve","blink","look"];
     var messages=["HAPPY BEAST!","PATS: 3/3","ALL CLEAN!","ALL CLEAN","RESTING","FULL / NONE","REAL BEAST","TEST ITEMS","POOP TEST","CLEAN TEST","REST TEST","EVOLVE TEST","TEST RESET","TIME +","STAGE SET","FAMILY TEST","CUE TEST","RARE FORM!","BE A LEGEND","TRY TRAIL","NEW JOURNEY","BEAST KEPT","BOND: 70","NEED CHARM"];
     var menuCounts=[];var menuTotal=0;var sceneCount=0;

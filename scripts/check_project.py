@@ -48,12 +48,22 @@ if "Service" in source:
     check("function onSteps()" in source["Service"], "Missing step background callback")
     check("Background.exit" in source["Service"], "Missing background exit")
 if "State" in source:
-    for required in ["ActivityMonitor.getInfo()", "ActivityMonitor.getHistory()",
+    for required in ["GarminActivity.info()", "GarminActivity.history()", "BeastActivityRules.observe(",
                      'store.write("v4"', "function mastery()", "function syncToday()"]:
         check(required in source["State"], "Missing expected state feature: " + required)
     check('if(!dev)' in source["State"], "Missing DEV commit guard")
-    check('data["xp"]+=delta' in source["State"], "Missing genuine step ledger")
     check('"baseGrowth"' in source["State"], "Missing separate passive growth")
+
+# Issue #19 moved these responsibilities; validate the boundary, not stale text
+# inside State. This remains structural preflight, never gameplay verification.
+for module, features in {
+    "GarminActivity": ["ActivityMonitor.getInfo()", "ActivityMonitor.getHistory()"],
+    "BeastActivityRules": ['data["xp"]+=delta'],
+}.items():
+    path = SRC / (module + ".mc")
+    content = path.read_text(encoding="utf-8") if path.is_file() else ""
+    for feature in features:
+        check(feature in content, f"Missing {module} boundary feature: {feature}")
 
 check((ROOT / "monkey.jungle").is_file(), "Missing monkey.jungle")
 for module in ["BeastStore", "BeastArt", "BeastGameView", "FeedbackManager", "TekuTekuBeastGlanceView"]:
