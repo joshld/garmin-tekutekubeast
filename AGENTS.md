@@ -10,6 +10,9 @@
 - Define the requested deliverable and minimum acceptance criteria; make the smallest coherent change that fully meets them.
 - Finish the requested work before exploring optional devices, features, refactors or repository-wide audits. Record worthwhile unrelated ideas as follow-up issues instead.
 - Once acceptance criteria pass, prioritise necessary validation, a safe commit/push and the requested artifact or exact path. Stop optional investigation.
+- **Artifact-first device builds:** For physical-watch testing, check for an already-built valid signed target-device `.prg` and report its absolute path first; otherwise compile only that device (default `enduro4`). Do not export a multi-device `.iq` merely to test on a watch.
+- **Explicit approval for full `.iq` exports:** Do not initiate a multi-hardware Store export unless the owner specifically requests that package. Confirm intended private/public identity and output, then deliver the artifact/path as soon as it is ready, without optional tests or audits. After an interruption, check for the finished artifact before restarting. Never silently substitute a Store `.iq` for a device-test `.prg` or vice versa.
+
 - Ask before starting substantial out-of-scope work. If blocked by an external service, make a reasonable diagnostic attempt, then report the blocker rather than retrying indefinitely.
 - Do not trade correctness, security, saved progress or meaningful testing for token savings.
 
