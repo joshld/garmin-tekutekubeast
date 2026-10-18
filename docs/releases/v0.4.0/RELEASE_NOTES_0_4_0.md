@@ -1,4 +1,6 @@
 # TekuTekuBeast 0.4.0 - development beta
+> Version-specific release evidence, not everyday build instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 ## What's new
 
@@ -39,4 +41,4 @@ Running activity type is not inferred; real steps and supported minutes/pushes
 are used. See [validation](V0_4_VALIDATION.md) for detailed evidence and limits.
 
 Copy-ready store text and the replacement cover are maintained in
-[art/store/v0.4](../art/store/v0.4/README.md).
+[art/store/v0.4](../../../art/store/v0.4/README.md).

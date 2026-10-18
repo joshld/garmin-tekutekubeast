@@ -1,4 +1,6 @@
 # TekuTekuBeast 0.5.0 beta candidate
+> Version-specific release evidence, not everyday build instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 ## What's new
 

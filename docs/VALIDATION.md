@@ -1,4 +1,20 @@
-# Issue #19: incremental cleanup checkpoint
+# Current source validation checkpoint
+
+Latest source: architectural milestones `3e75e22`, `6554747`, `386379b`.
+Enduro 4 only: 37 native tests, four public tests, 473 layout scenes and signed
+foreground builds passed; native background callback results are below.
+These are prior executed checks, not reruns for documentation consolidation.
+
+Release artifacts and per-device evidence are separate from current source:
+
+- [Compatibility guide and CSV](COMPATIBILITY.md): recorded 47-profile expansion.
+- [Public v0.5.2 artifact/identity](releases/v0.5.2/PUBLIC_RELEASE_0_5_2.md) and
+  [private Developer Beta export](releases/v0.5.2/DEVELOPER_BETA_0_5_2.md): exact hashes.
+- Earlier [v0.5.1](releases/v0.5.1/V0_5_1_VALIDATION.md),
+  [v0.5.0](releases/v0.5.0/V0_5_VALIDATION.md),
+  [v0.4.0](releases/v0.4.0/V0_4_VALIDATION.md) and
+  [raw v0.5 logs](validation/v0.5/README.md): historical evidence only.
+- [Watch acceptance](WATCH_ACCEPTANCE.md): user reports and unresolved hardware checks.
 
 Scope: behavior-preserving portability preparation after v0.5.2. No release,
 new devices, Store upload or work on #21/#17/#20. See [code map](ARCHITECTURE.md).
@@ -45,6 +61,8 @@ Committed/pushed as `6554747`.
 
 ## Milestone 3 — mini-game calculation boundary
 
+Committed/pushed as `386379b`.
+
 - Extracted timing, cue selection, seeded random/trail transitions and loot
   selection into `BeastGameRules`. Input, rendering, durable sessions, energy
   deductions, inventory updates and duplicate-claim prevention retain their
@@ -86,3 +104,16 @@ Both UUIDs, key, save schema, 47-profile manifest, version and signed v0.5.2
 release artifacts remain unchanged (both IQ SHA256 hashes rechecked). No
 physical-watch tests claimed. Other
 devices retain prior evidence; they were not rerun for this Enduro-only cleanup.
+
+## Documentation consolidation (Issue #19 final milestone)
+
+README/AGENTS route everyday work to seven current guides. Superseded plans
+are in `archive/`; versioned release/validation records are in `releases/`.
+Gameplay combines the former evolution guide and README feature detail;
+physical checklists now have one current owner. Historical hashes, raw logs,
+screenshots and compatibility CSV are preserved. All 175 local Markdown links/
+anchors passed; the guide inventory matches all 47 manifest profiles. Historical
+hashes/recorded numbers and the Markdown-only diff were checked; no SDK build,
+simulator, matrix, artifact export or watch/Store change was performed.
+Issue #19 has no essential remaining cleanup work; deliberate future seams
+and physical acceptance remain separate from this completed scope.

@@ -1,4 +1,6 @@
 # Private Developer Beta v0.5.2 IQ
+> Version-specific release evidence, not everyday build instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 Requested by the owner after public/developer identity separation. The private
 package updates the existing Developer Beta listing, with Developer Mode included.

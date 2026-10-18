@@ -1,4 +1,6 @@
 # v0.5.2: separate public application
+> Version-specific release evidence, not everyday build instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 Owner-authorized identity separation after the original same-UUID candidate.
 The earlier `TekuTekuBeast-0.5.2.iq` uses the Developer Beta UUID and must not be

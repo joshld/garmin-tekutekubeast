@@ -1,8 +1,10 @@
-# Mini-game redesign — character-driven fun and exploration
+# Mini-game redesign - character-driven fun and exploration
+> Historical design/plan, not current implementation instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 **v0.5 update:** the latest full-overhaul request supersedes the earlier
 stop-after-one-prototype workflow below. All three character-driven sessions are
-implemented together. [v0.5 validation](V0_5_VALIDATION.md) records the
+implemented together. [v0.5 validation](../../releases/v0.5.0/V0_5_VALIDATION.md) records the
 actual behaviour/tests; user-tested enjoyment is not claimed from SDK passes.
 
 ## Latest gameplay direction — FUN FIRST (supersedes rigid round designs)
@@ -81,4 +83,4 @@ Each title must be an understandable game with a beginning, multiple stages/turn
 3. Build Trail Treasure as real three-node expedition with onboarding, saved session and clear energy/item feedback.
 4. Balance and polish rewards/pet sprites, run regression and hardware QA.
 
-Companion docs: [current v0.4 gameplay](GAMEPLAY_V0_4.md), [SDK validations](V0_4_VALIDATION.md), [Codex roadmap](CODEX_V0_4_TASKS.md).
+Companion docs: [current v0.4 gameplay](../v0.4/GAMEPLAY_V0_4.md), [SDK validations](../../releases/v0.4.0/V0_4_VALIDATION.md), [Codex roadmap](../v0.4/CODEX_V0_4_TASKS.md).

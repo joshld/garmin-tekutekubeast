@@ -1,6 +1,44 @@
-# User-reported watch acceptance
+# Physical-watch acceptance and user reports
 
-## Latest v0.5.0 feedback / v0.5.1 boundary
+## Current acceptance checklist
+
+Simulator evidence is in [Validation](VALIDATION.md); it is not physical-watch
+acceptance. Keep completed reports below with app version/build hash, watch
+model/firmware, date, action and result where available. Do not turn an unreported
+check into a pass. Physical checks remain open unless explicitly confirmed.
+
+- **Safe update:** note pet/stage, genuine XP/history, friendship, inventory,
+  collections and settings before updating the matching app. Keep the existing
+  Developer Beta installed; public starts a separate pet. Never uninstall/reset
+  Storage or copy saves. Check both identities independently if dual-installed.
+- **Care and UI:** feed on a zero-step day, wait for poop, clean, pet/rest and
+  reopen. Check original-sized creatures, broad horizontal/vertical roaming,
+  circular boundaries, attention-only icons and direct-sunlight contrast.
+- **Scenery and sleep:** inspect four environments and real dawn/day/dusk/night;
+  check location source/age, saved/manual/offline fallback and watch time-zone
+  changes. Sunset must not force bedtime. Verify scheduled sleep/wake, morning
+  reopening and virtual lights without changing the hardware backlight.
+- **Games and recovery:** distinguish repeated UP cues; judge normal/Easy Bounce
+  fairness and button/touch response. Complete a three-stop adventure. Pause,
+  suspend, reopen and replay without duplicate energy charges or rewards.
+- **Real activity:** walk, reopen and reopen again; XP must increase once only.
+  Check daily rollover and relevant native sleep/wake/step callbacks. On deferred
+  profiles open daily for foreground catch-up; do not expect native watch-app
+  Glance launch on older CIQ 3.x. See [compatibility](COMPATIBILITY.md).
+- **Personal DEV only:** accelerate/test scenarios, discard/restart, and confirm
+  original progress plus genuine steps recorded during testing are restored.
+  Public Settings must not expose DEV controls.
+- **Glance and feedback:** verify sprite/name/mood/growth/poop, selection into the
+  game and inactivity timeout where supported. Check independent sound/haptic
+  settings, Alert Tones, DND and bedtime silence; system mute is not bypassed.
+- **Battery:** compare similar normal-use days and record app use/settings.
+  SDK timing/RAM does not establish real battery drain or OS event frequency.
+
+[Fenix 6S Pro installation](INSTALL_FENIX_6S_PRO.md) adds device-specific checks.
+Outstanding hardware checks belong to their respective features; they are not
+essential unfinished code-cleanup work in Issue #19.
+
+## Historical v0.5.0 feedback / v0.5.1 boundary
 
 The owner reports installing v0.5.0 on their physical Enduro 4. The enlarged
 creature was too big: restore the exact v0.4 pixels while expanding roaming
@@ -8,21 +46,21 @@ independently. They also report that consecutive identical memory cues look
 continuous and normal Bounce stars feel slow. These observations drive the
 v0.5.1 changes; they are not physical verification of the resulting candidate.
 
-The [v0.5.1 validation and physical checklist](V0_5_1_VALIDATION.md) records
-current SDK evidence and still-required watch checks, including cached-location
+The [v0.5.1 validation and physical checklist](releases/v0.5.1/V0_5_1_VALIDATION.md) records
+version-specific SDK evidence and still-required watch checks, including cached-location
 astronomy, sleep independence, progress preservation and comparable-day battery
 use. No agent-operated physical v0.5.1 test or Store submission is claimed.
 
 The records below remain historical reports, not superseding specifications.
 
-## Latest v0.4 hardware feedback / v0.5 boundary
+## Historical v0.4 hardware feedback / v0.5 boundary
 
 The user subsequently confirmed that vibration works but feels very short, and
 sound works when Garmin system Alert Tones are enabled and is blocked when those
 tones are disabled. These are v0.4 physical Enduro 4 findings, not v0.5 tests.
 The v0.5 changes respect that restriction; they do not bypass system tones or DND.
 New UI, sleep behaviour, games, feedback patterns and save upgrades still require
-the [v0.5 hardware checklist](V0_5_VALIDATION.md#physical-acceptance-still-required).
+the [v0.5 hardware checklist](releases/v0.5.0/V0_5_VALIDATION.md#physical-acceptance-still-required).
 
 ## Enduro 4 - v0.4 beta - 16 October 2026
 
@@ -63,5 +101,5 @@ not prove that all description, release-note and image changes were saved.
 No agent-operated Garmin upload or completed metadata-submission verification
 has occurred. The separate cover and copy changes do not require a new binary.
 
-See [release verification](RELEASE_0_4_0_VERIFICATION.md) for the unchanged signed
-package hashes and [simulator validation](V0_4_VALIDATION.md) for executed tests.
+See [release verification](releases/v0.4.0/RELEASE_0_4_0_VERIFICATION.md) for the unchanged signed
+package hashes and [simulator validation](releases/v0.4.0/V0_4_VALIDATION.md) for executed tests.

@@ -1,4 +1,6 @@
-# v0.5.1 beta — implementation and validation record
+# v0.5.1 beta - implementation and validation record
+> Version-specific release evidence, not everyday build instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 Current work record. Final device/artifact tables are filled from executed SDK
 runs, not inferred from the v0.5.0 record. Store publication is NOT authorised.

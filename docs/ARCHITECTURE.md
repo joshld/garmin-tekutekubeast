@@ -2,6 +2,9 @@
 
 This is the current code map, not a new platform implementation. Existing
 release validation records remain historical evidence.
+See [gameplay](GAMEPLAY.md) for behavior, [build/test](BUILD.md) for commands
+and [validation](VALIDATION.md) for the latest executed checks. Read archived
+designs only when a specific historical decision is relevant.
 
 | Boundary | Responsibility |
 | --- | --- |

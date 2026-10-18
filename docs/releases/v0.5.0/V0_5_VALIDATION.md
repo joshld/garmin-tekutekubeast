@@ -1,4 +1,6 @@
 # v0.5.0 beta candidate - implementation and acceptance
+> Version-specific release evidence, not everyday build instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 Implemented, built and SDK-tested beta candidate; physical acceptance remains
 open. This record distinguishes executed checks from outstanding checks.
@@ -12,19 +14,19 @@ then historical v0.4 specifications. A dated prototype workflow or old design
 instruction cannot override the comprehensive v0.5 implementation request.
 
 - Current behaviour/evidence: this document, `RELEASE_0_5_0.md`, `README.md`,
-  `BUILD.md` and the source/tests. `EVOLUTION_DESIGN.md` describes the retained
+  `../../BUILD.md` and the source/tests. `../../GAMEPLAY.md` describes the retained
   progression ledgers, not a request to restart them.
-- `MINIGAME_REDESIGN.md` retains the design discussion, but its earlier
+- `../../archive/v0.5/MINIGAME_REDESIGN.md` retains the design discussion, but its earlier
   stop-after-one-prototype workflow is superseded. Session length and rounds
   serve gameplay pacing, not a round-count compliance target. Three rewarded
   arcade sessions/day is a **reward cap**, never a round limit or play limit.
-- `GAMEPLAY_V0_4.md`, `CODEX_V0_4_TASKS.md`, `V0_4_REVIEW_AMENDMENTS.md` and
-  the old target tiers in `ACTIVITY_AND_GLANCE.md` are historical instructions.
+- `../../archive/v0.4/GAMEPLAY_V0_4.md`, `../../archive/v0.4/CODEX_V0_4_TASKS.md`, `../../archive/v0.4/V0_4_REVIEW_AMENDMENTS.md` and
+  the old target tiers in `../../archive/v0.4/ACTIVITY_AND_GLANCE.md` are historical instructions.
   Existing DEV, native Glance and the accepted 12-profile implementation were
   reviewed/extended, not replaced with new applications.
-- `V0_4_VALIDATION.md`, `RELEASE_0_4_0_VERIFICATION.md` and v0.4 release/artifact
+- `../v0.4.0/V0_4_VALIDATION.md`, `../v0.4.0/RELEASE_0_4_0_VERIFICATION.md` and v0.4 release/artifact
   records remain historical evidence. They are not relabelled as v0.5 results.
-- `WATCH_ACCEPTANCE.md` separates user-reported v0.4 hardware observations from
+- `../../WATCH_ACCEPTANCE.md` separates user-reported v0.4 hardware observations from
   still-unverified v0.5 hardware behaviour. System Alert Tones mute is respected.
 
 ## Scope and save contract

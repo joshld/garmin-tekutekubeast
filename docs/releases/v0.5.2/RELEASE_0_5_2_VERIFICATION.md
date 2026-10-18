@@ -1,4 +1,6 @@
 # v0.5.2 public beta release verification
+> Version-specific release evidence, not everyday build instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 **Historical same-UUID candidate. Do not use `TekuTekuBeast-0.5.2.iq` for a new
 public listing.** The subsequent owner-approved identity separation and correct
@@ -13,7 +15,7 @@ The v0.4/v0.5/v0.5.1 verification records are retained unchanged.
 
 47 advertised SDK profiles: existing 13 plus 34 accepted compatibility
 candidates. Exact IDs, measured simulator limits and exclusions are in
-[sdk-results.csv](compatibility/sdk-results.csv) and the production manifest.
+[sdk-results.csv](../../compatibility/sdk-results.csv) and the production manifest.
 Five failed profiles are excluded; three Venu 2 variants are held pending
 background/input acceptance. No new models were investigated during release
 completion and no complete simulator matrix was rerun.
@@ -77,7 +79,7 @@ have 33 tests/473 focused scenes. Existing profiles retain prior accepted
 evidence; they were not all rerun for this release.
 
 Native representative background/Glance evidence is recorded in
-[COMPATIBILITY_EXPANSION.md](COMPATIBILITY_EXPANSION.md): Fenix 6S Pro tiny
+[COMPATIBILITY_EXPANSION.md](../../COMPATIBILITY.md): Fenix 6S Pro tiny
 cleanup delegate 10,960 / 28,576 bytes, Enduro 4 normal background 43,272 /
 61,344 and compact Glance 33,304 / 61,344. Fenix 6S Pro simulator button input
 played all three games and opened the normal app entry; captures are linked
@@ -101,7 +103,7 @@ Physical acceptance remains: same-ID public/personal upgrade with real pet,
 actual step/background and sleep/wake delivery, Garmin Glance launch/timeout,
 Mum's controls/display, sound/haptics and battery. Keep #9/#18 open for those
 checks and Garmin listing/publication work. See
-[Mum's instructions](INSTALL_FENIX_6S_PRO.md) and [build commands](BUILD.md).
+[Mum's instructions](../../INSTALL_FENIX_6S_PRO.md) and [build commands](../../BUILD.md).
 
 ## Final signed artifacts
 

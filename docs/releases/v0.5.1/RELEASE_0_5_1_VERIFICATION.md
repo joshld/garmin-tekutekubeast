@@ -1,4 +1,6 @@
 # v0.5.1 signed beta candidate verification
+> Version-specific release evidence, not everyday build instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 17 October 2026. Runtime source: `3a2c013`; subsequent changes only affect QA,
 captures, records and merging the owner's root instructions. Not published.

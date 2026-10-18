@@ -1,4 +1,6 @@
 # v0.5.0 beta candidate - release artifact verification
+> Version-specific release evidence, not everyday build instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 Source freeze: `27ca7f1` (runtime code and interrupted-start recovery);
 `514bd97` expands the isolated QA layout harness. Documentation does not change the binary. Final builds

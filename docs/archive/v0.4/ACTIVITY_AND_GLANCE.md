@@ -1,20 +1,22 @@
-# TekuTekuBeast — Garmin targets, activity rewards and glance design
+# TekuTekuBeast - Garmin targets, activity rewards and glance design
+> Historical design/plan, not current implementation instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 **v0.5 implementation:** native Glance now shares sleep/mood rules and performs
 a bounded, read-only overnight care projection so missed wake callbacks do not
 leave stale SLEEPY text. Tiny Adventures replaces instant item rotation with
-three-stop, choice-driven whole expeditions. See [v0.5 evidence](V0_5_VALIDATION.md).
+three-stop, choice-driven whole expeditions. See [v0.5 evidence](../../releases/v0.5.0/V0_5_VALIDATION.md).
 The older design tiers below are retained history, not the current manifest.
 
 **Status: implemented v0.4 development beta.** These are original design tiers;
-see [validation](V0_4_VALIDATION.md) and [accepted profiles](DEVICE_MATRIX.md)
+see [validation](../../releases/v0.4.0/V0_4_VALIDATION.md) and [accepted profiles](../../releases/v0.4.0/DEVICE_MATRIX.md)
 for actual tests and physical-watch acceptance. Inclusive growth, shared
 step/minute/push rewards and the native Glance are in source.
 
 **Hardware update, 16 October 2026:** the user confirmed that TekuTekuBeast now
 appears in their physical Enduro 4 Glances list and Developer Mode is visible.
 Glance rendering, selection-to-game and session timeout checks are still open;
-see [WATCH_ACCEPTANCE.md](WATCH_ACCEPTANCE.md). The refresh action that resolved
+see [WATCH_ACCEPTANCE.md](../../WATCH_ACCEPTANCE.md). The refresh action that resolved
 the initially missing entry was not confirmed.
 
 ## 1. Watch compatibility plan

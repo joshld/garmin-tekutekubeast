@@ -1,4 +1,6 @@
 # v0.4 implementation and validation
+> Version-specific release evidence, not everyday build instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 ## Current beta - 16 October 2026
 
@@ -70,7 +72,7 @@ confirmed that TekuTekuBeast now appears in the Glances list. It was initially
 missing. The user did not identify which refresh action resolved this, so no
 specific sync/restart remedy is claimed verified. This is user-reported hardware
 evidence, not agent-operated physical-watch testing. See
-[WATCH_ACCEPTANCE.md](WATCH_ACCEPTANCE.md) for remaining checks.
+[WATCH_ACCEPTANCE.md](../../WATCH_ACCEPTANCE.md) for remaining checks.
 
 ### Resource budget and remaining hardware acceptance
 

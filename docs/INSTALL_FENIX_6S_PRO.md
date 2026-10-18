@@ -26,7 +26,7 @@ use an update of that existing installation once the owner approves publication.
    that first open are not retroactively turned into XP for a brand-new beast.
 
 The separate-UUID public `.iq` is intended for a new public listing; it does not
-update the existing Developer Beta. See `PUBLIC_RELEASE_0_5_2.md`. If the older
+update the existing Developer Beta. See the [public identity record](releases/v0.5.2/PUBLIC_RELEASE_0_5_2.md). If the older
 same-UUID candidate was installed, its saved pet stays in that older app; the new
 public app starts a separate pet. Do not uninstall expecting progress to transfer.
 Do not mix a USB copy and Store copy or uninstall to switch methods if there is
@@ -56,13 +56,14 @@ where activity is deferred. GPS is never continuously enabled for scenery.
 
 ## First-watch check
 
-- Settings shows 0.5.2 beta; Pet, Care and Details fit the round display.
-- All buttons and three games work; BACK pauses and reopening resumes safely.
-- Feed, clean, rest and reopen; inventory/progress remain.
-- Walk normally, reopen, note XP; reopen again and verify no duplicate credit.
-- Leave overnight, reopen, check sleep/wake and elapsed growth.
-- Public Settings has no Developer Mode entry.
-- Check direct-sunlight contrast, optional sound/haptics and normal battery use.
+Use the shared [physical-watch checklist](WATCH_ACCEPTANCE.md#current-acceptance-checklist).
+On this model specifically confirm 0.5.2 beta in Settings, round-screen readability,
+all five-button inputs and daily foreground catch-up; launch from START/apps,
+not an unsupported native watch-app Glance.
+
+An iPhone cannot install the downloaded `.prg` by opening it. Use a computer for
+the USB instructions above, or install through the appropriate Connect IQ Store
+listing when the owner has published/approved it.
 
 Do not reset/uninstall the app as a troubleshooting shortcut. Report the exact
 watch software version and symptom if a check fails.

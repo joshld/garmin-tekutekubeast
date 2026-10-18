@@ -1,14 +1,16 @@
-# Codex execution plan — TekuTekuBeast v0.4
+# Codex execution plan - TekuTekuBeast v0.4
+> Historical design/plan, not current implementation instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 **Historical roadmap.** The v0.5 overhaul supersedes the small pet area, persistent
 species heading and one-round games described below. See
-[current implementation/validation](V0_5_VALIDATION.md); retain this document for
+[current implementation/validation](../../releases/v0.5.0/V0_5_VALIDATION.md); retain this document for
 design history, not as a statement that the new features remain doc-only.
 
 **Read [v0.4 review amendments](V0_4_REVIEW_AMENDMENTS.md) before implementation.** Prior step-only evolution assumptions are superseded. Add Developer Mode **inside the same installed watch app** (not a second Developer Lab application) and make every normal evolution possible at zero steps; activity provides extra items/rewards and only a modest growth advantage. Preserve current saves. Simplify the Pet screen by dropping the app title and shortening other screens.
 
 **Implementation status:** v0.4 gameplay, artwork, games and Glance are now in
-source. This preserves the original plan; [validation](V0_4_VALIDATION.md)
+source. This preserves the original plan; [validation](../../releases/v0.4.0/V0_4_VALIDATION.md)
 records completed tests and remaining physical-watch checks.
 
 ## Pet screen space and animation overhaul (user-requested priority)
@@ -37,7 +39,7 @@ Work in `D:\\working\\garmin-tekutekubeast` or `joshld/garmin-tekutekubeast` on 
 
 ## User-reported mini-game redesign priority (post-v0.4.0)
 
-Read [multi-round Star Catch, Memory Steps and Trail Treasure redesign](MINIGAME_REDESIGN.md). Existing games are too brief and Trail Treasure is an immediate reward selector rather than a playable adventure. Add repeatable multi-round sessions, clear results/replay, and three-node meaningful expeditions with one adventure-energy charge per trip and crash-safe state. Implement and test this before treating mini-games as polished. Current source unchanged by this document.
+Read [multi-round Star Catch, Memory Steps and Trail Treasure redesign](../v0.5/MINIGAME_REDESIGN.md). Existing games are too brief and Trail Treasure is an immediate reward selector rather than a playable adventure. Add repeatable multi-round sessions, clear results/replay, and three-node meaningful expeditions with one adventure-energy charge per trip and crash-safe state. Implement and test this before treating mini-games as polished. Current source unchanged by this document.
 
 ## Feature roadmap: Garmin Glance and inclusive activity rewards
 

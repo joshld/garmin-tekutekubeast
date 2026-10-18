@@ -1,5 +1,11 @@
 # TekuTekuBeast — Codex project instructions
 
+## Documentation routing
+- Start with the [README guide map](README.md#documentation); read only the relevant current guide, not every archived plan.
+- Current authority: [gameplay](docs/GAMEPLAY.md), [architecture/portability](docs/ARCHITECTURE.md), [build/test/package](docs/BUILD.md), [compatibility](docs/COMPATIBILITY.md), [physical acceptance](docs/WATCH_ACCEPTANCE.md), [latest validation](docs/VALIDATION.md). [Fenix 6S Pro installation](docs/INSTALL_FENIX_6S_PRO.md) is the device-specific companion.
+- `docs/archive/` holds superseded specifications/plans; `docs/releases/` holds version-specific notes, hashes and evidence. Neither overrides current guides or the latest owner request. Preserve historical evidence; do not read it unless relevant.
+- For documentation-only changes, check links, consistency and the docs-only diff; do not compile or run simulators/device matrices.
+
 ## 1. Scope and delivery
 - Define the requested deliverable and minimum acceptance criteria; make the smallest coherent change that fully meets them.
 - Finish the requested work before exploring optional devices, features, refactors or repository-wide audits. Record worthwhile unrelated ideas as follow-up issues instead.
@@ -48,4 +54,4 @@
 - Preserve real saves, migration compatibility, genuine step-XP and watermarks, evolution, inventory, rewards, collections and native Glance.
 - Keep Developer Mode test changes isolated from the real pet; public-release DEV exclusion is a separate required acceptance item (see issue #18).
 - Never uninstall/reset the production app or clear Garmin Storage to simplify testing.
-- Current compatibility and public-release priorities are tracked in GitHub issues #9 and #18; do not interrupt ongoing local Codex work solely to apply these instructions.
+- Follow the latest requested issue scope; #9/#18 release records are historical context, not authorization to restart compatibility expansion or packaging.

@@ -27,5 +27,5 @@ not a gameplay screenshot. No artwork or binary has been uploaded for v0.5.
 All JPEG captures are below 150 KB. The final adventure-label correction does
 not change the Pet or memory layouts shown in those checkpoint captures.
 
-See [release notes](../../../docs/RELEASE_0_5_0.md) and
-[v0.5 validation](../../../docs/V0_5_VALIDATION.md) for final build/test scope.
+See [release notes](../../../docs/releases/v0.5.0/RELEASE_0_5_0.md) and
+[v0.5 validation](../../../docs/releases/v0.5.0/V0_5_VALIDATION.md) for final build/test scope.

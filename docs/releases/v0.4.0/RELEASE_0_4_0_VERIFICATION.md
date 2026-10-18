@@ -1,4 +1,6 @@
 # 0.4.0 signed beta verification
+> Version-specific release evidence, not everyday build instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 Built 16 October 2026 with SDK 9.2.0, Java 17 and the existing private signing
 key. Source includes the final reaction-navigation fix `fe96ba5`; the production
@@ -35,11 +37,11 @@ On 16 October 2026 the user reported Developer Mode visible on their watch and
 confirmed that TekuTekuBeast now appears in their Enduro 4 Glances list.
 Actual-user save migration, Glance selection-to-game/rendering/timeouts, real
 sensor sessions, audible tones, vibration and battery life remain hardware
-acceptance checks. See [the acceptance log](WATCH_ACCEPTANCE.md). Update the same
+acceptance checks. See [the acceptance log](../../WATCH_ACCEPTANCE.md). Update the same
 beta installation without uninstalling; do not replace it with an isolated QA app.
 
 The subsequent store-art/documentation update does not change the application
 binary or the hashes recorded above. Store assets and copy live in
-[art/store/v0.4](../art/store/v0.4/README.md). The user reported a Garmin submission
+[art/store/v0.4](../../../art/store/v0.4/README.md). The user reported a Garmin submission
 error followed by the dashboard showing 0.4.0; successful saving of all listing
 metadata has not been independently verified.

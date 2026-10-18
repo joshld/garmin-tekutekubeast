@@ -1,4 +1,6 @@
 # TekuTekuBeast v0.5.1 beta
+> Version-specific release evidence, not everyday build instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 Signed candidate prepared; final hashes and executed Enduro 4 test coverage
 are in `V0_5_1_VALIDATION.md` and `RELEASE_0_5_1_VERIFICATION.md`.

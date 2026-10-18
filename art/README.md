@@ -14,7 +14,8 @@ transformations run on the watch.
 Only the current Pet's eight poses (six plus two mirrored) are loaded; the egg
 shares a single bitmap. `scripts/verify_v051_art.py` checks 480 Pet variants
 against historical v0.4 pixels and verifies unchanged game/Glance assets.
-See [current evidence](../docs/V0_5_1_VALIDATION.md).
+See [current source validation](../docs/VALIDATION.md) and the
+[original scenery evidence](../docs/releases/v0.5.1/V0_5_1_VALIDATION.md).
 
 Four original transparent pixel-art landscape layers are in `source/v051`.
 [V0_5_1_PROMPTS.md](V0_5_1_PROMPTS.md) records generation and reference roles.
@@ -65,8 +66,10 @@ The internal `tests/art-preview` / `tests/matrix` harness renders two scenes per
 callback and checks native-font bounds, overlap and truncation across species,
 poses, menus, game phases, large counters and feedback. It uses an isolated QA
 application ID and an in-memory model; it is not the on-watch Developer Mode.
-Developer Mode is inside the production app and uses its normal screens.
+Developer Mode is inside personal/owner builds and uses their normal screens;
+public builds compile it out. See [build separation](../docs/BUILD.md).
 
-See [v0.5.1 validation](../docs/V0_5_1_VALIDATION.md) and the device matrix for actual
+See [current validation](../docs/VALIDATION.md) and
+[compatibility evidence](../docs/COMPATIBILITY.md) for actual
 results. Simulator screenshots and generated assets are not physical-watch
 photographs. Battery, display appearance and sound still need hardware checks.

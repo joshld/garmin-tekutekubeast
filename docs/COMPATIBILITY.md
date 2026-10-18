@@ -1,10 +1,35 @@
-# Issue #9 - v0.5.2 compatibility candidate
+# Garmin compatibility and supported models
 
-Current work record, 17 October 2026. v0.5.1 is complete and its evidence is
-retained unchanged. No Store publication is authorised.
+Current advertised set: **47 SDK profiles / 72 hardware parts**, unchanged by
+Issue #19. Exact IDs are in the production manifest; per-candidate results and
+exclusions are in [sdk-results.csv](compatibility/sdk-results.csv). That CSV
+records the compatibility expansion, not a new run against every later commit.
+See [latest source validation](VALIDATION.md) and [hardware acceptance](WATCH_ACCEPTANCE.md).
+
+## Supported SDK products
+
+The [manifest](../manifest.xml) is the exact advertised inventory. The CSV covers
+the 34 accepted additions and rejected/held candidates, not all 13 pre-existing
+profiles; earlier coverage remains in the versioned release evidence.
+
+| Group | SDK IDs (not every retail alias) |
+| --- | --- |
+| Enduro (2) | `enduro3`, `enduro4` |
+| Fenix (16) | `fenix6spro`, `fenix6pro`, `fenix6xpro`, `fenix7s`, `fenix7`, `fenix7x`, `fenix7spro`, `fenix7pro`, `fenix7xpro`, `fenix7pronowifi`, `fenix7xpronowifi`, `fenix8solar47mm`, `fenix8solar51mm`, `fenix843mm`, `fenix847mm`, `fenix8pro47mm` |
+| Epix (4) | `epix2`, `epix2pro42mm`, `epix2pro47mm`, `epix2pro51mm` |
+| Forerunner (16) | `fr165`, `fr165m`, `fr255`, `fr255m`, `fr255s`, `fr255sm`, `fr265`, `fr265s`, `fr57042mm`, `fr57047mm`, `fr745`, `fr945`, `fr945lte`, `fr955`, `fr965`, `fr970` |
+| Venu (5) | `venu`, `venu3`, `venu3s`, `venu441mm`, `venu445mm` |
+| vivoactive (4) | `vivoactive4`, `vivoactive4s`, `vivoactive5`, `vivoactive6` |
+
+No Fenix 9 SDK product is advertised. Similar retail names do not establish
+support; only individually validated manifest entries are supported.
+
+The implementation/evidence below records the 17 October 2026 expansion.
+v0.5.1 evidence is retained; subsequent focused Enduro 4 rule-refactor results
+do not replace its per-profile counts. No Store publication is authorised here.
 
 The later owner-approved public/Developer Beta UUID split is recorded in
-[PUBLIC_RELEASE_0_5_2.md](PUBLIC_RELEASE_0_5_2.md). The validated 47-profile set,
+[PUBLIC_RELEASE_0_5_2.md](releases/v0.5.2/PUBLIC_RELEASE_0_5_2.md). The validated 47-profile set,
 gameplay, resources and compatibility evidence below remain unchanged.
 
 ## Scope and architecture
@@ -59,7 +84,7 @@ support is retained on capable models. Older CIQ 3.x firmware treats Glances as
 widgets; native watch-app Glance launch is not advertised there. No separate
 widget/app is installed to bypass the existing identity.
 
-## Validation policy and current evidence
+## Recorded v0.5.2 compatibility evidence
 
 Representative profiles run all 33 unit tests and all 983 rendering scenes.
 Other new candidates get their own SDK compilation, 33 tests and focused
@@ -90,7 +115,7 @@ gradual-check result is claimed. Compatibility checks use
 the real Monkey C compiler/linker at level 0 plus native tests, not structural
 preflight as a substitute. Final per-profile results are recorded in
 `compatibility/sdk-results.csv`; the release hash and focused public/owner checks
-are in `RELEASE_0_5_2_VERIFICATION.md`. Raw logs stay ignored under `bin/`.
+are in `releases/v0.5.2/RELEASE_0_5_2_VERIFICATION.md`. Raw logs stay ignored under `bin/`.
 
 Changed commits write a canonical document plus a small changed Glance cache;
 unchanged commits still write neither. This is a storage/memory trade-off, not

@@ -1,7 +1,7 @@
 # Executed v0.5 SDK evidence
 
 These are actual Connect IQ SDK 9.2.0 runner outputs, not static preflight
-results. Read [the validation record](../../V0_5_VALIDATION.md) for provenance,
+results. Read [the validation record](../../releases/v0.5.0/V0_5_VALIDATION.md) for provenance,
 memory interpretation, hardware boundaries and the issue acceptance checklist.
 
 - `*-units.log` / `v05-unit-matrix.json`: final `27ca7f1`, 24 tests on each of

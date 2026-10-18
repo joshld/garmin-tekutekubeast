@@ -1,12 +1,14 @@
-# v0.4 design review — on-watch Developer Mode, inclusive progression, fast testing and clean UI
+# v0.4 design review - on-watch Developer Mode, inclusive progression, fast testing and clean UI
+> Historical design/plan, not current implementation instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 **Historical review.** For v0.5, the latest user request/feedback, GitHub issue
 descriptions/comments and current redesign documents take precedence. Retain
 the existing save-safe DEV, progression and Glance implementation; do not
-restart it from this old task list. See [v0.5 implementation/evidence](V0_5_VALIDATION.md).
+restart it from this old task list. See [v0.5 implementation/evidence](../../releases/v0.5.0/V0_5_VALIDATION.md).
 
 **Status: implemented v0.4 development beta; physical-watch acceptance pending.**
-See [validation](V0_4_VALIDATION.md). These requirements supersede older proposals
+See [validation](../../releases/v0.4.0/V0_4_VALIDATION.md). These requirements supersede older proposals
 for a separate Developer Lab, step-dependent evolution or ~100-day passive growth.
 
 ## 1. Primary product rule: full experience even at zero steps
@@ -86,4 +88,4 @@ Current manifest targets `enduro4` only. Target other suitable Connect IQ watche
 - Current Pip remains Pip on upgrade; egg hatch no longer happens instantly after 2k steps.
 - Repeated app launches, background events and system clock adjustments cannot double-credit steps or elapsed-time XP.
 
-Related: [v0.4 gameplay](GAMEPLAY_V0_4.md), [Codex roadmap](CODEX_V0_4_TASKS.md), [evolution tree](EVOLUTION_DESIGN.md). No actual source features changed in this documentation commit.
+Related: [v0.4 gameplay](GAMEPLAY_V0_4.md), [Codex roadmap](CODEX_V0_4_TASKS.md), [evolution tree](../../GAMEPLAY.md). No actual source features changed in this documentation commit.

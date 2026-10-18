@@ -1,7 +1,9 @@
 # v0.4 accepted SDK device matrix
+> Version-specific release evidence, not everyday build instructions. Start with
+> [current guides](../../../README.md#documentation).
 
 This is retained v0.4 evidence. For the v0.5 regression run see
-[V0_5_VALIDATION.md](V0_5_VALIDATION.md); no old pass is counted as a new pass.
+[V0_5_VALIDATION.md](../v0.5.0/V0_5_VALIDATION.md); no old pass is counted as a new pass.
 
 Recorded 16 October 2026, Connect IQ SDK 9.2.0, Windows / Java 17.
 These are individually compiled and executed simulator profiles, **not physical
@@ -73,7 +75,7 @@ The user confirmed on 16 October 2026 that the Glance now appears on their
 physical Enduro 4, after initially being absent. Selection-to-game, actual
 rendering and session timeout acceptance remain open in issue #10. This limited
 user confirmation is not general hardware certification; see
-[the acceptance log](WATCH_ACCEPTANCE.md).
+[the acceptance log](../../WATCH_ACCEPTANCE.md).
 
 ## Excluded / not yet accepted
 
