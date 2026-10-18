@@ -8,6 +8,7 @@ release validation records remain historical evidence.
 | `BeastProgression` | Growth, hatch/stage/mastery calculations and read-only family selection. Explicit save document and epoch-seconds inputs; no Garmin imports. |
 | `BeastActivityRules` | Deterministic step ledger, baseline/watermark and activity reward mutations; explicit local day and optional cumulative counters. No clock, watch or storage access. |
 | `GarminActivity` | Single normalization point for Garmin snapshots, history, optional active minutes and pushes. No new polling or storage. |
+| `BeastGameRules` | Pure mini-game timing, cue selection, seed transitions and loot choice. Views keep session transitions/buttons/drawing; State keeps atomic claims and inventory changes. |
 | `TekuTekuBeastState` | Application orchestration: migrations, clock/day sampling, care, transaction ownership, Developer Mode and save commits. |
 | `BeastStore` | Garmin persistence, dirty detection and compact Glance cache; injectable RAM backend for tests. |
 | Views/delegates | Drawing, artwork, input, timers and feedback. Glance uses its existing compact read-only cache. |
@@ -34,6 +35,12 @@ release validation records remain historical evidence.
   compilation inputs exclude both native owner tests and generated vectors.
 
 ## Deliberately not rewritten
+
+Mini-game periods, cue durations, gaps and jumps use 250 ms logical ticks (not
+wall-clock milliseconds). Seeds use the existing modulo-65521 transitions and
+are owned by durable sessions. A loot calculation cannot consume energy, claim
+a reward or update inventory. Preserve integer division/truncation in future
+language implementations; do not substitute their default floating division.
 
 State is still the transaction/application boundary, not a portable engine.
 View inheritance, menu/render coupling and exact-span public-source exclusion

@@ -2,6 +2,33 @@ using Toybox.Test;
 using Toybox.Lang;
 
 (:test)
+function gameGoldenVectorsTest(logger){
+    var rows=RuleVectors.games();
+    for(var i=0;i<rows.size();i++){
+        var row=rows[i];Test.assertEqual(BeastGameRules.nextSeed(row["seed"]),row["nextSeed"]);
+        Test.assertEqual(BeastGameRules.treasureItem(row["seed"],row["risk"],row["finds"],row["route"],row["mask"]),row["item"]);
+    }
+    Test.assertEqual(BeastGameRules.trailSeed(1,2,1,1),447);
+    var normal=[16,12,9];var easyPeriods=[24,20,16];var jump=[7,6,5];
+    for(var round=0;round<3;round++){
+        Test.assertEqual(BeastGameRules.period(false,round),normal[round]);Test.assertEqual(BeastGameRules.period(true,round),easyPeriods[round]);
+        Test.assertEqual(BeastGameRules.jumpDuration(false,round),jump[round]);Test.assertEqual(BeastGameRules.jumpDuration(true,round),7);
+    }
+    var sequence=[0,0,2];var copy=new BeastStore().copy(sequence);
+    for(var easy=0;easy<2;easy++){
+        var on=BeastGameRules.tempo(easy==1);var cycle=on+BeastGameRules.cueGap();
+        for(var cue=0;cue<sequence.size();cue++){
+            Test.assertEqual(BeastGameRules.displayedMove(sequence,1,cue*cycle,easy==1),sequence[cue]);
+            Test.assertEqual(BeastGameRules.displayedMove(sequence,1,cue*cycle+on-1,easy==1),sequence[cue]);
+            Test.assertEqual(BeastGameRules.displayedMove(sequence,1,cue*cycle+on,easy==1),-1);
+        }
+    }
+    Test.assertEqual(BeastGameRules.displayedMove([],1,0,false),-1);
+    Test.assertEqual(BeastGameRules.displayedMove(sequence,2,0,false),-1);
+    Test.assert(TestSupport.same(sequence,copy));return true;
+}
+
+(:test)
 function activityGoldenVectorsTest(logger){
     var rows=RuleVectors.activity();var fields=["xp","snacks","snackRemainder","activityMilestone","adventure","activityBonus"];
     for(var i=0;i<rows.size();i++){

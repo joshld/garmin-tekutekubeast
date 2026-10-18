@@ -258,10 +258,8 @@ class TekuTekuBeastState {
             if(session.hasKey("practice") && session["practice"]){commit();return "SCOUT COMPLETE";}
             // Route choices shape loot pools; an unowned item is favoured without
             // ever requiring activity. Seed is durable: replay/restart cannot reroll.
-            var route=session["route"];var pools=[[0,1,2,7],[0,5,1,6],[0,3,2,7],[0,4,6,5]];
-            var seed=(session["seed"]*17+session["risk"]*31+session["finds"]*13)%65521;
-            var pool=pools[route];var item=pool[seed%pool.size()];
-            if(session["finds"]>=2){for(var i=0;i<8;i++){var candidate=(seed+i)%8;if((number("discoveryMask")&(1<<candidate))==0){item=candidate;break;}}}
+            var route=session["route"];
+            var item=BeastGameRules.treasureItem(session["seed"],session["risk"],session["finds"],route,number("discoveryMask"));
             data["items"][item]++;data["discoveryMask"]=number("discoveryMask")|(1<<item);data["encounters"]++;
             data["personality"][route]++;if(item==0){data["snacks"]=min(12,snacks()+1);}
             data["happiness"]=clamp(number("happiness")+8);data["friendship"]=clamp(friendship()+1);careReward(25,route);

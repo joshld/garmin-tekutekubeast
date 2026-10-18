@@ -75,7 +75,7 @@ class BeastGameView extends TekuTekuBeastView {
         session["timingV051"]=1;
         beast.saveSession(session);
     }
-    function random(limit){session["seed"]=(session["seed"]*17+11)%65521;return session["seed"]%limit;}
+    function random(limit){session["seed"]=BeastGameRules.nextSeed(session["seed"]);return session["seed"]%limit;}
     function begin(){
         session=beast.beginSession(kind);if(session==null){result="CARE / PLAY EARNS IT";return;}
         // A paused session is resumed, not replaced or charged twice.
@@ -118,14 +118,13 @@ class BeastGameView extends TekuTekuBeastView {
         else if(phase==0 && kind==2){artTick=(tick/8)%2;}
         return phase+":"+artTick+":"+cursor+":"+round+":"+retries+":"+choice+":"+resultChoice+":"+hint+":"+score+":"+lane;
     }
-    function period(){return beast.number("easy")==1?[24,20,16][round]:[16,12,9][round];}
-    function tempo(){return beast.number("easy")==1?8:6;}
-    function cueGap(){return 1;} // one existing 250ms tick, including UP -> UP
+    function period(){return BeastGameRules.period(beast.number("easy")==1,round);}
+    function tempo(){return BeastGameRules.tempo(beast.number("easy")==1);}
+    function cueGap(){return BeastGameRules.cueGap();} // includes UP -> UP
     function displayedMove(){
-        if(phase!=1 || sequence.size()==0 || elapsed%(tempo()+cueGap())>=tempo()){return -1;}
-        return sequence[beast.min(sequence.size()-1,(elapsed/(tempo()+cueGap())).toNumber())];
+        return BeastGameRules.displayedMove(sequence,phase,elapsed,beast.number("easy")==1);
     }
-    function jumpDuration(){return beast.number("easy")==1?7:[7,6,5][round];}
+    function jumpDuration(){return BeastGameRules.jumpDuration(beast.number("easy")==1,round);}
     function starPosition(){return elapsed.toFloat()/period();}
     function catchStar(check){
         // The pet must actually jump into a falling star; input never awards it
@@ -164,7 +163,7 @@ class BeastGameView extends TekuTekuBeastView {
         // Safe helping/searching and bold routes affect discoveries/chances.
         var bonus=choice==0?1:random(3);
         session["finds"]+=bonus;session["risk"]+=choice;
-        session["seed"]=(session["seed"]+trail*97+node*41+choice*211)%65521;
+        session["seed"]=BeastGameRules.trailSeed(session["seed"],trail,node,choice);
         hint=choice==0?["A FRIEND HELPS","A HIDDEN CLUE","A CHEST AHEAD"][node]:
             (bonus>0?["A SECRET PATH!","GLOWING TRACKS!","A RARE GLIMMER!"][node]:"A QUIET DETOUR");
         phase=4;elapsed=0;checkpoint();

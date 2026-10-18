@@ -5,6 +5,8 @@ new devices, Store upload or work on #21/#17/#20. See [code map](ARCHITECTURE.md
 
 ## Milestone 1 — progression boundary
 
+Committed/pushed as `3e75e22`.
+
 - Extracted deterministic growth, evolution, mastery and family selection;
   State retains migrations, DEV overrides, calendar/time reads and transactions.
 - Added 15 JSON golden cases and native purity/passive-growth tests. Preserved
@@ -24,6 +26,8 @@ new devices, Store upload or work on #21/#17/#20. See [code map](ARCHITECTURE.md
 
 ## Milestone 2 — activity boundary
 
+Committed/pushed as `6554747`.
+
 - `GarminActivity` normalizes optional fields once per background callback;
   `BeastActivityRules` owns deterministic ledger/reward calculations. State keeps
   lazy catch-up, day rollover, DEV guards and atomic saves.
@@ -39,10 +43,46 @@ new devices, Store upload or work on #21/#17/#20. See [code map](ARCHITECTURE.md
   handling; production rules did not need changes to satisfy the golden traces.
 - M1 layout evidence reused: this milestone changes no rendering or geometry.
 
-## Remaining milestone
+## Milestone 3 — mini-game calculation boundary
 
-3. Extract mini-game timing/seed/loot calculations; finish boundary documentation.
+- Extracted timing, cue selection, seeded random/trail transitions and loot
+  selection into `BeastGameRules`. Input, rendering, durable sessions, energy
+  deductions, inventory updates and duplicate-claim prevention retain their
+  original owners and behavior.
+- Enduro 4: all 37 native tests and four public tests passed. Nine JSON game
+  vectors plus repeated-move/timing/purity assertions exercise the production
+  module. Existing migration, interrupted-session, reward, DEV, care and
+  reconciliation tests pass unchanged.
+- Final production-renderer audit: 473 scenes, zero failures; foreground peak
+  124,808 / 781,976 bytes, scenery render maximum 31 ms (coarse SDK measurement).
+  The first layout launch returned only the SDK prompt; reran the already-built
+  program, not the successful units or a device matrix.
+- Signed Enduro 4 owner and public release-mode programs compile. Debug-symbol
+  inspection confirms owner DEV remains, while public owner controls and test
+  vectors are absent. New local outputs: `bin/cleanup-final-owner-enduro4.prg`
+  and `bin/cleanup-final-public-enduro4.prg`; not exported Store packages.
+- Final native Steps Progress stress callback: 45,344 / 61,344 bytes,
+  one save write, one unchanged-cache skip, 16 ms coarse SDK timing. This is
+  2,072 bytes above the pre-cleanup callback, leaving 16,000 bytes headroom.
+  Existing fixture XP/inventory/three paused sessions remain intact. The
+  computer-use skill triggered native events in an isolated QA application;
+  production storage was not cleared or modified.
+- Logs: `bin/cleanup-final-pass-enduro4-tests.log`,
+  `cleanup-final-layout-retry.log`, `cleanup-final-public-tests.log`,
+  `cleanup-final-owner-build.log`, `cleanup-final-release-build.log`,
+  `cleanup-final-background.log`. New test fixture compile-name collision was
+  corrected before the passing run; no gameplay changes were needed.
+
+## Scope left deliberately intact
+
+The portable boundaries and shared test data are preparation, not a PWA/ESP32
+port. Care/day/session orchestration still lives in State, and view inheritance
+and build-time DEV source-span removal remain documented hotspots. Further
+extraction should be driven by a concrete consumer, not a speculative framework.
+Glance source, cache contract, resources and launch scopes are unchanged; prior
+native Glance evidence is reused, not reported as a new run.
 
 Both UUIDs, key, save schema, 47-profile manifest, version and signed v0.5.2
-release artifacts remain unchanged. No physical-watch tests claimed. Other
+release artifacts remain unchanged (both IQ SHA256 hashes rechecked). No
+physical-watch tests claimed. Other
 devices retain prior evidence; they were not rerun for this Enduro-only cleanup.

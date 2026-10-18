@@ -6,6 +6,17 @@ module RuleVectors {
         {"name"=>"optional counters initialize without retroactive rewards","data"=>{"birth"=>20261016,"day"=>20261016},"samples"=>[{"steps"=>null,"minutes"=>10,"pushes"=>500,"expected"=>[0,0,0,0,0,0]},{"steps"=>null,"minutes"=>30,"pushes"=>1500,"expected"=>[0,0,0,2,2,2000]},{"steps"=>null,"minutes"=>40,"pushes"=>2000,"expected"=>[0,0,0,3,3,3000]},{"steps"=>null,"minutes"=>90,"pushes"=>6000,"expected"=>[0,0,0,5,5,5000]},{"steps"=>null,"minutes"=>90,"pushes"=>6000,"expected"=>[0,0,0,5,5,5000]}]},
         {"name"=>"snack cap retains remainder semantics","data"=>{"birth"=>20261016,"day"=>20261016,"snacks"=>12,"snackRemainder"=>2499},"samples"=>[{"steps"=>1,"minutes"=>null,"pushes"=>null,"expected"=>[1,12,0,0,0,0]},{"steps"=>2500,"minutes"=>null,"pushes"=>null,"expected"=>[2500,12,2499,1,1,1000]}]}
     ];}
+    function games(){return [
+        {"seed"=>0,"nextSeed"=>11,"risk"=>0,"finds"=>0,"route"=>0,"mask"=>0,"item"=>0},
+        {"seed"=>1,"nextSeed"=>28,"risk"=>0,"finds"=>0,"route"=>0,"mask"=>0,"item"=>1},
+        {"seed"=>1,"nextSeed"=>28,"risk"=>0,"finds"=>0,"route"=>1,"mask"=>0,"item"=>5},
+        {"seed"=>1,"nextSeed"=>28,"risk"=>0,"finds"=>0,"route"=>2,"mask"=>0,"item"=>3},
+        {"seed"=>1,"nextSeed"=>28,"risk"=>0,"finds"=>0,"route"=>3,"mask"=>0,"item"=>4},
+        {"seed"=>1,"nextSeed"=>28,"risk"=>0,"finds"=>2,"route"=>0,"mask"=>0,"item"=>3},
+        {"seed"=>1,"nextSeed"=>28,"risk"=>0,"finds"=>2,"route"=>0,"mask"=>8,"item"=>4},
+        {"seed"=>1,"nextSeed"=>28,"risk"=>0,"finds"=>2,"route"=>0,"mask"=>255,"item"=>7},
+        {"seed"=>65520,"nextSeed"=>65515,"risk"=>0,"finds"=>0,"route"=>0,"mask"=>0,"item"=>0}
+    ];}
     function progression(){return [
         {"name"=>"new egg","ageSeconds"=>0,"data"=>{},"expected"=>{"stage"=>0,"hatchHours"=>24,"growth"=>0}},
         {"name"=>"2000 steps do not hatch instantly","ageSeconds"=>0,"data"=>{"xp"=>2000},"expected"=>{"stage"=>0,"hatchHours"=>22,"growth"=>2000}},

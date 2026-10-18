@@ -1,0 +1,11 @@
+[
+  {"seed":0,"nextSeed":11,"risk":0,"finds":0,"route":0,"mask":0,"item":0},
+  {"seed":1,"nextSeed":28,"risk":0,"finds":0,"route":0,"mask":0,"item":1},
+  {"seed":1,"nextSeed":28,"risk":0,"finds":0,"route":1,"mask":0,"item":5},
+  {"seed":1,"nextSeed":28,"risk":0,"finds":0,"route":2,"mask":0,"item":3},
+  {"seed":1,"nextSeed":28,"risk":0,"finds":0,"route":3,"mask":0,"item":4},
+  {"seed":1,"nextSeed":28,"risk":0,"finds":2,"route":0,"mask":0,"item":3},
+  {"seed":1,"nextSeed":28,"risk":0,"finds":2,"route":0,"mask":8,"item":4},
+  {"seed":1,"nextSeed":28,"risk":0,"finds":2,"route":0,"mask":255,"item":7},
+  {"seed":65520,"nextSeed":65515,"risk":0,"finds":0,"route":0,"mask":0,"item":0}
+]
