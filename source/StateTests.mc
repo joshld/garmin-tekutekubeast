@@ -2,6 +2,42 @@ using Toybox.Test;
 using Toybox.Lang;
 
 (:test)
+function progressionGoldenVectorsTest(logger){
+    var vectors=RuleVectors.progression();
+    for(var i=0;i<vectors.size();i++){
+        var row=vectors[i];var s=TestSupport.fixture();var keys=row["data"].keys();
+        for(var k=0;k<keys.size();k++){s.data[keys[k]]=row["data"][keys[k]];}
+        s.testNow+=row["ageSeconds"];var before=s.store.copy(s.data);var expected=row["expected"];
+        logger.debug(row["name"]);
+        Test.assert(BeastProgression.stage(s.data,s.now())==expected["stage"]);
+        Test.assert(s.stage()==expected["stage"]);
+        Test.assert(BeastProgression.hatchDurationHours(s.data)==expected["hatchHours"]);
+        Test.assert(s.growth()==expected["growth"]);
+        Test.assert(TestSupport.same(before,s.data));
+    }
+    return true;
+}
+(:test)
+function progressionPurityAndAdvanceTest(logger){
+    var s=TestSupport.fixture();var before=s.store.copy(s.data);
+    Test.assertEqual(BeastProgression.chooseFamily(s.data),1);
+    Test.assert(TestSupport.same(before,s.data));
+    for(var family=0;family<4;family++){
+        s.data["personality"]=[0,0,0,0];s.data["personality"][family]=2;
+        Test.assertEqual(BeastProgression.chooseFamily(s.data),family+1);
+    }
+    var xp=s.xp();var storeWrites=s.store.writes;var start=s.now();
+    BeastProgression.advance(s.data,start+1);BeastProgression.advance(s.data,start+86400);
+    Test.assert(s.number("baseGrowth")==12000);Test.assert(s.number("growthRemainder")==0);
+    Test.assert(s.xp()==xp);Test.assertEqual(s.store.writes,storeWrites);
+    before=s.store.copy(s.data);BeastProgression.advance(s.data,start+86399);
+    Test.assert(TestSupport.same(before,s.data));
+    s.data["stageFloor"]=5;s.data["baseGrowth"]=325000l;
+    Test.assert(s.mastery()==2);Test.assert(s.progress()==0);
+    return true;
+}
+
+(:test)
 function compactGlanceAndDeferredCatchupTest(logger){
     var s=TestSupport.fixture();s.observe(s.today(),3000);s.data["friendship"]=71;
     s.data["items"][7]=9;s.beginSession(1);s.commit();

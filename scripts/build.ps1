@@ -18,6 +18,11 @@ $java=(Get-Command java -ErrorAction SilentlyContinue).Source
 if (!$java) {$java='C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot\bin\java.exe'}
 $temp=Join-Path $project 'bin/build-temp'
 New-Item -ItemType Directory -Force -Path $temp | Out-Null
+if($Tests){
+    $python="$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
+    & $python "$PSScriptRoot/prepare_rule_vectors.py"
+    if($LASTEXITCODE -ne 0){throw 'Cannot prepare deterministic rule fixtures'}
+}
 if($Export -or (Select-String -LiteralPath "$project/monkey.jungle" -SimpleMatch "$Device.sourcePath = bin/legacy-source" -Quiet)){
     $python="$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
     if(!(Test-Path $python)){$python=(Get-Command python -ErrorAction Stop).Source}

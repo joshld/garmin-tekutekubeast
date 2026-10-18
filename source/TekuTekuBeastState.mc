@@ -113,43 +113,25 @@ class TekuTekuBeastState {
         for(var i=0;i<fields.size();i++){summary[fields[i]]=data[fields[i]];}
         store.writeGlance(summary);}}
     function xp(){return number("xp");} // genuine lifetime watch steps ONLY
-    function growth(){return number("baseGrowth")+number("careGrowth")+number("activityBonus")+max(0l,xp()-number("petXpBaseline"));}
-    function ageDays(){return (max(0l,now()-number("birthEpoch"))/86400).toNumber();}
-    function oldStage(x,a){
-        if(x>=300000 && a>=21){return 5;}if(x>=150000 && a>=14){return 4;}
-        if(x>=70000 && a>=7){return 3;}if(x>=20000 && a>=2){return 2;}return x>=2000?1:0;
-    }
+    function growth(){return BeastProgression.growth(data);}
+    function ageDays(){return BeastProgression.ageDays(data,now());}
+    function oldStage(x,a){return BeastProgression.oldStage(x,a);}
     function stage(){
         if(dev && number("forcedStage")>=0){return number("forcedStage");}
-        var s=oldStage(growth(),ageDays());
-        if(s==1 && number("stageFloor")==0){
-            var h=max(0l,now()-number("birthEpoch"))/3600.0;
-            s=h>=hatchDurationHours()?1:0;
-        }
-        if(s==0 && now()-number("birthEpoch")>=number("hatchHours")*3600){s=1;}
-        if(growth()>=300000 && ageDays()>=number("legendDays")){s=5;}
-        if(s==5 && ageDays()<number("legendDays")){s=4;}
-        return max(number("stageFloor"),s);
+        return BeastProgression.stage(data,now());
     }
     function hatchDurationHours(){
-        // Full optional care can accelerate incubation equally to activity.
-        var bonus=min(16,max(number("activityBonus"),max(0l,xp()-number("petXpBaseline")))/1000.0+number("careGrowth")/(max(1,number("careCap"))/16.0));
-        return max(number("hatchMinimum"),number("hatchHours")-bonus);
+        return BeastProgression.hatchDurationHours(data);
     }
-    function mastery(){return stage()<5?0:1+max(0l,(growth()-300000)/25000);}
-    function masteryProgress(){return max(0l,growth()-300000)%25000;}
-    function nextSteps(){return [12000,20000,70000,150000,300000,325000][stage()];}
-    function nextAge(){return [1,2,7,14,number("legendDays"),0][stage()];}
+    function mastery(){return BeastProgression.mastery(data,stage());}
+    function masteryProgress(){return BeastProgression.masteryProgress(data);}
+    function nextSteps(){return BeastProgression.nextSteps(stage());}
+    function nextAge(){return BeastProgression.nextAge(data,stage());}
     function progress(){
-        if(stage()==5){return masteryProgress()/25000.0;}
-        if(stage()==0){return min(1.0,max(0l,now()-number("birthEpoch"))/(hatchDurationHours()*3600.0));}
-        var previous=[0,2000,20000,70000,150000][stage()];
-        return min(1.0,max(0l,growth()-previous)/(nextSteps()-previous).toFloat());
+        return BeastProgression.progress(data,now(),stage());
     }
     function tick(){
-        start();var t=now();var elapsed=max(0l,t-number("lastGrowth"));
-        if(elapsed>0){var units=elapsed*number("passiveRate")+number("growthRemainder");
-            data["baseGrowth"]+=units/86400;data["growthRemainder"]=units%86400;data["lastGrowth"]=t;}
+        start();var t=now();BeastProgression.advance(data,t);
         var day=today();
         // Persisted high-water local day prevents rollback reward refills.
         if(day>number("day")){data["day"]=day;data["meals"]=2;data["games"]=0;data["careToday"]=0;
@@ -223,13 +205,7 @@ class TekuTekuBeastState {
     function family(){
         if(dev && number("forcedFamily")>0){return number("forcedFamily");}if(stage()<3){return 0;}
         if(number("family")!=0){return number("family");}
-        var scores=store.copy(data["personality"]);var big=0;var steady=0;var moderate=0;var easy=0;
-        for(var i=0;i<32;i++){if(data["days"][i]==0){continue;}var n=data["counts"][i];
-            if(n>=18000){big++;}if(n>=6000){steady++;}if(n>=3000){moderate++;}else{easy++;}}
-        if(big>=2){scores[1]+=8;}if(steady>=5){scores[0]+=8;}if(moderate>=3 && easy>=1){scores[2]+=8;}
-        var winner=((number("birthEpoch")%4+number("petSerial"))%4).toNumber();
-        for(var i=0;i<4;i++){if(scores[i]>scores[winner]){winner=i;}}
-        data["family"]=winner+1;return winner+1;
+        data["family"]=BeastProgression.chooseFamily(data);return number("family");
     }
     function familyName(){return ["MYSTERY","GROVE","EMBER","TIDE","WISP"][family()];}
     function speciesName(){

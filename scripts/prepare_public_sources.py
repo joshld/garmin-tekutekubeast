@@ -93,12 +93,13 @@ def main():
         destination = out/folder
         destination.mkdir(exist_ok=True)
         source = ROOT/('source' if folder == 'source' else 'bin/legacy-source')
-        expected = {p.name for p in source.glob('*.mc') if p.name != 'StateTests.mc'}
+        excluded = {'StateTests.mc', 'RuleVectors.mc'}
+        expected = {p.name for p in source.glob('*.mc') if p.name not in excluded}
         unexpected = {p.name for p in destination.glob('*.mc')} - expected
         if unexpected:
             raise ValueError(f'Unexpected public compilation inputs: {unexpected}')
         for path in source.glob('*.mc'):
-            if path.name == 'StateTests.mc':
+            if path.name in excluded:
                 continue # Public QA has its own fixture; owner suite stays private.
             text = public_source(path.name, path.read_text(), args.tests)
             forbidden = r'enableDev|devSet|simulateSleep|setSpeed|virtualNow|testNow|Dev Tools|Sky preview|Developer:|DEV / TEMPORARY|\bdev\s*=\s*true'

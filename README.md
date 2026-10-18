@@ -1,5 +1,8 @@
 # TekuTekuBeast
 
+Development: [current code boundaries](docs/ARCHITECTURE.md) and
+[Issue #19 cleanup checkpoint](docs/CLEANUP_ISSUE_19.md).
+
 A native, offline Garmin virtual-beast game. Grow through time, care and play;
 genuine watch activity adds growth and extra adventure opportunities. No phone,
 internet connection, exercise requirement, death or recovery-day punishment.
