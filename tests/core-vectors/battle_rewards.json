@@ -1,0 +1,10 @@
+[
+  {"status":0,"turn":0,"practice":false,"rewarded":0,"eligible":false,"xp":0},
+  {"status":1,"turn":1,"practice":false,"rewarded":0,"eligible":true,"xp":12},
+  {"status":2,"turn":4,"practice":false,"rewarded":4,"eligible":true,"xp":5},
+  {"status":3,"turn":20,"practice":false,"rewarded":4,"eligible":true,"xp":7},
+  {"status":1,"turn":1,"practice":false,"rewarded":5,"eligible":false,"xp":0},
+  {"status":1,"turn":1,"practice":true,"rewarded":0,"eligible":false,"xp":0},
+  {"status":1,"turn":0,"practice":false,"rewarded":0,"eligible":false,"xp":0},
+  {"status":1,"turn":1,"practice":false,"rewarded":-1,"eligible":false,"xp":0}
+]

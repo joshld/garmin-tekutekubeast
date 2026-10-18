@@ -2,6 +2,37 @@
 
 Latest source work: Issue #20 battles, following Issue #17 `74b98a6`.
 
+## Issue #20 - portable foundation follow-up
+
+- Canonical platform-neutral `data/battle-v1.json` now supplies the native roster,
+  IDs, effects and numeric constants through a small build-time generator. Builds
+  and structural CI fail on drift. No runtime JSON loading or second rules engine.
+- Pure snapshot import/export plus `data/battle-state-v1.schema.json` define the
+  versioned serialization boundary; unknown versions, malformed values and
+  inconsistent state are rejected without mutation or silent seed repair.
+  JSON codecs remain platform-owned; the kernel uses only language/container
+  primitives, no Garmin hardware, UI, storage, clock or communications APIs.
+- Enduro 4 / SDK 9.2: 61 native tests passed (56 existing plus five portability
+  tests). Four full-state replay scenarios cover nine commands, AI, all four move
+  roles, cooldown rejection, RNG consumption, affinity/bond/training, damage
+  truncation, victory/defeat/draw and XP/mastery. Four stat fixtures include egg
+  rejection, personality ties and training/level bounds. Every intermediate
+  replay snapshot crosses export/import before the next command.
+  Eight reward-policy vectors cover practice, incomplete matches and the daily
+  cap; the Garmin transaction owner consumes the same pure eligibility rule.
+- Five public-input tests passed on the final source, including battle claims.
+  Signed owner/public Enduro 4 foreground builds passed with public DEV exclusion
+  and owner DEV retention. IDs, save formats, version and old Store IQs unchanged.
+- Final evidence: `bin/battle20-portable-complete-final-unit-enduro4.log`,
+  `battle20-portable-public-tests.log`, `battle20-portable-owner-build.log`,
+  `battle20-portable-release-build.log`. Prior 100-scene rendering evidence below
+  is reused: UI/assets are unchanged, not claimed as a new layout run.
+- JavaScript/C/C++ arithmetic, state, effect and RNG parity rules are in the
+  [architecture contract](ARCHITECTURE.md#portable-battle-protocol-v1). No JS/C++
+  engine, phone app, firmware or networking was built; those future implementations
+  must pass these same vectors before parity can be claimed. No physical-watch
+  test, full-device matrix, Store export/upload or publication.
+
 ## Issue #20 - playable integration (milestones 2-4)
 
 - Actions > Play > Wild battles: named-move combat, temporary HP, queued daily/

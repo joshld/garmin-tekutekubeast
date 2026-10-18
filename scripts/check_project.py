@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 import struct
 import xml.etree.ElementTree as ET
+from prepare_battle_data import render as render_battle_data
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "source"
@@ -140,6 +141,11 @@ for size in (240,260,280,390,416,454):
 world = (SRC / "BeastWorld.mc").read_text(encoding="utf-8")
 check("enableLocationEvents(" not in world, "Scenery must not activate GPS")
 check('"Positioning"' in MANIFEST.read_text(encoding="utf-8"), "Missing cached-location permission")
+
+try:
+    check((SRC / "BeastBattleData.mc").read_text() == render_battle_data(), "Portable battle definitions/native data drift")
+except (ValueError, KeyError, OSError) as error:
+    check(False, "Invalid portable battle definitions: " + str(error))
 
 if errors:
     print("Preflight FAILED (structural checks only):")

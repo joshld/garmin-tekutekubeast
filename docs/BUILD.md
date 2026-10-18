@@ -109,10 +109,14 @@ separate encounter/claim document.
 ```powershell
 python scripts/check_project.py
 python scripts/prepare_rule_vectors.py --check
+python scripts/prepare_battle_data.py --check
 ```
 
 Structural preflight (also used by GitHub Actions) is not compilation or
 simulator evidence. Native `-Tests` builds refresh JSON-derived test literals.
+All Windows builds fail closed if `data/battle-v1.json` differs from generated
+`BeastBattleData.mc`; after an intentional data edit run
+`python scripts/prepare_battle_data.py` and review the data/native diff together.
 See [rule contracts](ARCHITECTURE.md) and
 [fixture format](../tests/core-vectors/README.md). For artwork changes only,
 `scripts/verify_v051_art.py` and `scripts/prepare_v051_world.py` retain existing

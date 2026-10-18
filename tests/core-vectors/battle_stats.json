@@ -1,0 +1,6 @@
+[
+{"stage":0,"family":0,"rare":0,"friendship":0,"personality":null,"xp":0,"mastery":null,"expected":null},
+{"stage":1,"family":0,"rare":0,"friendship":0,"personality":null,"xp":0,"mastery":null,"expected":{"form":0,"family":0,"stage":1,"maxHp":42,"hp":42,"power":3,"armour":0,"friendship":0,"temper":0,"guard":0,"buff":0,"cooldown":0,"mastery":[0,0,0,0]}},
+{"stage":2,"family":0,"rare":0,"friendship":100,"personality":[5,5,0,0],"xp":80,"mastery":[0,0,0,0,99,2,10,999,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"expected":{"form":1,"family":0,"stage":2,"maxHp":47,"hp":47,"power":4,"armour":1,"friendship":100,"temper":0,"guard":0,"buff":0,"cooldown":0,"mastery":[99,2,10,999]}},
+{"stage":5,"family":3,"rare":1,"friendship":180,"personality":[0,1,1,8],"xp":9999,"mastery":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9999,15,30,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"expected":{"form":13,"family":3,"stage":5,"maxHp":70,"hp":70,"power":11,"armour":2,"friendship":100,"temper":3,"guard":0,"buff":0,"cooldown":0,"mastery":[999,15,30,7]}}
+]

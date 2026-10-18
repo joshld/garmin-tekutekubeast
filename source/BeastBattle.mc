@@ -95,10 +95,10 @@ class BeastBattle {
         if(match==null || match["status"]==0){return "MATCH PAUSED";}
         if(match["claimed"] || match["id"]<=data["claim"]){return match["outcome"];}
         var xp=0;
-        if(!match["practice"] && data["rewarded"]<5 && match["turn"]>0){
+        if(BeastBattleRules.rewardEligible(match["status"],match["turn"],match["practice"],data["rewarded"])){
             xp=BeastBattleRules.xpReward(match);data["xp"]+=xp;data["rewarded"]++;
             var increments=BeastBattleRules.masteryReward(match);
-            for(var i=0;i<72;i++){data["mastery"][i]=beast.min(999,data["mastery"][i]+increments[i]);}
+            for(var i=0;i<72;i++){data["mastery"][i]=beast.min(BeastBattleData.MASTERY_CAP,data["mastery"][i]+increments[i]);}
             data["seen"]|=1<<match["actors"][1]["form"];
             if(match["status"]==1){data["wins"]++;}
         }

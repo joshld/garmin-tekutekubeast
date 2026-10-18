@@ -2,6 +2,81 @@ using Toybox.Test;
 using Toybox.Lang;
 
 (:test)
+function battlePortableRewardGoldenTest(logger){
+    var rows=RuleVectors.battle_rewards();
+    for(var i=0;i<rows.size();i++){
+        var r=rows[i];var eligible=BeastBattleRules.rewardEligible(r["status"],r["turn"],r["practice"],r["rewarded"]);
+        Test.assertEqual(eligible,r["eligible"]);
+        Test.assertEqual(eligible?BeastBattleRules.xpReward({"status"=>r["status"]}):0,r["xp"]);
+    }
+    return true;
+}
+
+(:test)
+function battlePortableStatsGoldenTest(logger){
+    var rows=RuleVectors.battle_stats();
+    for(var i=0;i<rows.size();i++){
+        var r=rows[i];var actor=BeastBattleRules.fighter(r["stage"],r["family"],r["rare"],r["friendship"],r["personality"],r["xp"],r["mastery"]);
+        Test.assert(TestSupport.same(actor,r["expected"]));
+    }
+    return true;
+}
+
+(:test)
+function battlePortableReplayGoldenTest(logger){
+    var rows=RuleVectors.battle_replay();
+    for(var i=0;i<rows.size();i++){
+        var row=rows[i];var state=BeastBattleRules.importState(row["initial"]);Test.assert(state!=null);
+        if(row.hasKey("rng")){for(var r=1;r<row["rng"].size();r++){Test.assertEqual(BeastBattleRules.nextSeed(row["rng"][r-1]),row["rng"][r]);}}
+        for(var t=0;t<row["commands"].size();t++){
+            logger.debug(row["id"]+" turn "+t+" AI "+BeastBattleRules.ai(state));
+            var before=new BeastStore().copy(state);Test.assertEqual(BeastBattleRules.ai(state),row["ai"][t]);
+            var next=BeastBattleRules.turn(state,row["commands"][t]);Test.assert(TestSupport.same(before,state));
+            Test.assert(TestSupport.same(next,row["states"][t]));
+            // Object snapshot boundary models JSON save/load without a platform
+            // codec or reference engine. Every intermediate state must resume.
+            state=BeastBattleRules.importState(BeastBattleRules.exportState(next));
+            Test.assert(state!=null);Test.assert(TestSupport.same(state,next));
+        }
+        Test.assertEqual(BeastBattleRules.xpReward(state),row["xp"]);
+        Test.assert(TestSupport.same(BeastBattleRules.masteryReward(state),row["mastery"]));
+    }
+    return true;
+}
+(:test)
+function battleSnapshotVersionAndTypeTest(logger){
+    var s=RuleVectors.battle_replay()[0]["initial"];var copy=new BeastStore().copy(s);
+    s["practice"]=true;Test.assert(BeastBattleRules.importState(s)==null);
+    Test.assert(TestSupport.same(BeastBattleRules.exportState(s),copy));s.remove("practice");
+    s["v"]=2;Test.assert(BeastBattleRules.importState(s)==null);Test.assert(BeastBattleRules.exportState(s)==null);
+    Test.assert(BeastBattleRules.turn(s,0)==null);Test.assert(!BeastBattleRules.available(s,0));s["v"]=1;
+    s["seed"]=1.5;Test.assert(BeastBattleRules.importState(s)==null);
+    Test.assert(BeastBattleRules.exportState(s)==null);s["seed"]=-1;Test.assert(BeastBattleRules.exportState(s)==null);
+    s["seed"]=65521;Test.assert(BeastBattleRules.exportState(s)==null);
+    Test.assert(BeastBattleRules.exportState({"v"=>1})==null);
+    s["seed"]=42.0;var normalized=BeastBattleRules.importState(s);Test.assert(normalized!=null);
+    Test.assert(!(normalized["seed"] instanceof Lang.Float));s["seed"]=42;
+    s["id"]=2147483647;Test.assert(BeastBattleRules.importState(s)!=null);
+    s["id"]=2147483648l;Test.assert(BeastBattleRules.importState(s)==null);
+    Test.assert(BeastBattleRules.importState(null)==null);Test.assert(BeastBattleRules.importState("v1")==null);
+    Test.assert(TestSupport.same(copy,BeastBattleRules.turn(copy,0.5)));return true;
+}
+(:test)
+function battleSnapshotSemanticTest(logger){
+    var source=RuleVectors.battle_replay()[0]["initial"];var store=new BeastStore();var s=store.copy(source);
+    s["uses"][0]=1;Test.assert(BeastBattleRules.importState(s)==null);s=store.copy(source);
+    s["actors"][0]["hp"]=71;Test.assert(BeastBattleRules.importState(s)==null);s=store.copy(source);
+    s["actors"][0]["form"]=17;Test.assert(BeastBattleRules.importState(s)==null);s=store.copy(source);
+    s["actors"][0]["mastery"]=[0,0];Test.assert(BeastBattleRules.importState(s)==null);s=store.copy(source);
+    s["actors"][1]=null;Test.assert(BeastBattleRules.importState(s)==null);s=store.copy(source);
+    s["status"]=1;Test.assert(BeastBattleRules.importState(s)==null);
+    s=store.copy(RuleVectors.battle_replay()[0]["states"][0]);s["events"][1]["move"]=71;
+    Test.assert(BeastBattleRules.importState(s)==null);s=store.copy(source);
+    var restored=BeastBattleRules.importState(s);restored["actors"][0]["mastery"][0]=99;
+    Test.assert(TestSupport.same(s,source));return true;
+}
+
+(:test)
 function battleViewLifecycleTest(logger){
     var s=TestSupport.fixture();s.data["sleepMode"]=2;var v=new BeastBattleView(s);
     v.burst=8;var writes=s.store.writes;v.refresh();Test.assertEqual(v.burst,8);

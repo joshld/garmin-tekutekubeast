@@ -18,6 +18,9 @@ $java=(Get-Command java -ErrorAction SilentlyContinue).Source
 if (!$java) {$java='C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot\bin\java.exe'}
 $temp=Join-Path $project 'bin/build-temp'
 New-Item -ItemType Directory -Force -Path $temp | Out-Null
+$battlePython="$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
+& $battlePython "$PSScriptRoot/prepare_battle_data.py" --check
+if($LASTEXITCODE -ne 0){throw 'Portable battle data is out of sync; refusing to build'}
 if($Tests){
     $python="$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
     & $python "$PSScriptRoot/prepare_rule_vectors.py"

@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tekutekubeast:battle-state:1",
+  "title": "TekuTekuBeast pure battle snapshot v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "id",
+    "seed",
+    "turn",
+    "status",
+    "actors",
+    "events",
+    "uses"
+  ],
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "id": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65520
+    },
+    "turn": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 20
+    },
+    "status": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3
+    },
+    "actors": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "$ref": "#/$defs/actor"
+      }
+    },
+    "events": {
+      "type": "array",
+      "maxItems": 2,
+      "items": {
+        "$ref": "#/$defs/event"
+      }
+    },
+    "uses": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 20
+      }
+    }
+  },
+  "$defs": {
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "form",
+        "family",
+        "stage",
+        "maxHp",
+        "hp",
+        "power",
+        "armour",
+        "friendship",
+        "temper",
+        "guard",
+        "buff",
+        "cooldown",
+        "mastery"
+      ],
+      "properties": {
+        "form": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 17
+        },
+        "family": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "stage": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "maxHp": {
+          "type": "integer",
+          "minimum": 42,
+          "maximum": 70
+        },
+        "hp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 70
+        },
+        "power": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 11
+        },
+        "armour": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "friendship": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "temper": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "guard": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "buff": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "cooldown": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "mastery": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 999
+          }
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actor",
+        "move",
+        "damage",
+        "effect"
+      ],
+      "properties": {
+        "actor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "move": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 71
+        },
+        "damage": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 70
+        },
+        "effect": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        }
+      }
+    }
+  },
+  "$comment": "Shape validation is necessary but not sufficient: importState also checks HP/status, form/stage, sum(uses)=turn and event actor/move/effect consistency. Storage metadata is not a pure snapshot."
+}

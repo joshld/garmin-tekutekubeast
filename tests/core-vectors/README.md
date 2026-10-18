@@ -22,6 +22,24 @@ neither platform is implemented by this cleanup.
 - `battle.json`: the complete 18-form/72-technique stable-ID roster and reviewed
   seed/damage/effect probes. Native tests check copy-pure replay/resume, AI,
   cooldowns, family/personality/bond modifiers and bounded progression.
+- `battle_stats.json`: complete constructor outputs, including no egg, personality
+  ties, XP-level bounds and mastery clamping. Inputs are literal integers.
+- `battle_rewards.json`: pure reward eligibility/base XP, including practice,
+  incomplete matches and the five-reward daily boundary. Atomic claim ownership
+  remains the platform transaction layer's responsibility.
+- `battle_replay.json`: validated initial snapshots, ordered move slots, expected
+  pre-turn AI and every complete post-turn state, plus XP and 72 mastery increments.
+  The first case also freezes the exact RNG chain. Includes guard/buff/signature,
+  cooldown rejection, affinity/bond/training, victory, defeat and turn-20 draw.
+  Boundary scenarios may start from a constructed valid snapshot; they do not
+  claim to reconstruct its entire earlier gameplay history. Ports must compare
+  all fields and resume after each serialization round trip, not just compare HP.
+
+Canonical runtime definitions are [battle-v1.json](../../data/battle-v1.json),
+not these independently reviewed expected outputs. Regenerate native literals
+with `python scripts/prepare_battle_data.py`; `--check` detects definition drift.
+Snapshot shape and JS/C++ arithmetic/serialization rules are documented in the
+[architecture contract](../../docs/ARCHITECTURE.md#portable-battle-protocol-v1).
 
 No test writes physical Garmin steps or production saves. The native fixture
 uses RAM storage and a fixed epoch, 1792108800. Run `scripts/build.ps1 -Tests`
