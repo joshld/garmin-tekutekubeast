@@ -1,4 +1,3 @@
-using Toybox.ActivityMonitor;
 using Toybox.Time;
 using Toybox.Time.Gregorian;
 using Toybox.Lang;
@@ -157,25 +156,20 @@ class TekuTekuBeastState {
     }
     // Watermark + XP + inventory saved in one atomic document, never separately.
     function observe(day,total){
-        start();if(dev || day<number("birth") || total<0){return;}
-        var eligible=max(0,total-(day==number("birth")?number("birthBaseline"):0));var slot=day%32;
-        var previous=data["days"][slot]==day?data["counts"][slot]:0;
-        if(eligible<=previous){return;}
-        data["days"][slot]=day;data["counts"][slot]=eligible;var delta=eligible-previous;data["xp"]+=delta;
-        var food=number("snackRemainder")+delta;data["snacks"]=min(12,number("snacks")+food/2500);data["snackRemainder"]=food%2500;
+        start();if(dev){return;}BeastActivityRules.observe(data,day,total);
     }
-    function syncToday(){syncFromInfo(dev || skipWatch?null:ActivityMonitor.getInfo());}
+    function syncToday(){syncFromInfo(dev || skipWatch?null:GarminActivity.info());}
     function syncFromInfo(info){
+        syncActivity(GarminActivity.steps(info),GarminActivity.minutes(info),GarminActivity.pushes(info));
+    }
+    function syncActivity(steps,minutes,pushes){
         start();refreshSleepCached();tick();
-        if(!dev && !skipWatch && info!=null){if(info.steps!=null){observe(today(),info.steps);}
-            var minutes=null;var pushes=null;
-            if(info has :activeMinutesDay){var a=info.activeMinutesDay;if(a!=null){minutes=a.moderate+a.vigorous;}}
-            if(info has :pushes){pushes=info.pushes;}
-            activityRewards(today(),info.steps,minutes,pushes);}
+        if(!dev && !skipWatch){if(steps!=null){observe(today(),steps);}
+            activityRewards(today(),steps,minutes,pushes);}
         tick();commit();
     }
     function syncHistory(){
-        start();if(!dev && !skipWatch){var h=ActivityMonitor.getHistory();for(var i=0;i<h.size();i++){
+        start();if(!dev && !skipWatch){var h=GarminActivity.history();for(var i=0;i<h.size();i++){
             if(h[i].startOfDay!=null && h[i].steps!=null){observe(dateKey(h[i].startOfDay),h[i].steps);}}}
         refreshSleep();syncToday();
     }
@@ -187,20 +181,15 @@ class TekuTekuBeastState {
         if(steps==null || steps<0 || day!=number("day") || t<number("lastGrowth") || t-number("lastGrowth")>=60 || t-number("lastCare")>=3600){return false;}
         if(number("poopDue")>0 && t>=number("poopDue")){return false;}
         if(number("sleepMode")==0 && (number("scheduleAt")==0 || t<number("scheduleAt") || t-number("scheduleAt")>=900)){return false;}
-        var eligible=max(0,steps-(day==number("birth")?number("birthBaseline"):0));var slot=day%32;
-        var prior=data["days"][slot]==day?data["counts"][slot]:0;if(eligible>prior){return false;}
+        var eligible=BeastActivityRules.eligible(data,day,steps);
+        var prior=BeastActivityRules.credited(data,day);if(eligible>prior){return false;}
         var n=prior/max(1,number("target"));
         if(minutes!=null){if(number("minutesBase")<0){return false;}n=max(n,max(0,minutes-number("minutesBase"))/10);}
         if(pushes!=null){if(number("pushBase")<0){return false;}n=max(n,max(0,pushes-number("pushBase"))/500);}
         return min(5,n)<=number("activityMilestone");
     }
     function activityRewards(day,steps,minutes,pushes){
-        if(dev || day!=number("day")){return;}var n=0;
-        if(steps!=null){var slot=day%32;n=(data["days"][slot]==day?data["counts"][slot]:0)/number("target");}
-        if(minutes!=null){if(number("minutesBase")<0){data["minutesBase"]=minutes;}n=max(n,max(0,minutes-number("minutesBase"))/10);}
-        if(pushes!=null){if(number("pushBase")<0){data["pushBase"]=pushes;}n=max(n,max(0,pushes-number("pushBase"))/500);}
-        // Same physical effort measured by several APIs only earns once.
-        n=min(5,n);if(n>number("activityMilestone")){var delta=n-number("activityMilestone");data["adventure"]+=delta;data["activityBonus"]=number("activityBonus")+delta*number("activityUnitGrowth");data["activityMilestone"]=n;}
+        if(dev){return;}BeastActivityRules.rewards(data,day,steps,minutes,pushes);
     }
     function family(){
         if(dev && number("forcedFamily")>0){return number("forcedFamily");}if(stage()<3){return 0;}
@@ -214,7 +203,7 @@ class TekuTekuBeastState {
         return [["MOSSBIT","CINDERCUB","PUDDLEFIN","FLICKLET"],["THORNBUCK","PYROLYNX","CURRENTAIL","NOCTURNE"],
             ["VERDANT ELDER","SOLFLARE","LEVIATHAN","STARWEAVER"]][s-3][family()-1];
     }
-    function getTodaySteps(){var i=ActivityMonitor.getInfo();return i.steps==null?0:i.steps;}
+    function getTodaySteps(){return GarminActivity.todaySteps();}
     function friendship(){return number("friendship");}function snacks(){return number("snacks");}
     function patsToday(){return number("patDay")==number("day")?number("pats"):0;}
     function careReward(points,personality){

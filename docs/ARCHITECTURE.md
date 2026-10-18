@@ -6,6 +6,8 @@ release validation records remain historical evidence.
 | Boundary | Responsibility |
 | --- | --- |
 | `BeastProgression` | Growth, hatch/stage/mastery calculations and read-only family selection. Explicit save document and epoch-seconds inputs; no Garmin imports. |
+| `BeastActivityRules` | Deterministic step ledger, baseline/watermark and activity reward mutations; explicit local day and optional cumulative counters. No clock, watch or storage access. |
+| `GarminActivity` | Single normalization point for Garmin snapshots, history, optional active minutes and pushes. No new polling or storage. |
 | `TekuTekuBeastState` | Application orchestration: migrations, clock/day sampling, care, transaction ownership, Developer Mode and save commits. |
 | `BeastStore` | Garmin persistence, dirty detection and compact Glance cache; injectable RAM backend for tests. |
 | Views/delegates | Drawing, artwork, input, timers and feedback. Glance uses its existing compact read-only cache. |
@@ -20,6 +22,10 @@ release validation records remain historical evidence.
 - `BeastProgression.advance` mutates only passive-growth fields; calculations
   and family selection do not write storage. State owns all commits and DEV guards.
 - Genuine step XP is distinct from growth and must never be synthesized by ports.
+- Activity input is cumulative steps plus nullable moderate+vigorous minutes
+  and nullable pushes. `null` means unavailable, not zero. Observe before granting
+  rewards. State owns day rollover, DEV/skip-watch guards and atomic commit;
+  rules never sample calendars or persist intermediate watermarks separately.
 - `tests/core-vectors/*.json` contains reviewed language-neutral golden inputs
   and outputs. `scripts/prepare_rule_vectors.py` generates only test literals,
   not a second gameplay implementation. Future ports can consume the same JSON.

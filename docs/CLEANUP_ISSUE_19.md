@@ -22,9 +22,25 @@ new devices, Store upload or work on #21/#17/#20. See [code map](ARCHITECTURE.md
   Initial new characterization assertion was corrected to match the unchanged
   care-only gate; all 33 pre-existing tests passed on the initial run too.
 
-## Remaining milestones
+## Milestone 2 — activity boundary
 
-2. Separate Garmin activity sampling from deterministic ledger/reward rules.
+- `GarminActivity` normalizes optional fields once per background callback;
+  `BeastActivityRules` owns deterministic ledger/reward calculations. State keeps
+  lazy catch-up, day rollover, DEV guards and atomic saves.
+- Enduro 4: 36 native tests and four public tests passed. JSON traces cover
+  baselines, duplicate/rolled-back totals, unavailable counters and reward caps.
+- Actual Steps Progress stress callback: 44,800 / 61,344 bytes, one write and
+  one unchanged-cache skip, 15 ms coarse SDK timing. No new polling/allocating
+  activity snapshot containers. Legacy generator excludes both helpers from
+  constrained background scope; no other-device simulator pass is claimed.
+- Logs: `bin/cleanup-m2-pass-final-unit-enduro4.log`,
+  `cleanup-m2-public-tests.log`, `cleanup-m2-background.log`.
+  New test assertions were corrected for Monkey C Long/Number equality and null
+  handling; production rules did not need changes to satisfy the golden traces.
+- M1 layout evidence reused: this milestone changes no rendering or geometry.
+
+## Remaining milestone
+
 3. Extract mini-game timing/seed/loot calculations; finish boundary documentation.
 
 Both UUIDs, key, save schema, 47-profile manifest, version and signed v0.5.2

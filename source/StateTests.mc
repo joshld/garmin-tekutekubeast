@@ -2,6 +2,28 @@ using Toybox.Test;
 using Toybox.Lang;
 
 (:test)
+function activityGoldenVectorsTest(logger){
+    var rows=RuleVectors.activity();var fields=["xp","snacks","snackRemainder","activityMilestone","adventure","activityBonus"];
+    for(var i=0;i<rows.size();i++){
+        var row=rows[i];logger.debug(row["name"]);var s=TestSupport.fixture();var keys=row["data"].keys();
+        for(var k=0;k<keys.size();k++){s.data[keys[k]]=row["data"][keys[k]];}
+        var day=s.number("day");var writes=s.store.writes;var ruleData=s.store.copy(s.data);
+        for(var j=0;j<row["samples"].size();j++){
+            var sample=row["samples"][j];var steps=sample["steps"];var minutes=sample["minutes"];var pushes=sample["pushes"];
+            if(steps!=null){s.observe(day,steps);BeastActivityRules.observe(ruleData,day,steps);}
+            s.activityRewards(day,steps,minutes,pushes);BeastActivityRules.rewards(ruleData,day,steps,minutes,pushes);
+            for(var k=0;k<fields.size();k++){Test.assert(s.data[fields[k]]==sample["expected"][k]);}
+            Test.assert(TestSupport.same(ruleData,s.data));Test.assertEqual(s.store.writes,writes);
+        }
+        var before=s.store.copy(s.data);BeastActivityRules.observe(s.data,day-1,90000);
+        BeastActivityRules.observe(s.data,day,-1);BeastActivityRules.rewards(s.data,day-1,90000,99,9999);
+        Test.assert(TestSupport.same(before,s.data));
+    }
+    Test.assert(GarminActivity.steps(null)==null);Test.assert(GarminActivity.minutes(null)==null);
+    Test.assert(GarminActivity.pushes(null)==null);return true;
+}
+
+(:test)
 function progressionGoldenVectorsTest(logger){
     var vectors=RuleVectors.progression();
     for(var i=0;i<vectors.size();i++){
