@@ -2,6 +2,62 @@
 
 Latest source work: Issue #20 battles, following Issue #17 `74b98a6`.
 
+## Issue #20 - offline playtesting and polish
+
+Completed on Enduro 4 / SDK 9.2 only; no full compatibility matrix. Reused the
+already-passing 100-scene battle audit after interruption (zero clipping/overlap,
+150,320 / 781,976 bytes peak audit heap), rather than rerunning it.
+
+Six complete sessions used actual production battle screens and simulator watch
+button mappings (SELECT/UP/DOWN/BACK), under the isolated QA matrix identity:
+
+| Player | Turns | Result | Battle XP |
+| --- | ---: | --- | ---: |
+| Pip | 4 | Victory | 12 |
+| Nimble | 4 | Defeat | 5 |
+| Adult Grove / Mossbit | 4 | Victory | 12 |
+| Champion Ember / Pyrolynx | 4 | Victory | 12 |
+| Legendary Tide / Leviathan | 4 | Victory | 12 |
+| Legendary Wisp / Starweaver | 4 | Victory | 12 |
+
+Reviewed each form's four named moves, HP bars, wrapped names, reactions and
+results. Nimble exercised guard, buff and signature recovery; BACK then a full
+QA VM exit/relaunch resumed turn one with both fighters exactly 29/46 HP before
+finishing. The QA harness retains only isolated per-fixture battle records;
+pet fixtures stay in RAM. It supplies encounters for playtesting, not proof of
+natural discovery. Four-turn samples are short/bounded; automation delays are
+not a trustworthy 30-60-second human pacing or enjoyment measurement.
+
+- Fixed confusing signature recovery: keep the move grid visible and show
+  remaining own moves. Compact-grid hints explain hit/protection/two-hit boost.
+- Existing views now discover opportunities after fresh foreground step catch-up.
+  A match claimed across midnight refreshes daily rewards, rolling care first
+  so yesterday's care cannot generate new-day encounters. Claimed results remain
+  no-op/idempotent, including on later days. No new timer or background work.
+- Final native suite: **65 passed**, including new hint/resumed-discovery,
+  midnight/care/cap/rollback, terminal-before-claim reload and balance-survey
+  tests, plus existing queue/step/reward/sleep/DEV/migration/golden regressions.
+  Public-input suite: **5 passed**. Signed owner/public Enduro 4 foreground
+  release-mode builds passed; public absence tests retain DEV separation.
+- Survey: 18 forms x 8 seeds x 3 strategies = **432 native-engine matches**.
+  Direct: 125 wins/19 losses, 4-6 turns; signature-cycle: 141/3, 3-5 turns;
+  buff-cycle: 35/109, 4-6 turns; no draws. Identical matchups compare strategies,
+  not population win rates. Signatures dominate repeated buff setup; record as
+  a beta balance concern, not proof every buff use is wrong. Versioned v1
+  definitions, RNG, golden outcomes, rewards and evolution/step balance unchanged.
+- Logs: `bin/battle20-playtest-session1.log`, `battle20-playtest-session2.log`,
+  `battle20-polish-layout.log`, `battle20-polish-final-native.log`,
+  `battle20-polish-final-public.log`, `battle20-polish-owner-build.log`,
+  `battle20-polish-public-build.log`. Detailed output remains ignored locally.
+
+Both application/signing identities, pet schemas and existing public/private
+Store IQ SHA256 hashes are unchanged. No package export/upload/publication or
+physical-watch test occurred. Existing Glance/background evidence is reused;
+these foreground-only changes do not newly validate those VMs or older devices.
+Offline battles are an owner-playtest beta candidate, not a final balance/fun
+sign-off. Issue #20 retains physical pacing/readability/interruption/battery,
+older-renderer release checks and unresolved future multiplayer acceptance.
+
 ## Issue #20 - portable foundation follow-up
 
 - Canonical platform-neutral `data/battle-v1.json` now supplies the native roster,

@@ -104,6 +104,15 @@ with a fixture Pip and queued encounters. Stop the QA VM to flush its counters;
 do not clear Storage. Native unit tests include deterministic battles and the
 separate encounter/claim document.
 
+For manual stage-by-stage battle playtesting, build
+`tests/battle-playtest/monkey.jungle` with `-Owner -Device enduro4` to a separate
+QA program. UP/DOWN selects Pip, Nimble, Adult Grove, Champion Ember or Legendary
+Tide/Wisp; SELECT opens the production battle view/input. BACK returns to the
+chooser. Continue Last resumes after a VM restart. Pet fixtures stay in RAM;
+only `qa.fixture` / `qa.battle.0` through `.5` persist under the isolated matrix
+UUID, never either real app. The harness supplies encounters for playtesting;
+native tests, not this fixture supply, verify genuine discovery limits.
+
 ## Static checks and fixtures
 
 ```powershell

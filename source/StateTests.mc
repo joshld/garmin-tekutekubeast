@@ -86,6 +86,21 @@ function battleViewLifecycleTest(logger){
 }
 
 (:test)
+function battleMoveHintsAndResumedDiscoveryTest(logger){
+    var s=TestSupport.fixture();s.data["stageFloor"]=1;s.data["sleepMode"]=2;s.commit();
+    var v=new BeastBattleView(s);Test.assertEqual(v.fight.battleQueueCount(),1);
+    // A fresh foreground reconciliation must be observed by the existing view.
+    s.observe(s.today(),10000);s.commit();v.onShow();
+    Test.assertEqual(v.fight.battleQueueCount(),3);v.battle=v.fight.beginBattle();v.battlePhase=1;
+    v.moveChoice=3;v.battle=v.fight.battleTurn(3);
+    Test.assert(v.moveHint().equals("Ready in 2 moves"));var turn=v.battle["turn"];var writes=s.store.writes;
+    v.selectAction();Test.assertEqual(v.battlePhase,1);Test.assertEqual(v.battle["turn"],turn);
+    Test.assertEqual(s.store.writes,writes);Test.assert(v.battleNotice.equals(""));
+    v.moveChoice=1;Test.assert(v.moveHint().equals("Soften next hit"));
+    v.moveChoice=2;Test.assert(v.moveHint().equals("Boost next 2 hits"));v.onHide();return true;
+}
+
+(:test)
 function battleSeparateSaveAndDevTest(logger){
     var s=TestSupport.fixture();s.data["stageFloor"]=1;s.data["sleepMode"]=2;s.commit();
     var pet=s.store.copy(s.store.read("v4"));var fight=new BeastBattle(s);Test.assertEqual(fight.battleQueueCount(),1);
@@ -149,6 +164,78 @@ function battleSleepAndRewardLimitsTest(logger){
     Test.assertEqual(s.number("games"),0);Test.assertEqual(s.number("adventure"),0);return true;
 }
 
+(:test)
+function battleMidnightClaimAndCareRolloverTest(logger){
+    var s=TestSupport.fixture();s.data["stageFloor"]=1;s.data["sleepMode"]=2;s.commit();
+    var pet=s.store.copy(s.store.read("v4"));var fight=new BeastBattle(s);fight.beginBattle();
+    fight.data["active"]["actors"][1]["hp"]=1;fight.battleTurn(0);
+    fight.data["rewarded"]=5;fight.commit();s.data["careToday"]=300;
+    s.testNow+=86400;var day=s.today();var outcome=fight.finishBattle();
+    Test.assertEqual(fight.data["day"],day);Test.assertEqual(s.number("careToday"),0);
+    Test.assertEqual(fight.battleQueueCount(),1);Test.assertEqual(fight.data["rewarded"],1);
+    Test.assertEqual(fight.battleXp(),12);Test.assert(outcome.equals("+12 BATTLE XP"));
+    // Lazy pet catch-up must not introduce a second canonical save transaction.
+    Test.assert(TestSupport.same(pet,s.store.read("v4")));var writes=s.store.writes;
+    fight.discover();Test.assertEqual(s.store.writes,writes);
+    // Claimed results stay idempotent even if reopened on a later local day.
+    s.testNow+=86400;Test.assert(fight.finishBattle().equals(outcome));
+    Test.assertEqual(s.store.writes,writes);Test.assertEqual(fight.data["rewarded"],1);
+    Test.assertEqual(fight.data["day"],day);Test.assertEqual(fight.battleXp(),12);
+    s.testNow-=2*86400;fight.discover();Test.assertEqual(fight.data["day"],day);
+    Test.assertEqual(fight.data["rewarded"],1);Test.assertEqual(fight.battleXp(),12);return true;
+}
+(:test)
+function battleTerminalBeforeClaimReloadTest(logger){
+    var s=TestSupport.fixture();s.data["stageFloor"]=1;s.data["sleepMode"]=2;s.commit();
+    var fight=new BeastBattle(s);fight.beginBattle();fight.data["active"]["actors"][1]["hp"]=1;fight.battleTurn(0);
+    var terminal=fight.battleSession();Test.assertEqual(terminal["status"],1);Test.assert(!terminal["claimed"]);
+    Test.assertEqual(fight.battleXp(),0);s.battleData=null;var reload=new BeastBattle(s);
+    Test.assert(TestSupport.same(terminal,reload.battleSession()));Test.assertEqual(reload.battleXp(),0);
+    Test.assert(reload.finishBattle().equals("+12 BATTLE XP"));var writes=s.store.writes;
+    s.battleData=null;var claimed=new BeastBattle(s);claimed.finishBattle();
+    Test.assertEqual(claimed.battleXp(),12);Test.assertEqual(claimed.data["rewarded"],1);
+    Test.assertEqual(s.store.writes,writes);return true;
+}
+(:test)
+function battleBalanceSurveyTest(logger){
+    // Diagnostic native-engine survey, not a substitute for button playtesting.
+    // Identical seed/matchups compare direct, signature-cycle and buff-cycle.
+    var totals=[[0,0,0,0,20,0],[0,0,0,0,20,0],[0,0,0,0,20,0]];
+    for(var form=0;form<18;form++){
+        var stage=form<2?form+1:3+BeastBattleRules.min(2,(form-2)%4);
+        var family=form<2?0:1+((form-2)/4).toNumber();var rare=form>=2 && (form-2)%4==3?1:0;
+        for(var sample=0;sample<8;sample++){
+            var seed=17+sample*719;var temper=[0,0,0,0];temper[sample%4]=1;
+            var p=BeastBattleRules.fighter(stage,family,rare,60,temper,0,null);
+            var e=BeastBattleRules.fighter(stage,family==0?0:1+sample%4,0,30,temper,0,null);
+            var original=new BeastStore().copy([p,e]);
+            for(var strategy=0;strategy<3;strategy++){
+                var state=BeastBattleRules.create(1,seed,p,e);
+                while(state["status"]==0){
+                    var slot=0;
+                    if(strategy==1 && BeastBattleRules.available(state,3)){slot=3;}
+                    if(strategy==2 && state["actors"][0]["buff"]==0){slot=2;}
+                    state=BeastBattleRules.turn(state,slot);
+                    Test.assert(state["turn"]<=20);
+                    for(var actor=0;actor<2;actor++){
+                        Test.assert(state["actors"][actor]["hp"]>=0);
+                        Test.assert(state["actors"][actor]["hp"]<=state["actors"][actor]["maxHp"]);
+                    }
+                }
+                Test.assert(BeastBattleRules.exportState(state)!=null);
+                Test.assert(TestSupport.same(original,[p,e]));
+                var row=totals[strategy];row[state["status"]-1]++;row[3]+=state["turn"];
+                row[4]=BeastBattleRules.min(row[4],state["turn"]);row[5]=BeastBattleRules.max(row[5],state["turn"]);
+            }
+        }
+    }
+    var names=["direct","signature-cycle","buff-cycle"];
+    for(var i=0;i<3;i++){
+        var row=totals[i];Test.assertEqual(row[0]+row[1]+row[2],144);
+        logger.debug("BATTLE_BALANCE "+names[i]+": wins="+row[0]+" losses="+row[1]+" draws="+row[2]+" turns="+row[3]+" range="+row[4]+"-"+row[5]+" matches=144");
+    }
+    return true;
+}
 (:test)
 function battleRosterGoldenTest(logger){
     var rows=RuleVectors.battle();var seen={};var count=0;

@@ -32,6 +32,10 @@ class BeastBattle {
         var day=beast.today();
         // Monotonic local-day watermark: rollback cannot farm daily encounters.
         if(day>data["day"]){
+            // A battle can remain open across midnight. Roll the pet's care
+            // day first: yesterday's care must not become new-day encounters.
+            // tick() is lazy game catch-up, not a Garmin query or storage write.
+            beast.tick();
             data["day"]=day;data["rewarded"]=0;data["stepOffers"]=0;
             data["careMark"]=0;offer(0); // Daily accessible trail, no steps needed.
         }
@@ -94,6 +98,9 @@ class BeastBattle {
         var match=data["active"];
         if(match==null || match["status"]==0){return "MATCH PAUSED";}
         if(match["claimed"] || match["id"]<=data["claim"]){return match["outcome"];}
+        // Refresh bounded opportunities and the reward day only for a new
+        // claim. Reopening an already-claimed result stays a complete no-op.
+        discover();
         var xp=0;
         if(BeastBattleRules.rewardEligible(match["status"],match["turn"],match["practice"],data["rewarded"])){
             xp=BeastBattleRules.xpReward(match);data["xp"]+=xp;data["rewarded"]++;

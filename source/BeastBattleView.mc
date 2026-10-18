@@ -16,7 +16,7 @@ class BeastBattleView extends TekuTekuBeastView {
     function onShow(){
         battleVisible=true;burst=0;
         Application.getApp().activeView=self;
-        if(!beast.dev){beast.data=null;}beast.syncHistory();
+        if(!beast.dev){beast.data=null;}beast.syncHistory();fight.discover();
         battle=fight.battleSession();battleSleeping=beast.isSleeping();
         battlePhase=battle==null?0:(battle["status"]==0?1:3);
         if(battlePhase==3){battleResult=fight.finishBattle();}
@@ -61,7 +61,9 @@ class BeastBattleView extends TekuTekuBeastView {
             if(battle==null){battleNotice=beast.stage()==0?"Hatch before battling":"Find a wild encounter";}
             else{battlePhase=battle["status"]==0?1:3;loadBattleArt();}
         }else if(battlePhase==1){
-            if(!BeastBattleRules.available(battle,moveChoice)){battleNotice="Technique recovering";WatchUi.requestUpdate();return;}
+            // Keep every named option visible while a signature recovers.
+            // The selected-move hint explains the remaining own actions.
+            if(!BeastBattleRules.available(battle,moveChoice)){WatchUi.requestUpdate();return;}
             battle=fight.battleTurn(moveChoice);
             if(battle==null){battlePhase=0;battleNotice="Battle paused";}
             else{
@@ -115,6 +117,10 @@ class BeastBattleView extends TekuTekuBeastView {
         }
         compactGrid=moveFont!=null;if(moveFont==null){moveFont=Graphics.FONT_XTINY;}
     }
+    function moveHint(){
+        if(moveChoice==3){var cooldown=battle["actors"][0]["cooldown"];return cooldown>0?"Ready in "+cooldown+" moves":"Strong hit";}
+        return ["Hit the wild beast","Soften next hit","Boost next 2 hits"][moveChoice];
+    }
     function hpBar(dc,x,top,width,actor){
         dc.setColor(INK,Graphics.COLOR_TRANSPARENT);dc.drawRectangle(x,top,width,6);
         var fill=((width-2)*actor["hp"].toFloat()/actor["maxHp"]).toNumber();
@@ -152,7 +158,7 @@ class BeastBattleView extends TekuTekuBeastView {
             label(dc,y(dc,0.28),fight.battleQueueCount()+" WAITING",Graphics.FONT_XTINY);
             label(dc,y(dc,0.40),"BATTLE XP "+fight.battleXp(),Graphics.FONT_XTINY);
             label(dc,y(dc,0.57),battleNotice.length()>0?battleNotice:"SELECT: MEET A BEAST",Graphics.FONT_XTINY);
-            label(dc,y(dc,0.72),"UP/DOWN: CHOOSE",Graphics.FONT_XTINY);
+            label(dc,y(dc,0.72),"UP/DOWN PICK MOVES",Graphics.FONT_XTINY);
             label(dc,y(dc,0.83),"BACK: LATER",Graphics.FONT_XTINY);return;
         }
         loadBattleArt();var actors=battle["actors"];
@@ -187,5 +193,6 @@ class BeastBattleView extends TekuTekuBeastView {
             if(i==moveChoice){dc.setColor(LIGHT,Graphics.COLOR_TRANSPARENT);dc.fillRoundedRectangle(x-cellWidth/2,top-1,cellWidth,rowHeight,3);}
             battleText(dc,x,top,cellWidth-4,names[i]);
         }
+        battleText(dc,dc.getWidth()/2,y(dc,0.86),dc.getWidth()*0.46,moveHint());
     }
 }

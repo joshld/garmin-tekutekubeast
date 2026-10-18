@@ -40,6 +40,8 @@ Decline next. Eggs must hatch first; a sleeping beast must explicitly Wake Up.
 UP/DOWN chooses among four actual named techniques; SELECT uses one and BACK
 pauses. Touching a move chooses/uses it. Each turn saves before its short visual
 reaction, so closing/reopening resumes the same opponent, HP, seed and turn.
+On the compact move grid, the selected technique has a short effect hint.
+Recovering signatures show the remaining own moves without hiding other options.
 Older renderers without compact vector fonts show a full-width named-move
 selector instead of the 2x2 grid; UP/DOWN still selects all four techniques.
 HP is temporary: defeat never injures, kills, de-evolves or spends the real pet's
