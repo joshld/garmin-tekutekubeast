@@ -1,8 +1,22 @@
 # Current source validation checkpoint
 
-Latest source change: Issue #17 sleep interactions, after Issue #21 `2d411b1`.
+Latest source work: Issue #20 battles, following Issue #17 `74b98a6`.
 
-## Issue #17 - sleep interactions
+## Issue #20 - milestone 1: deterministic engine
+
+- Exact 18-form/72-name roster and stable IDs, no egg battles; copy-pure seeded
+  turns, AI, temporary HP, guard/buff/cooldown, family/personality/friendship and
+  technique/XP modifiers. Results and reward calculations are bounded and do not
+  touch pet growth or genuine step XP. No networking or live UI hook in this
+  milestone; it is an engine checkpoint, not a playable Store update.
+- Enduro 4 / SDK 9.2: build and all 50 native tests passed (45 prior + five
+  engine tests). JSON roster/damage probes cover replay, resume, purity, effects,
+  cooldown rejection, AI bounds, no eggs, rare gating and progression limits.
+  Evidence: `bin/battle20-m1-final-unit-enduro4.log`.
+- Existing application IDs, signing/version, Store packages and canonical save
+  remain unchanged. No physical-watch test or full-device matrix.
+
+## Prior Issue #17 - sleep interactions
 
 - Visible-but-blocked care/play actions give the exact silent notice; explicit
   Wake Up overrides only the current nap/night. Temporary 0-2-point happiness

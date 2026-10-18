@@ -2,6 +2,103 @@ using Toybox.Test;
 using Toybox.Lang;
 
 (:test)
+function battleRosterGoldenTest(logger){
+    var rows=RuleVectors.battle();var seen={};var count=0;
+    for(var i=0;i<rows.size();i++){
+        var row=rows[i];var form=BeastBattleMoves.form(row["stage"],row["family"],row["rare"]);
+        Test.assertEqual(form,row["form"]);var names=BeastBattleMoves.names(form);Test.assertEqual(names.size(),4);
+        for(var slot=0;slot<4;slot++){
+            var id=BeastBattleMoves.id(form,slot);Test.assertEqual(id,form*4+slot);
+            Test.assert(!seen.hasKey(id));seen[id]=true;count++;
+            Test.assert(names[slot].equals(row["names"][slot]));Test.assert(BeastBattleMoves.name(id).equals(row["names"][slot]));
+            Test.assertEqual(BeastBattleMoves.role(id),slot);
+        }
+    }
+    Test.assertEqual(count,72);Test.assertEqual(BeastBattleMoves.form(0,0,0),-1);
+    Test.assert(BeastBattleRules.fighter(0,0,0,0,null,0,null)==null);
+    Test.assertEqual(BeastBattleMoves.names(-1).size(),0);
+    for(var family=1;family<=4;family++){
+        Test.assertEqual(BeastBattleMoves.form(3,family,1),BeastBattleMoves.form(3,family,0));
+        Test.assertEqual(BeastBattleMoves.form(4,family,1),BeastBattleMoves.form(4,family,0));
+    }
+    return true;
+}
+(:test)
+function battleReplayPurityAndResumeTest(logger){
+    var p=BeastBattleRules.fighter(3,1,0,80,[3,2,1,0],120,null);
+    var foe=BeastBattleRules.fighter(3,2,0,40,[0,3,1,2],80,null);var saved=new BeastStore().copy(p);
+    var a=BeastBattleRules.create(17,12345,p,foe);var b=new BeastStore().copy(a);
+    Test.assert(TestSupport.same(p,saved));a["actors"][0]["mastery"][0]=1;Test.assertEqual(p["mastery"][0],0);
+    a["actors"][0]["mastery"][0]=0;
+    for(var turn=0;turn<20 && a["status"]==0;turn++){
+        var slot=turn%4;if(!BeastBattleRules.available(a,slot)){slot=0;}
+        var before=new BeastStore().copy(a);var next=BeastBattleRules.turn(a,slot);
+        Test.assert(TestSupport.same(before,a));b=BeastBattleRules.turn(b,slot);Test.assert(TestSupport.same(next,b));
+        a=new BeastStore().copy(next); // plain persisted snapshot needs no VM-specific reconstruction
+        Test.assertEqual(a["v"],1);Test.assertEqual(a["id"],17);Test.assert(a["seed"]>=0 && a["seed"]<65521);
+        Test.assert(a["events"].size()>=1 && a["events"].size()<=2);
+        for(var actor=0;actor<2;actor++){Test.assert(a["actors"][actor]["hp"]>=0 && a["actors"][actor]["hp"]<=a["actors"][actor]["maxHp"]);}
+    }
+    Test.assert(a["status"]>0);Test.assert(a["turn"]<=20);
+    Test.assert(TestSupport.same(a,BeastBattleRules.turn(a,0)));return true;
+}
+(:test)
+function battleEffectsAndInfluenceTest(logger){
+    var expected=RuleVectors.battle()[0]["probe"];
+    var p=BeastBattleRules.fighter(3,0,0,0,[3,0,0,0],0,null);var foe=BeastBattleRules.fighter(3,0,0,0,[3,0,0,0],0,null);
+    var normal=BeastBattleRules.create(1,42,p,foe);BeastBattleRules.act(normal,0,0);var damage=normal["events"][0]["damage"];
+    Test.assertEqual(normal["seed"],expected["nextSeed"]);Test.assertEqual(damage,expected["damage"]);
+    var guarded=BeastBattleRules.create(1,42,p,foe);BeastBattleRules.act(guarded,1,1);BeastBattleRules.act(guarded,0,0);
+    Test.assertEqual(guarded["events"][1]["damage"],expected["guarded"]);Test.assertEqual(guarded["actors"][1]["guard"],0);
+    var buffed=BeastBattleRules.create(1,42,p,foe);BeastBattleRules.act(buffed,0,2);BeastBattleRules.act(buffed,0,0);
+    Test.assertEqual(buffed["events"][1]["damage"],expected["buffed"]);Test.assertEqual(buffed["actors"][0]["buff"],1);
+    var bonded=BeastBattleRules.create(1,42,p,foe);bonded["actors"][0]["friendship"]=100;BeastBattleRules.act(bonded,0,0);
+    Test.assertEqual(bonded["events"][0]["damage"],expected["bonded"]);
+    var bold=BeastBattleRules.create(1,42,p,foe);bold["actors"][0]["temper"]=1;BeastBattleRules.act(bold,0,0);
+    Test.assertEqual(bold["events"][0]["damage"],expected["bold"]);
+    var trained=BeastBattleRules.create(1,42,p,foe);trained["actors"][0]["mastery"][0]=30;BeastBattleRules.act(trained,0,0);
+    Test.assertEqual(trained["events"][0]["damage"],expected["trained"]);
+    Test.assert(BeastBattleRules.affinity(1,3)>0);Test.assert(BeastBattleRules.affinity(3,1)<0);
+    Test.assertEqual(BeastBattleRules.affinity(0,3),0);
+    var adult=BeastBattleRules.fighter(3,1,0,0,[0,0,0,0],0,null);var legend=BeastBattleRules.fighter(5,1,0,0,[0,0,0,0],0,null);
+    Test.assert(legend["maxHp"]>adult["maxHp"]);Test.assert(legend["power"]>adult["power"]);return true;
+}
+(:test)
+function battleAiCooldownAndBoundsTest(logger){
+    var p=BeastBattleRules.fighter(5,1,0,50,[0,0,0,1],0,null);var foe=BeastBattleRules.fighter(5,2,0,50,[0,1,0,0],0,null);
+    var state=BeastBattleRules.create(2,123,p,foe);state["actors"][0]["hp"]=10000;state["actors"][1]["hp"]=10000;
+    state=BeastBattleRules.turn(state,3);Test.assertEqual(state["actors"][0]["cooldown"],2);Test.assert(!BeastBattleRules.available(state,3));
+    Test.assert(TestSupport.same(state,BeastBattleRules.turn(state,3)));Test.assert(TestSupport.same(state,BeastBattleRules.turn(state,-1)));
+    Test.assert(TestSupport.same(state,BeastBattleRules.turn(state,4)));state=BeastBattleRules.turn(state,0);
+    Test.assert(!BeastBattleRules.available(state,3));state=BeastBattleRules.turn(state,0);Test.assert(BeastBattleRules.available(state,3));
+    for(var seed=0;seed<40;seed++){
+        state["seed"]=seed;state["actors"][1]["cooldown"]=2;var before=new BeastStore().copy(state);var choice=BeastBattleRules.ai(state);
+        Test.assert(choice>=0 && choice<3);Test.assert(TestSupport.same(before,state));
+    }
+    while(state["status"]==0){state=BeastBattleRules.turn(state,1);}
+    Test.assertEqual(state["turn"],20);Test.assertEqual(state["status"],3);return true;
+}
+(:test)
+function battleProgressionBoundsTest(logger){
+    Test.assertEqual(BeastBattleRules.level(-80),0);Test.assertEqual(BeastBattleRules.level(79),0);
+    Test.assertEqual(BeastBattleRules.level(80),1);Test.assertEqual(BeastBattleRules.level(99999),12);
+    var mastery=[];for(var n=0;n<72;n++){mastery.add(99999);}
+    var p=BeastBattleRules.fighter(3,1,0,900,[0,0,0,1],99999,mastery);Test.assertEqual(p["friendship"],100);
+    Test.assertEqual(p["mastery"][0],999);var foe=BeastBattleRules.fighter(1,0,0,0,[0,0,0,0],0,null);
+    var state=BeastBattleRules.create(3,0,p,foe);Test.assertEqual(BeastBattleRules.xpReward(state),0);
+    var empty=BeastBattleRules.masteryReward(state);Test.assertEqual(empty.size(),72);
+    for(var i=0;i<72;i++){Test.assertEqual(empty[i],0);}
+    var xp=[0,12,5,7];
+    for(var status=1;status<=3;status++){
+        state["status"]=status;state["uses"]=[20,2,1,0];var before=new BeastStore().copy(state);
+        Test.assertEqual(BeastBattleRules.xpReward(state),xp[status]);var increments=BeastBattleRules.masteryReward(state);
+        for(var id=0;id<72;id++){var slot=id-p["form"]*4;Test.assertEqual(increments[id],slot==0?3:(slot==1?2:(slot==2?1:0)));}
+        Test.assert(TestSupport.same(before,state));
+    }
+    return true;
+}
+
+(:test)
 function sleepingActionsNoMutationTest(logger){
     var s=TestSupport.fixture();s.data["sleepMode"]=2;s.data["poop"]=1;s.data["items"][0]=3;s.rest();
     var before=s.store.copy(s.data);var writes=s.store.writes;

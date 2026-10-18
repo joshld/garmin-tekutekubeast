@@ -6,6 +6,26 @@ module RuleVectors {
         {"name"=>"optional counters initialize without retroactive rewards","data"=>{"birth"=>20261016,"day"=>20261016},"samples"=>[{"steps"=>null,"minutes"=>10,"pushes"=>500,"expected"=>[0,0,0,0,0,0]},{"steps"=>null,"minutes"=>30,"pushes"=>1500,"expected"=>[0,0,0,2,2,2000]},{"steps"=>null,"minutes"=>40,"pushes"=>2000,"expected"=>[0,0,0,3,3,3000]},{"steps"=>null,"minutes"=>90,"pushes"=>6000,"expected"=>[0,0,0,5,5,5000]},{"steps"=>null,"minutes"=>90,"pushes"=>6000,"expected"=>[0,0,0,5,5,5000]}]},
         {"name"=>"snack cap retains remainder semantics","data"=>{"birth"=>20261016,"day"=>20261016,"snacks"=>12,"snackRemainder"=>2499},"samples"=>[{"steps"=>1,"minutes"=>null,"pushes"=>null,"expected"=>[1,12,0,0,0,0]},{"steps"=>2500,"minutes"=>null,"pushes"=>null,"expected"=>[2500,12,2499,1,1,1000]}]}
     ];}
+    function battle(){return [
+        {"form"=>0,"stage"=>1,"family"=>0,"rare"=>0,"names"=>["Tiny Tackle","Curl Up","Happy Chirp","Pip Pop"],"probe"=>{"seed"=>42,"nextSeed"=>725,"damage"=>13,"guarded"=>4,"buffed"=>16,"bonded"=>15,"bold"=>14,"trained"=>16}},
+        {"form"=>1,"stage"=>2,"family"=>0,"rare"=>0,"names"=>["Quick Pounce","Swift Dodge","Brave Bounce","Whirlwind Dash"]},
+        {"form"=>2,"stage"=>3,"family"=>1,"rare"=>0,"names"=>["Leaf Flick","Bark Guard","Growing Spirit","Root Snare"]},
+        {"form"=>3,"stage"=>4,"family"=>1,"rare"=>0,"names"=>["Thorn Swipe","Bramble Wall","Forest Cry","Thorn Barrage"]},
+        {"form"=>4,"stage"=>5,"family"=>1,"rare"=>0,"names"=>["Vine Lash","Ancient Bark","Nature's Blessing","Verdant Fury"]},
+        {"form"=>5,"stage"=>5,"family"=>1,"rare"=>1,"names"=>["Luminous Vine","Sacred Grove","Heartbloom","Aurora Roots"]},
+        {"form"=>6,"stage"=>3,"family"=>2,"rare"=>0,"names"=>["Ember Pop","Cinder Shield","Burning Courage","Blazing Pounce"]},
+        {"form"=>7,"stage"=>4,"family"=>2,"rare"=>0,"names"=>["Flame Claw","Heat Veil","Fireheart Roar","Inferno Claw"]},
+        {"form"=>8,"stage"=>5,"family"=>2,"rare"=>0,"names"=>["Solar Slash","Sunfire Ward","Radiant Roar","Solar Inferno"]},
+        {"form"=>9,"stage"=>5,"family"=>2,"rare"=>1,"names"=>["Phoenix Talon","Ashen Guard","Rekindle","Phoenix Rebirth"]},
+        {"form"=>10,"stage"=>3,"family"=>3,"rare"=>0,"names"=>["Bubble Burst","Ripple Guard","Flowing Spirit","Tidal Spin"]},
+        {"form"=>11,"stage"=>4,"family"=>3,"rare"=>0,"names"=>["Aqua Strike","Wave Screen","Ocean Pulse","Riptide Crash"]},
+        {"form"=>12,"stage"=>5,"family"=>3,"rare"=>0,"names"=>["Abyss Bite","Deep Guard","Tidal Majesty","Abyssal Surge"]},
+        {"form"=>13,"stage"=>5,"family"=>3,"rare"=>1,"names"=>["Moonlit Torrent","Silver Mist","Tranquil Waters","Lunar Tidalwave"]},
+        {"form"=>14,"stage"=>3,"family"=>4,"rare"=>0,"names"=>["Star Spark","Phantom Veil","Starlight Wish","Phantom Blink"]},
+        {"form"=>15,"stage"=>4,"family"=>4,"rare"=>0,"names"=>["Moonlash","Dusk Shroud","Night Hymn","Lunar Hex"]},
+        {"form"=>16,"stage"=>5,"family"=>4,"rare"=>0,"names"=>["Comet Pierce","Astral Veil","Celestial Song","Eclipse Nova"]},
+        {"form"=>17,"stage"=>5,"family"=>4,"rare"=>1,"names"=>["Void Lance","Eclipse Cloak","Cosmic Harmony","Eternal Eclipse"]}
+    ];}
     function games(){return [
         {"seed"=>0,"nextSeed"=>11,"risk"=>0,"finds"=>0,"route"=>0,"mask"=>0,"item"=>0},
         {"seed"=>1,"nextSeed"=>28,"risk"=>0,"finds"=>0,"route"=>0,"mask"=>0,"item"=>1},

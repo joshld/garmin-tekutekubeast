@@ -12,6 +12,7 @@ designs only when a specific historical decision is relevant.
 | `BeastActivityRules` | Deterministic step ledger, baseline/watermark and activity reward mutations; explicit local day and optional cumulative counters. No clock, watch or storage access. |
 | `GarminActivity` | Single normalization point for Garmin snapshots, history, optional active minutes and pushes. No new polling or storage. |
 | `BeastGameRules` | Pure mini-game timing, cue selection, seed transitions and loot choice. Views keep session transitions/buttons/drawing; State keeps atomic claims and inventory changes. |
+| `BeastBattleMoves` / `BeastBattleRules` | Issue #20 deterministic engine: 72 fixed named techniques, temporary combat snapshots, AI, effects and bounded progression calculations. No platform imports or pet-save mutation. |
 | `TekuTekuBeastState` | Application orchestration: migrations, clock/day sampling, care, transaction ownership, Developer Mode and save commits. |
 | `BeastStore` | Garmin persistence, dirty detection and compact Glance cache; injectable RAM backend for tests. |
 | Views/delegates | Drawing, artwork, input, timers and feedback. Glance uses its existing compact read-only cache. |
@@ -55,6 +56,17 @@ framebuffer or GPU-only blending is required.
   compilation inputs exclude both native owner tests and generated vectors.
 
 ## Deliberately not rewritten
+
+Battle protocol v1 uses plain dictionaries/arrays: `v`, `id`, `seed`, `turn`,
+`status` (0 active, 1 victory, 2 defeat, 3 draw), two `actors`, latest `events`
+and four player move-use counters. Form IDs 0/1 are Pip/Nimble; family groups
+contain adult/champion/legendary/earned rare. Move ID = form * 4 + slot; never
+reorder these IDs. Eggs have no moves. `turn` returns an independent snapshot;
+invalid/cooling moves are no-ops. Seed recurrence is `(seed * 17 + 11) % 65521`:
+AI peeks at the next seed, then each damaging action consumes one seed, player
+first. Guard/buff actions consume none. Match results stop at 20 turns. These
+contracts and the JSON roster/probes are reusable by future ports; no ANT, BLE,
+ESP-NOW or multiplayer transport is implemented.
 
 Mini-game periods, cue durations, gaps and jumps use 250 ms logical ticks (not
 wall-clock milliseconds). Seeds use the existing modulo-65521 transitions and

@@ -19,6 +19,9 @@ neither platform is implemented by this cleanup.
 - `sleep.json`: explicit elapsed nap seconds and expected temporary annoyance
   (0-2). Native tests also cover bounded wake overrides, raw-happiness purity,
   clock changes, persistence, DEV isolation and once-daily reward safeguards.
+- `battle.json`: the complete 18-form/72-technique stable-ID roster and reviewed
+  seed/damage/effect probes. Native tests check copy-pure replay/resume, AI,
+  cooldowns, family/personality/bond modifiers and bounded progression.
 
 No test writes physical Garmin steps or production saves. The native fixture
 uses RAM storage and a fixed epoch, 1792108800. Run `scripts/build.ps1 -Tests`
