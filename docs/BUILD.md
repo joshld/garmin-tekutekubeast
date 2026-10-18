@@ -90,6 +90,13 @@ and RAM saves. After PASS, tap previews/toggles lights, UP/DOWN changes themes
 and BACK changes sky phase; stop the QA VM to flush its runner log. These are
 fixture controls, not altered production button mappings.
 
+For Issue #17, build `tests/sleep/monkey.jungle` with `-Owner -Device enduro4`
+to a separate QA `.prg`. The RAM-only audit checks 62 sleep/wake/grumpy sprite,
+menu, notice, game and Care scenes. After PASS, tap once for a 20-minute nap
+scenario; subsequent inputs use the normal production Actions/Wake Up controls.
+Stop the isolated QA VM to flush its layout/memory log. This does not touch the
+real pet or Store packages.
+
 ## Static checks and fixtures
 
 ```powershell

@@ -1,6 +1,7 @@
 # Current gameplay and features
 
-Implemented behavior through v0.5.2, the Issue #19 refactor and Issue #21 lighting.
+Implemented behavior through v0.5.2, the Issue #19 refactor, Issue #21 lighting
+and Issue #17 sleep interactions (source changes, not a new Store release).
 This is the current gameplay guide, not an implementation wishlist. Normal play
 is native and offline; activity is optional, with no death, lost XP, de-evolution
 or recovery-day punishment. See [current validation](VALIDATION.md) for tested
@@ -146,7 +147,8 @@ reactions. See [art assets and prompts](../art/README.md). Only current frames a
 cached; Pet resources restore exact v0.4 pixels and padding, retain mirrored
 walking poses and native nearest-neighbour sizes on MIP and AMOLED. Species names
 remain on Details, not the Pet page. Apple/heart needs appear only for attention;
-poop sits on the floor. Sleeping/tired creatures stay curled instead of wandering.
+poop sits on the floor. Sleeping creatures curl up; awake tired creatures use
+quiet looking/blinking poses, without wandering or pretending to be asleep.
 
 The same watch app implements a read-only native Glance: current sprite/name,
 mood, growth and cleanup status. No Glance-owned animation timer, save mutation
@@ -178,6 +180,25 @@ not the actual sky. Neither lighting mode changes sunrise/sunset, sun/moon
 positions, scheduled sleep, Garmin backlight or Sleep Focus. Watch schedule/API
 agreement still needs hardware testing; choose MANUAL if the reported source
 does not match the watch's actual schedule.
+
+While asleep, Feed, Pat, Play and Clean remain visible but show the silent
+notice `Beast is asleep.` without spending items/energy or granting rewards.
+An in-progress game checkpoints and pauses at bedtime; wake explicitly before
+resuming it. Actions > Wake Up appears only while sleeping, needs no confirmation
+and keeps the beast awake through the current nap/night window. Later nights
+retain the normal schedule. Rest deliberately starts a new one-hour nap, but its
+existing energy/care bonus remains once daily; repeating Wake Up/Rest earns no
+extra bonus and does not reset other care or game limits.
+
+Waking a nap before five minutes or after thirty minutes causes no grumpiness;
+the small bell-shaped response peaks around 15-20 minutes. Effective happiness
+temporarily falls by at most two points, recovering within five minutes. Night
+waking causes at most one point for two minutes, with no effect near bedtime or
+scheduled waking. Natural waking has no penalty. Saved base happiness and family
+personality are never reduced by waking. Reopening retains the bounded wake/grump
+window; clock rollback before waking or a time-zone change invalidates the wake
+override. Lighting and the astronomical sky remain independent: waking does not
+cancel AUTO bedtime dimming, change the sky or generate sound/vibration alerts.
 
 Settings > Outdoor world selects Forest, Meadow, Lakeside or Garden, or AUTO
 for a stable family-based choice. Sun / location uses retained watch/weather

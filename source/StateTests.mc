@@ -2,6 +2,100 @@ using Toybox.Test;
 using Toybox.Lang;
 
 (:test)
+function sleepingActionsNoMutationTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;s.data["poop"]=1;s.data["items"][0]=3;s.rest();
+    var before=s.store.copy(s.data);var writes=s.store.writes;
+    Test.assert(!s.feedFood(true));Test.assert(!s.feedFood(false));Test.assert(!s.pat());Test.assert(!s.clean());
+    for(var game=0;game<3;game++){Test.assert(s.beginSession(game)==null);}
+    Test.assert(s.gameReward(true,0).equals("Beast is asleep."));Test.assert(!s.useItem(0));Test.assert(!s.useItem(1));
+    Test.assert(s.explore(0).equals("Beast is asleep."));s.rest();
+    Test.assert(TestSupport.same(before,s.data));Test.assertEqual(s.store.writes,writes);
+    var v=new TekuTekuBeastView();v.beast=s;var names=["Feed","Pat","Play","Clean"];
+    var cue=FeedbackManager.lastCue;
+    for(var action=0;action<names.size();action++){
+        v.openMenu("Actions");var found=false;
+        for(var i=0;i<v.rows.size();i++){if(v.rows[i].equals(names[action])){v.selection=i;found=true;break;}}
+        Test.assert(found);v.selectAction();Test.assert(v.notice.equals("Beast is asleep."));
+        Test.assert(v.visualState().equals("sleep"));Test.assert(TestSupport.same(before,s.data));
+    }
+    v.openMenu("Feed");v.selectAction();Test.assert(v.notice.equals("Beast is asleep."));
+    Test.assertEqual(FeedbackManager.lastCue,cue);v.openMenu("Actions");Test.assert(v.rows[8].equals("Wake Up"));
+    v.selection=8;v.selectAction();Test.assert(!s.isSleeping());Test.assert(v.notice.equals("Waking up."));
+    Test.assert(s.feedFood(true));Test.assert(s.pat());Test.assert(s.clean());return true;
+}
+(:test)
+function napGrumpGoldenTest(logger){
+    var rows=RuleVectors.sleep();
+    for(var i=0;i<rows.size();i++){
+        var row=rows[i];Test.assertEqual(BeastSleep.napAnnoyance(row["seconds"]),row["annoyance"]);
+        var s=TestSupport.fixture();s.data["sleepMode"]=2;s.rest();var personality=s.store.copy(s.data["personality"]);
+        var joy=s.number("happiness");s.testNow+=row["seconds"];
+        if(row["seconds"]>=3600){var before=s.store.copy(s.data);Test.assert(!s.wakeUp());Test.assert(TestSupport.same(before,s.data));}
+        else{Test.assert(s.wakeUp());Test.assertEqual(s.grump(),row["annoyance"]);Test.assertEqual(s.happiness(),joy-row["annoyance"]);}
+        Test.assert(!s.isSleeping());Test.assertEqual(s.number("happiness"),joy);
+        Test.assert(TestSupport.same(personality,s.data["personality"]));var writes=s.store.writes;
+        s.testNow+=300;Test.assertEqual(s.grump(),0);Test.assertEqual(s.happiness(),joy);Test.assertEqual(s.store.writes,writes);
+    }
+    return true;
+}
+(:test)
+function scheduledWakeReopenAndLightingTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=1;s.data["bedMinute"]=1320;s.data["wakeMinute"]=420;
+    s.testNow+=((1340-BeastSleep.minuteAt(s.now())+1440)%1440)*60;s.tick();s.setLighting(2);
+    Test.assert(s.isSleeping());Test.assert(s.wakeUp());Test.assert(s.isNight());Test.assert(!s.isSleeping());
+    Test.assertEqual(s.grump(),1);Test.assert(s.isDark());Test.assertEqual(s.lightingMode(),2);
+    var at=s.now();var end=s.number("awakeUntil");Test.assertEqual(BeastSleep.minuteAt(end),420);
+    var reload=new TekuTekuBeastState();reload.store=s.store;reload.skipWatch=true;reload.testNow=at+60;reload.start();
+    Test.assert(!reload.isSleeping());Test.assertEqual(reload.grump(),1);
+    Test.assert(!BeastSleep.sleeping(s.store.read("glance.v1"),at));Test.assert(BeastSleep.previewMood(s.store.read("glance.v1"),at).equals("GRUMPY"));
+    reload.testNow=at-1;Test.assert(reload.isSleeping());reload.testNow=at;
+    reload.data["awakeZone"]+=3600;Test.assert(reload.isSleeping());reload.data["awakeZone"]-=3600;
+    reload.testNow=end;Test.assert(!reload.isSleeping());Test.assertEqual(reload.grump(),0);
+    reload.testNow=end+15*3600;Test.assert(reload.isSleeping());Test.assertEqual(reload.number("bedMinute"),1320);
+    var watch=TestSupport.fixture();watch.data["nextBed"]=watch.now()+18*3600;watch.data["nextWake"]=watch.now()+2*3600;
+    watch.data["scheduleAt"]=watch.now();Test.assert(watch.wakeUp());Test.assertEqual(watch.number("awakeUntil"),watch.number("nextWake"));
+    return true;
+}
+(:test)
+function wakeRestRewardAndEnergyTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;s.data["energy"]=10;s.rest();
+    var energy=s.number("energy");var growth=s.number("careGrowth");var personality=s.store.copy(s.data["personality"]);
+    for(var i=0;i<10;i++){Test.assert(s.wakeUp());Test.assert(!s.wakeUp());s.rest();}
+    Test.assertEqual(s.number("energy"),energy);Test.assertEqual(s.number("careGrowth"),growth);
+    Test.assert(TestSupport.same(personality,s.data["personality"]));Test.assertEqual(s.xp(),0l);Test.assertEqual(s.number("rested"),1);
+    var began=s.now();s.testNow+=2700;Test.assert(s.wakeUp());
+    Test.assert(BeastSleep.sleeping(s.data,began+1800));Test.assert(!BeastSleep.sleeping(s.data,began+3000));
+    s.testNow=began+3600;var forecast=BeastSleep.forecastEnergy(s.data,s.now());s.tick();Test.assertEqual(s.number("energy"),forecast);
+    s.testNow=began-1;Test.assert(!s.isSleeping()); // no multi-day nap after rollback
+    return true;
+}
+(:test)
+function sleepingGameCheckpointTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;s.data["adventure"]=2;
+    var game=new BeastGameView(s,2);game.begin();var id=game.session["id"];s.rest();var saved=s.store.copy(s.data);
+    game.refresh();Test.assertEqual(game.phase,3);Test.assert(game.result.equals("Beast is asleep."));
+    Test.assertEqual(s.data["sessions"][2]["id"],id);Test.assertEqual(s.number("adventure"),1);
+    Test.assert(s.completeSession(s.data["sessions"][2],true).equals("Beast is asleep."));Test.assert(TestSupport.same(saved,s.data));
+    Test.assert(s.wakeUp());game.refresh();Test.assertEqual(game.phase,0);game.begin();Test.assertEqual(game.session["id"],id);
+    Test.assertEqual(s.number("adventure"),1);s.completeSession(game.session,true);var discoveries=s.number("encounters");
+    s.completeSession(game.session,true);Test.assertEqual(s.number("encounters"),discoveries);Test.assertEqual(discoveries,1);return true;
+}
+(:test)
+function wakeMigrationAndDevIsolationTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;s.observe(s.today(),4250);s.rest();s.commit();
+    var old=s.store.copy(s.store.read("v4"));var fields=["awakeAt","awakeUntil","awakeZone","grumpAt","grumpLevel"];
+    for(var i=0;i<fields.size();i++){old.remove(fields[i]);}s.store.write("v4",old);
+    var reload=new TekuTekuBeastState();reload.store=s.store;reload.skipWatch=true;reload.testNow=s.now()+1200;reload.start();
+    Test.assert(reload.isSleeping());Test.assertEqual(reload.number("awakeAt"),0l);Test.assertEqual(reload.xp(),4250l);
+    var dev=reload.enableDev();var real=reload.store.copy(reload.store.read("v4"));Test.assert(dev.wakeUp());Test.assertEqual(dev.grump(),2);
+    Test.assert(TestSupport.same(real,reload.store.read("v4")));Test.assert(reload.isSleeping());
+    Test.assert(reload.wakeUp());var view=new TekuTekuBeastView();view.beast=reload;
+    Test.assert(view.visualState().equals("grumpy"));Test.assertEqual(view.desiredPeriod(),1000);
+    var joy=reload.happiness();reload.testNow+=150;Test.assertEqual(reload.happiness(),joy+1);
+    reload.testNow+=150;Test.assertEqual(reload.grump(),0);return true;
+}
+
+(:test)
 function lightingModesPersistenceTest(logger){
     var s=TestSupport.fixture();s.data["sleepMode"]=1;s.data["bedMinute"]=1320;s.data["wakeMinute"]=420;
     s.testNow+=((1320-BeastSleep.minuteAt(s.now())+1440)%1440)*60;s.data["lastCare"]=s.now();
@@ -484,7 +578,7 @@ function scheduledSleepAndLightsTest(logger){
     var v=new TekuTekuBeastView();v.beast=s;v.animation="happy";v.animationTicks=12;Test.assert(v.visualState().equals("sleep"));
     s.toggleLights();Test.assert(!s.isDark());Test.assert(s.isNight());s.testNow+=8*3600;s.tick();Test.assert(s.number("energy")>=64);
     Test.assert(s.isNight());Test.assert(s.isDark());s.testNow+=3600;s.tick();Test.assert(!s.isNight());
-    s.data["poop"]=0;s.data["energy"]=0;Test.assert(s.mood().equals("SLEEPY"));Test.assert(v.visualState().equals("sleep"));
+    s.data["poop"]=0;s.data["energy"]=0;Test.assert(s.mood().equals("SLEEPY"));Test.assert(v.visualState().equals("tired"));
     s.rest();Test.assert(s.mood().equals("RESTING"));var energy=s.number("energy");s.testNow-=3600;s.tick();Test.assertEqual(s.number("energy"),energy);
     s.data["sleepMode"]=2;s.data["sleepUntil"]=0l;s.data["energy"]=80;Test.assert(!s.isNight());return true;
 }
@@ -545,7 +639,7 @@ function gameRetryReplayAndSuspendTest(logger){
 (:test)
 function devNewSystemsIsolationTest(logger){
     var s=TestSupport.fixture();s.observe(s.today(),4200);s.commit();var d=s.enableDev();d.simulateSleep(true);
-    d.toggleLights();d.data["adventure"]=20;var trip=d.beginSession(2);trip["finds"]=3;d.completeSession(trip,true);
+    d.toggleLights();Test.assert(d.wakeUp());d.data["adventure"]=20;var trip=d.beginSession(2);trip["finds"]=3;d.completeSession(trip,true);
     d.data["easy"]=1;d.jump(7*86400);d.commit();
     var restored=new TekuTekuBeastState();restored.store=s.store;restored.testNow=s.testNow;restored.skipWatch=true;restored.start();
     Test.assertEqual(restored.number("adventure"),0);Test.assertEqual(restored.number("encounters"),0);Test.assertEqual(restored.number("easy"),0);

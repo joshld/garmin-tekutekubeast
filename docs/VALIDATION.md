@@ -1,8 +1,48 @@
 # Current source validation checkpoint
 
-Latest source change: Issue #21 night lighting, after cleanup `bb35726`.
+Latest source change: Issue #17 sleep interactions, after Issue #21 `2d411b1`.
 
-## Issue #21 — night lighting
+## Issue #17 - sleep interactions
+
+- Visible-but-blocked care/play actions give the exact silent notice; explicit
+  Wake Up overrides only the current nap/night. Temporary 0-2-point happiness
+  overlay follows the tested nap bell without changing saved base joy/personality.
+  Natural waking, next-night schedule, clock/zone changes, save/reopen, DEV
+  isolation, game checkpoints and once-daily Rest limits have native coverage.
+- Enduro 4 / SDK 9.2 only: 45 native tests, four public-input tests, 62 focused
+  production-renderer scenes (zero layout failures), signed owner/public
+  release-mode foreground builds. Final results/logs below cover the save-memory
+  correction too; no full device matrix was run.
+- Using the computer-use skill, observed the sleeping pose, blocked Clean notice,
+  visible Wake Up row and immediate unconfirmed wake/reaction in the simulator.
+  Sky stayed nighttime and poop was not silently cleaned by the blocked action.
+  QA used isolated fixture identities/RAM, never a real pet.
+- Native Glance: 60 awake/tired/nap/night scenes, zero layout failures,
+  37,272 / 61,344 bytes. Foreground sleep-layout peak: 132,216 / 781,976 bytes.
+- The native background sleep stress check exposed serialization OOM with three
+  paused games. The store now releases its obsolete comparison snapshot before
+  serializing a changed atomic save; a failed write keeps disk data intact and
+  leaves a null baseline so retry is not suppressed.
+  Corrected native sleep callback: 48,048 / 61,344 bytes, two writes, SDK timing
+  0 ms (timer resolution, not zero execution cost). Fixture XP 123456, three
+  pending games and inventory 18 remained intact. The background service itself
+  is unchanged; real OS event frequency and battery cost are not measured.
+- Sleep/grump expiry is read-only; no new timers, resources, GPS or background
+  alerts. Tired idle retains the five-second cadence; brief wake/grump reactions
+  use one second with motion enabled. Hidden-view timer shutdown is unchanged.
+- Public symbols exclude DEV/test controls; owner retains them. Both UUIDs,
+  signing identity, version, production manifests/assets and the recorded
+  public/private Store IQ hashes are unchanged. No export, upload or publication.
+- Ignored evidence: `bin/sleep17-verified-final-unit-enduro4.log`,
+  `sleep17-layout.log`, `sleep17-glance-initial.log`, `sleep17-background-final.log`,
+  `sleep17-public-tests.log`, `sleep17-owner-build.log`, `sleep17-release-build.log`.
+  Structural preflight, JSON-vector consistency and 176 local Markdown links
+  passed. Earlier failed runs are retained locally, not misreported as passes.
+- Physical Enduro 4 buttons/postures, watch schedule/time-zone behavior, real
+  sleep/wake callbacks and battery still require owner acceptance; see the
+  [sleep checklist](WATCH_ACCEPTANCE.md). Other device checks were not rerun.
+
+## Prior Issue #21 - night lighting
 
 - Explicit AUTO / ON / OFF, selected/applied labels, remaining minutes and silent
   one-hour manual overrides. Existing save keys and bedtime preference retain

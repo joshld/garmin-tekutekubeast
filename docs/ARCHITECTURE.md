@@ -22,6 +22,14 @@ Lighting mode/expiry is read-only in `BeastSleep`, using the existing `lights`,
 view displays mode versus applied state; Scenery draws only a local light pool.
 Sprite tint options are cached per view and capability-guarded. Neither lighting
 rules nor rendering mutate `BeastWorld` astronomy caches or sleep settings.
+
+Issue #17 keeps sleep decisions in `BeastSleep` and deliberate wake transactions
+in State. Optional `awakeAt`/`awakeUntil`/`awakeZone` fields suppress only the
+current sleep window; `grumpAt`/`grumpLevel` apply a read-only, reversible happiness
+overlay. Existing nap history remains available for lazy energy sampling. State
+guards care/reward entry points; views provide the quiet notice and checkpoint
+games before pausing. These additive defaults preserve the canonical `v4` save,
+DEV isolation and compact read-only Glance cache. Expiry needs no timer or write.
 Garmin's [bitmap tint API](https://developer.garmin.com/connect-iq/api-docs/Toybox/Graphics/Dc.html#drawBitmap2-instance_function)
 is guarded by `has`; unsupported renderers keep the native sprite. No alpha
 framebuffer or GPU-only blending is required.

@@ -1,0 +1,12 @@
+[
+  {"seconds":0,"annoyance":0},
+  {"seconds":300,"annoyance":0},
+  {"seconds":600,"annoyance":1},
+  {"seconds":900,"annoyance":2},
+  {"seconds":1050,"annoyance":2},
+  {"seconds":1200,"annoyance":2},
+  {"seconds":1500,"annoyance":1},
+  {"seconds":1800,"annoyance":0},
+  {"seconds":3599,"annoyance":0},
+  {"seconds":3600,"annoyance":0}
+]

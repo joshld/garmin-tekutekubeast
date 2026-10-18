@@ -34,4 +34,16 @@ module RuleVectors {
         {"name"=>"saved stage never regresses","ageSeconds"=>0,"data"=>{"stageFloor"=>4},"expected"=>{"stage"=>4,"hatchHours"=>24,"growth"=>0}},
         {"name"=>"pet XP baseline is not growth","ageSeconds"=>0,"data"=>{"xp"=>100000,"petXpBaseline"=>100000},"expected"=>{"stage"=>0,"hatchHours"=>24,"growth"=>0}}
     ];}
+    function sleep(){return [
+        {"seconds"=>0,"annoyance"=>0},
+        {"seconds"=>300,"annoyance"=>0},
+        {"seconds"=>600,"annoyance"=>1},
+        {"seconds"=>900,"annoyance"=>2},
+        {"seconds"=>1050,"annoyance"=>2},
+        {"seconds"=>1200,"annoyance"=>2},
+        {"seconds"=>1500,"annoyance"=>1},
+        {"seconds"=>1800,"annoyance"=>0},
+        {"seconds"=>3599,"annoyance"=>0},
+        {"seconds"=>3600,"annoyance"=>0}
+    ];}
 }

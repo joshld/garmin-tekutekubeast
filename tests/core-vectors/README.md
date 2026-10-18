@@ -16,6 +16,9 @@ neither platform is implemented by this cleanup.
 - `games.json`: all inputs explicit. Read next random seed and treasure choice
   without claiming a reward. Native tests additionally characterize normal/Easy
   timing, repeated-move blank intervals and non-mutation.
+- `sleep.json`: explicit elapsed nap seconds and expected temporary annoyance
+  (0-2). Native tests also cover bounded wake overrides, raw-happiness purity,
+  clock changes, persistence, DEV isolation and once-daily reward safeguards.
 
 No test writes physical Garmin steps or production saves. The native fixture
 uses RAM storage and a fixed epoch, 1792108800. Run `scripts/build.ps1 -Tests`

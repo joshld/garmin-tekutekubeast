@@ -57,18 +57,21 @@ class TekuTekuBeastView extends WatchUi.View {
         var wanted=desiredPeriod();if(refresher!=null && wanted!=timerPeriod){timerPeriod=wanted;refresher.stop();refresher.start(method(:refresh),timerPeriod,true);}
     }
     function desiredPeriod(){
+        if(visualState().equals("tired")){return 5000;}
+        if(visualState().equals("grumpy") || visualState().equals("wake")){return beast.number("motion")==0 || menu!=null || page!=0?5000:1000;}
         if(animationTicks>0 || noticeTicks>0){return beast.number("motion")==2 && !visualState().equals("sleep")?250:1000;}
         if(menu!=null || page!=0 || beast.stage()==0 || beast.number("motion")==0 || visualState().equals("sleep")){return 5000;}
         return beast.number("motion")==2 && tick%24<16?250:1000;
     }
     function visualKey(){
-        return page+":"+menu+":"+selection+":"+notice+":"+beast.stage()+":"+beast.family()+":"+(beast.progress()*256).toNumber()+":"+beast.xp()+":"+beast.number("fullness")+":"+beast.number("happiness")+":"+beast.number("energy")+":"+beast.number("cleanliness")+":"+beast.number("poop")+":"+visualState()+":"+beast.isDark()+":"+lightingStamp+":"+(beast.realNow()/60).toNumber()+":"+beast.number("meals")+":"+beast.snacks()+":"+motionKey();
+        return page+":"+menu+":"+selection+":"+notice+":"+beast.stage()+":"+beast.family()+":"+(beast.progress()*256).toNumber()+":"+beast.xp()+":"+beast.number("fullness")+":"+beast.happiness()+":"+beast.number("energy")+":"+beast.number("cleanliness")+":"+beast.number("poop")+":"+visualState()+":"+beast.isDark()+":"+lightingStamp+":"+(beast.realNow()/60).toNumber()+":"+beast.number("meals")+":"+beast.snacks()+":"+motionKey();
     }
-    function lightingKey(){return beast.lightingMode()+":"+beast.isDark()+":"+beast.lightingMinutes();}
+    function lightingKey(){return beast.lightingMode()+":"+beast.isDark()+":"+beast.lightingMinutes()+":"+beast.isSleeping();}
     function lightingLabel(){return ["AUTO","ON","OFF"][beast.lightingMode()];}
     function motionKey(){
         if(menu!=null || page!=0){return 0;}var a=visualState();var m=beast.number("motion");
         if(a.equals("sleep")){return 0;}if(a.equals("evolve")){return 500+tick%4;}
+        if(a.equals("grumpy") || a.equals("tired") || a.equals("wake")){return m==0?0:3000+(tick%16<4?1:0);}
         if(m==0){return 0;}if(a.equals("eat")){return 300+(((m==2?tick:(tick/4).toNumber())%4==3)?1:0);}
         if(a.equals("clean")){return 400+tick%3;}if(a.equals("look") || a.equals("blink") || beast.stage()==0){return 0;}
         var s=(roamTicks/(beast.family()==1?2:1)).toNumber();var p=s%48;
@@ -81,7 +84,7 @@ class TekuTekuBeastView extends WatchUi.View {
     function toast(text,action){page=0;notice=text;noticeTicks=12;animation=action;animationTicks=12;loadSprite();if(!action.equals("idle")){new FeedbackManager().cue(beast,action);}if(refresher!=null){timerPeriod=desiredPeriod();refresher.stop();refresher.start(method(:refresh),timerPeriod,true);}WatchUi.requestUpdate();}
     function openMenu(name){menu=name;selection=0;updateRows();WatchUi.requestUpdate();}
     function updateRows(){
-        if(menu.equals("Actions")){rows=beast.number("poop")>0?["Clean","Feed","Play","Pat","Rest","Collection","Settings"]:["Feed","Clean","Play","Pat","Rest","Collection","Settings"];rows.add("Lights: "+lightingLabel());lightingStamp=lightingKey();if(beast.dev){rows.add("Dev Tools");}}
+        if(menu.equals("Actions")){rows=beast.number("poop")>0?["Clean","Feed","Play","Pat","Rest","Collection","Settings"]:["Feed","Clean","Play","Pat","Rest","Collection","Settings"];rows.add("Lights: "+lightingLabel());lightingStamp=lightingKey();if(beast.isSleeping()){rows.add("Wake Up");}if(beast.dev){rows.add("Dev Tools");}}
         else if(menu.equals("Lighting")){
             var mode=beast.lightingMode();rows=[(mode==0?"* ":"")+"AUTO",(mode==1?"* ":"")+"ON: 1 hour",(mode==2?"* ":"")+"OFF: 1 hour",
                 "Applied: "+(beast.isDark()?"OFF":"ON"),mode==0?(beast.number("autoLights")==1?"Follows bedtime":"Bedtime dim disabled"):"AUTO in "+beast.lightingMinutes()+" min"];
@@ -124,8 +127,12 @@ class TekuTekuBeastView extends WatchUi.View {
     function selectAction(){
         if(menu==null){openMenu("Actions");return;}
         var name=rows[selection];var n=selection;var context=menu;
+        if(beast.isSleeping() && ((context.equals("Actions") && (name.equals("Feed") || name.equals("Pat") || name.equals("Play") || name.equals("Clean") || name.equals("Rest"))) || context.equals("Feed") || context.equals("Play") || context.equals("Toys / accessories"))){
+            menu=null;toast("Beast is asleep.","idle");return;
+        }
         if(worldAction(context,name,n)){return;}
         if(context.equals("Actions")){
+            if(name.equals("Wake Up")){var woke=beast.wakeUp();menu=null;toast(woke?"Waking up.":"Already awake.","wake");return;}
             if(name.find("Lights: ")==0){openMenu("Lighting");return;}
             if(name.equals("Pat")){menu=null;toast(beast.pat()?"HAPPY BEAST!":"PATS: 3/3","happy");}
             else if(name.equals("Clean")){menu=null;toast(beast.clean()?"ALL CLEAN!":"ALL CLEAN","clean");}
@@ -293,6 +300,7 @@ class TekuTekuBeastView extends WatchUi.View {
         if(active.equals("sleep")){frame=3;centerX=dc.getWidth()*0.30;centerY=dc.getHeight()*0.69-size/2;wasSleeping=true;}
         else if(active.equals("eat")){frame=motion>0 && (motion==2?tick:(tick/4).toNumber())%4==3?0:2;}
         else if(active.equals("look")){frame=5;}
+        else if(active.equals("grumpy") || active.equals("tired") || active.equals("wake")){frame=motion>0 && tick%16<4?4:5;}
         else if(active.equals("blink") || active.equals("clean")){frame=4;}
         else if(motion>0 && beast.stage()>0){
             // Travel between 2-D destinations, pause and look; alternating
@@ -325,6 +333,7 @@ class TekuTekuBeastView extends WatchUi.View {
         if(beast.isDark() && (dc has :drawBitmap2)){dc.drawBitmap2(x,top,frames[frame],nightTint);}
         else{dc.drawBitmap(x,top,frames[frame]);}var color=sceneInk;
         if(active.equals("sleep")){pixelIcon(dc,x+size/2-7,top+7,[127,2,4,8,16,32,127],color,2);}
+        if(active.equals("grumpy")){pixelIcon(dc,x+size/2-4,top+7,[5,2,5],color,2);}
         if(active.equals("clean")){dc.setColor(0xFFFFFF,Graphics.COLOR_TRANSPARENT);dc.drawCircle(x+size/4,top+size/2,4+tick%3);}
         if(beast.number("rare")==1){pixelIcon(dc,x+size/2-7,top+2,[65,85,127,62],0xFFFF55,2);}
         if(beast.number("equipped")>=0){pixelIcon(dc,x+size/2+12,top+14,[8,28,62,28,8],0xAA55FF,2);}
@@ -343,7 +352,9 @@ class TekuTekuBeastView extends WatchUi.View {
     }
     function visualState(){
         // Sleep/tiredness wins over stale celebration or poop reactions.
-        if(beast.isSleeping() || beast.number("energy")<20){return "sleep";}
+        if(beast.isSleeping()){return "sleep";}
+        if(beast.grump()>0){return "grumpy";}
+        if(beast.number("energy")<20){return "tired";}
         if(animationTicks>0 && !animation.equals("idle")){return animation;}
         if(beast.number("fullness")<45){return tick%24<6?"look":"idle";}
         return "idle";
@@ -366,7 +377,7 @@ class TekuTekuBeastView extends WatchUi.View {
         scenery.draw(dc,world.choose(beast.family(),beast.today()),sky,beast.isDark());sceneInk=scenery.ink;
         var color=sceneInk;var scale=beast.max(2,(dc.getWidth()/140).toNumber());
         if(beast.number("fullness")<45){pixelIcon(dc,dc.getWidth()/2-10*scale,y(dc,0.12),[8,12,54,127,127,62,28],color,scale);}
-        if(beast.number("happiness")<50){pixelIcon(dc,dc.getWidth()/2-2*scale,y(dc,0.12),[54,127,119,62,28,8],color,scale);}
+        if(beast.happiness()<50){pixelIcon(dc,dc.getWidth()/2-2*scale,y(dc,0.12),[54,127,119,62,28,8],color,scale);}
         if(beast.number("energy")<20 && !visualState().equals("sleep")){pixelIcon(dc,dc.getWidth()/2+6*scale,y(dc,0.12),[14,24,48,48,56,30,15],color,scale);}
         devBadge(dc,color);
         creature(dc);
@@ -387,7 +398,7 @@ class TekuTekuBeastView extends WatchUi.View {
         label(dc,y(dc,0.10),beast.dev?"CARE  DEV":"CARE",Graphics.FONT_SMALL);
         var keys=["fullness","happiness","energy","cleanliness"];
         var captions=["FOOD","JOY","ENERGY","CLEAN"];
-        for(var i=0;i<4;i++){var top=y(dc,0.25+i*0.13);label(dc,top,captions[i]+" "+beast.number(keys[i]),Graphics.FONT_XTINY);bar(dc,top+dc.getFontHeight(Graphics.FONT_XTINY)+1,beast.number(keys[i])/100.0,110);}
+        for(var i=0;i<4;i++){var top=y(dc,0.25+i*0.13);var value=i==1?beast.happiness():beast.number(keys[i]);label(dc,top,captions[i]+" "+value,Graphics.FONT_XTINY);bar(dc,top+dc.getFontHeight(Graphics.FONT_XTINY)+1,value/100.0,110);}
         label(dc,y(dc,0.81),notice!=null?notice:"M "+beast.number("meals")+" / S "+beast.snacks(),Graphics.FONT_XTINY);
     }
     function drawStats(dc){

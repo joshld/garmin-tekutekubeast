@@ -18,7 +18,7 @@ class TekuTekuBeastGlanceView extends WatchUi.GlanceView {
         var index=0;
         if(snapshot!=null && snapshot.hasKey("cachedSprite")){index=snapshot["cachedSprite"] as Lang.Number;}
         if(index<0 || index>=ids.size()){index=0;}
-        var sleeping=snapshot!=null && (BeastSleep.sleeping(snapshot,Time.now().value()) || BeastSleep.forecastEnergy(snapshot,Time.now().value())<20);
+        var sleeping=snapshot!=null && (BeastSleep.sleeping(snapshot,Time.now().value()) || (BeastSleep.forecastEnergy(snapshot,Time.now().value())<20 && !BeastSleep.awake(snapshot,Time.now().value())));
         var key=index+(sleeping?100:0);
         if(key!=cachedId){
             if(sleeping){
@@ -37,7 +37,7 @@ class TekuTekuBeastGlanceView extends WatchUi.GlanceView {
         var name="EGG";var mood="OPEN GAME";var progress=0.0;
         if(snapshot!=null && snapshot.hasKey("cachedName")){
             name=snapshot["cachedName"];mood=BeastSleep.previewMood(snapshot,Time.now().value());progress=snapshot["cachedProgress"];
-            if(snapshot["poop"]>0 && !BeastSleep.sleeping(snapshot,Time.now().value()) && BeastSleep.forecastEnergy(snapshot,Time.now().value())>=20){mood="CLEANUP";}
+            if(snapshot["poop"]>0 && BeastSleep.grump(snapshot,Time.now().value())==0 && !BeastSleep.sleeping(snapshot,Time.now().value()) && BeastSleep.forecastEnergy(snapshot,Time.now().value())>=20){mood="CLEANUP";}
         }
         var font=Graphics.FONT_XTINY;var left=50;var width=dc.getWidth()-left-12;
         var lines=[name];var split=name.find(" ");

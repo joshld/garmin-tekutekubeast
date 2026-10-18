@@ -71,7 +71,8 @@ not depend on that finite step history.
 ## Glance and persistence
 
 Canonical `v4`/legacy saves are not replaced or renamed. A new optional
-`glance.v1` cache contains only 18 display/sleep fields, not full inventory,
+`glance.v1` cache contains only 23 display/sleep fields (including optional
+Issue #17 wake/grump timing), not full inventory,
 history and paused games. It is written after a successful canonical commit,
 only when changed. An absent cache displays OPEN GAME until foreground open;
 it never risks loading the full save into a 32KB Glance VM. A cache is not an

@@ -26,7 +26,7 @@ class BeastGameView extends TekuTekuBeastView {
         if(refresher!=null){refresher.stop();refresher=null;}
         Application.getApp().activeView=self;if(!beast.dev){beast.data=null;}beast.syncHistory();loadSprite();
         var saved=beast.data["sessions"][kind];
-        if(saved!=null){restore(saved);}
+        if(saved!=null && !beast.isSleeping()){restore(saved);}sleepGate();
         refresher=new Toybox.Timer.Timer();timerPeriod=desiredGamePeriod();refresher.start(method(:refresh),timerPeriod,true);
     }
     function desiredGamePeriod(){
@@ -77,7 +77,7 @@ class BeastGameView extends TekuTekuBeastView {
     }
     function random(limit){session["seed"]=BeastGameRules.nextSeed(session["seed"]);return session["seed"]%limit;}
     function begin(){
-        session=beast.beginSession(kind);if(session==null){result="CARE / PLAY EARNS IT";return;}
+        if(sleepGate()){return;}session=beast.beginSession(kind);if(session==null){result="CARE / PLAY EARNS IT";return;}
         // A paused session is resumed, not replaced or charged twice.
         if(session["elapsed"]>0 || session["node"]>0 || session["sequence"].size()>0 || session["travel"]>0){restore(session);return;}
         phase=kind==2?5:1;round=0;elapsed=0;attempts=0;hits=0;score=0;combo=0;best=0;retries=0;node=0;
@@ -91,6 +91,7 @@ class BeastGameView extends TekuTekuBeastView {
         cursor=0;elapsed=0;phase=1;
     }
     function refresh() as Void {
+        if(sleepGate()){return;}
         var step=timerPeriod/250;tick+=step;if(phase==1 || phase==2 || phase==4 || phase==5){elapsed+=step;}
         if(kind==0 && phase==1){
             if(jumpTicks>0){jumpTicks--;}
@@ -171,7 +172,19 @@ class BeastGameView extends TekuTekuBeastView {
     function nextTrail(){
         node++;if(node>=3){finish(true);return;}phase=5;travel=0;elapsed=0;checkpoint();
     }
+    function sleepGate(){
+        if(!beast.isSleeping()){
+            if(phase==3 && result.equals("Beast is asleep.")){phase=0;result="";resultChoice=0;WatchUi.requestUpdate();}
+            return false;
+        }
+        if(phase!=3 || !result.equals("Beast is asleep.")){
+            checkpoint();session=null;phase=3;result="Beast is asleep.";resultChoice=1;
+            tuneGameTimer();WatchUi.requestUpdate();}
+        return true;
+    }
     function selectAction(){
+        if(phase==3 && resultChoice==1){WatchUi.popView(WatchUi.SLIDE_RIGHT);return;}
+        if(sleepGate()){return;}
         if(phase==0){begin();}
         else if(phase==3){
             if(resultChoice==1){WatchUi.popView(WatchUi.SLIDE_RIGHT);return;}phase=0;begin();
@@ -183,6 +196,7 @@ class BeastGameView extends TekuTekuBeastView {
         tuneGameTimer();WatchUi.requestUpdate();
     }
     function switchPage(delta){
+        if(sleepGate()){return;}
         if(phase==0){
             if(kind==2){trail=(trail+delta+4)%4;}
             else{beast.data["easy"]=1-beast.number("easy");beast.commit();}
@@ -193,6 +207,7 @@ class BeastGameView extends TekuTekuBeastView {
         WatchUi.requestUpdate();
     }
     function touch(point){
+        if(beast.isSleeping()){selectAction();return;}
         if(phase==3){resultChoice=resultTouchChoice(point[1]);selectAction();return;}
         if(kind==0 && phase==1){lane=point[0]<touchWidth/3?0:(point[0]>touchWidth*2/3?2:1);selectAction();}
         else if(kind==1 && phase==2){memoryInput(point[0]<touchWidth/3?0:(point[0]>touchWidth*2/3?2:1));WatchUi.requestUpdate();}
@@ -200,6 +215,7 @@ class BeastGameView extends TekuTekuBeastView {
     }
     function resultTouchChoice(top){return top>touchWidth*0.845?1:0;}
     function resultDetail(){
+        if(result.equals("Beast is asleep.")){return "Wake Up in Actions";}
         if(kind!=2){return "SCORE "+score+"  BEST "+(kind==0?best:hits);}
         return result.equals("SCOUT COMPLETE")?"SCOUT: NO LOOT":"IN YOUR COLLECTION";
     }
@@ -257,7 +273,7 @@ class BeastGameView extends TekuTekuBeastView {
             label(dc,y(dc,0.86),paused?"RESUME":"START",Graphics.FONT_XTINY);
         }else if(phase==3){
             label(dc,y(dc,0.25),result,Graphics.FONT_XTINY);
-            drawPlayer(dc,dc.getWidth()/2,y(dc,0.66),beast.number("motion")==0?0:(tick%8<4?4:1),beast.number("motion")==2 && tick%8<4?5:0);
+            drawPlayer(dc,dc.getWidth()/2,y(dc,0.66),beast.isSleeping()?3:(beast.number("motion")==0?0:(tick%8<4?4:1)),!beast.isSleeping() && beast.number("motion")==2 && tick%8<4?5:0);
             label(dc,y(dc,0.65),resultDetail(),Graphics.FONT_XTINY);
             label(dc,y(dc,0.75),(resultChoice==0?"> ":"")+(kind==2?"ANOTHER TRIP":"PLAY AGAIN"),Graphics.FONT_XTINY);
             label(dc,y(dc,0.86),(resultChoice==1?"> ":"")+"EXIT",Graphics.FONT_XTINY);

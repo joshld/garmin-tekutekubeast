@@ -15,6 +15,11 @@ class BeastStore {
     }
     function write(key,value) {
         if(key.equals("v4") && same(canonical,value)){skipped++;return false;}
+        // Comparison is finished. Release the obsolete deep snapshot before
+        // Storage serializes the replacement in the small background VM.
+        // On failure the old persistent save remains intact and a null
+        // baseline forces a retry rather than incorrectly skipping it.
+        if(key.equals("v4")){canonical=null;}
         if(memory!=null){memory[key]=value;}else{Storage.setValue(key,value);}
         writes++;if(key.equals("v4")){canonical=value;}return true;
     }

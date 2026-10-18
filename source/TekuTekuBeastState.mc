@@ -66,7 +66,8 @@ class TekuTekuBeastState {
         // intact. A single atomic document also owns resumable game transactions.
         var defaults={"sleepMode"=>0,"bedMinute"=>1320,"wakeMinute"=>420,"watchBed"=>1320,"watchWake"=>420,
             "nextBed"=>0l,"nextWake"=>0l,"scheduleAt"=>0l,"sleepSource"=>"FALLBACK","autoLights"=>1,"lights"=>0,"lightsUntil"=>0l,"vibeStyle"=>0,
-            "gameSerial"=>0,"gameDone"=>0,"session"=>null,"sessions"=>[null,null,null],"gameClaims"=>[0,0,0],"easy"=>0,"v5"=>1,"profileZone"=>null};
+            "gameSerial"=>0,"gameDone"=>0,"session"=>null,"sessions"=>[null,null,null],"gameClaims"=>[0,0,0],"easy"=>0,"v5"=>1,"profileZone"=>null,
+            "awakeAt"=>0l,"awakeUntil"=>0l,"awakeZone"=>null,"grumpAt"=>0l,"grumpLevel"=>0};
         var keys=defaults.keys();for(var i=0;i<keys.size();i++){if(!data.hasKey(keys[i])){data[keys[i]]=defaults[keys[i]];}}
     }
     function refreshSleep(){
@@ -97,6 +98,17 @@ class TekuTekuBeastState {
     }
     function isNight(){return BeastSleep.night(data,now());}
     function isSleeping(){return BeastSleep.sleeping(data,now());}
+    function grump(){return BeastSleep.grump(data,now());}
+    function happiness(){return BeastSleep.happiness(data,now());}
+    function wakeUp(){
+        start();if(!isSleeping()){return false;}tick();var t=now();
+        var until=number("sleepUntil");if(isNight()){until=max(until,BeastSleep.scheduleEnd(data,t));}
+        var level=BeastSleep.wakeAnnoyance(data,t);
+        // Retain nap history for lazy energy accounting. This bounded interval
+        // suppresses only the current sleep; Rest explicitly starts a new one.
+        data["awakeAt"]=t;data["awakeUntil"]=min(until,t+86400);data["awakeZone"]=BeastSleep.zoneAt(t);
+        data["grumpAt"]=t;data["grumpLevel"]=level;commit();return true;
+    }
     function isDark(){return BeastSleep.dark(data,now());}
     function lightingMode(){return BeastSleep.lightingMode(data,now());}
     function lightingMinutes(){return BeastSleep.lightingMinutes(data,now());}
@@ -114,7 +126,7 @@ class TekuTekuBeastState {
         if(store.changed(data)){store.write("v4",store.copy(data));}
         // Never load the large inventory/history/session document in a 32KB
         // Glance VM. This optional read-only cache does not own pet progress.
-        var summary={};var fields=["cachedName","cachedProgress","cachedSprite","poop","energy","fullness","happiness","friendship","lastCare","sleepMode","nextBed","nextWake","scheduleAt","watchBed","watchWake","bedMinute","wakeMinute","sleepUntil"];
+        var summary={};var fields=["cachedName","cachedProgress","cachedSprite","poop","energy","fullness","happiness","friendship","lastCare","sleepMode","nextBed","nextWake","scheduleAt","watchBed","watchWake","bedMinute","wakeMinute","sleepUntil","awakeAt","awakeUntil","awakeZone","grumpAt","grumpLevel"];
         for(var i=0;i<fields.size();i++){summary[fields[i]]=data[fields[i]];}
         store.writeGlance(summary);}}
     function xp(){return number("xp");} // genuine lifetime watch steps ONLY
@@ -218,30 +230,32 @@ class TekuTekuBeastState {
         if(credit>0){data["personality"][personality]++;}data["adventure"]+=number("careToday")/100-before;
     }
     function pat(){
-        tick();var n=patsToday();if(n>=3){return false;}data["patDay"]=number("day");data["pats"]=n+1;
+        start();if(isSleeping()){return false;}tick();var n=patsToday();if(n>=3){return false;}data["patDay"]=number("day");data["pats"]=n+1;
         data["friendship"]=clamp(friendship()+2);data["happiness"]=clamp(number("happiness")+8);careReward(25,0);commit();return true;
     }
     function feed(){return feedFood(false);}
     function feedFood(meal){
-        tick();var key=meal?"meals":"snacks";if(number(key)<1 || number("fullness")>=95){return false;}
+        start();if(isSleeping()){return false;}tick();var key=meal?"meals":"snacks";if(number(key)<1 || number("fullness")>=95){return false;}
         data[key]--;data["fullness"]=clamp(number("fullness")+(meal?30:10));data["happiness"]=clamp(number("happiness")+6);
         data["friendship"]=clamp(friendship()+5);if(number("poopDue")==0){data["poopDue"]=now()+10800;}
         careReward(25,0);commit();return true;
     }
     function clean(){
-        tick();if(number("poop")==0){return false;}data["poop"]=0;data["cleanliness"]=100;
+        start();if(isSleeping()){return false;}tick();if(number("poop")==0){return false;}data["poop"]=0;data["cleanliness"]=100;
         data["happiness"]=clamp(number("happiness")+10);data["friendship"]=clamp(friendship()+3);careReward(30,2);commit();return true;
     }
     function rest(){
-        tick();data["sleepUntil"]=now()+3600;if(number("rested")==0){data["energy"]=clamp(number("energy")+20);data["rested"]=1;careReward(25,2);}commit();
+        start();if(isSleeping()){return;}tick();data["awakeAt"]=0l;data["awakeUntil"]=0l;
+        data["grumpAt"]=0l;data["grumpLevel"]=0;
+        data["sleepUntil"]=now()+3600;if(number("rested")==0){data["energy"]=clamp(number("energy")+20);data["rested"]=1;careReward(25,2);}commit();
     }
     function gameReward(win,kind){
-        tick();if(number("games")>=3){return "PRACTICE";}if(number("energy")<10){return "REST FIRST";}
+        start();if(isSleeping()){return "Beast is asleep.";}tick();if(number("games")>=3){return "PRACTICE";}if(number("energy")<10){return "REST FIRST";}
         data["games"]++;data["energy"]-=10;data["happiness"]=clamp(number("happiness")+(win?15:5));
         data["friendship"]=clamp(friendship()+2);careReward(win?75:40,kind==0?1:3);commit();return win?"WELL PLAYED!":"NICE TRY!";
     }
     function beginSession(kind){
-        tick();var current=data["sessions"][kind];if(current!=null){return store.copy(current);}
+        start();if(isSleeping()){return null;}tick();var current=data["sessions"][kind];if(current!=null){return store.copy(current);}
         data["gameSerial"]++;var seed=((realNow()%100000)+number("gameSerial")*719).toNumber();
         var session={"id"=>number("gameSerial"),"kind"=>kind,"round"=>0,"elapsed"=>0,"attempts"=>0,
             "hits"=>0,"score"=>0,"combo"=>0,"best"=>0,"sequence"=>[],"cursor"=>0,"retries"=>0,
@@ -256,7 +270,7 @@ class TekuTekuBeastState {
         if(!store.same(current,session)){data["sessions"][kind]=store.copy(session);commit();}return true;
     }
     function completeSession(session,win){
-        tick();var kind=session["kind"];var current=data["sessions"][kind];
+        start();if(isSleeping()){return "Beast is asleep.";}tick();var kind=session["kind"];var current=data["sessions"][kind];
         if(current==null || current["id"]!=session["id"] || data["gameClaims"][kind]>=session["id"]){return "ALREADY SAVED";}
         // Claim + final inventory/reward + removal are one atomic Storage write.
         data["gameClaims"][kind]=session["id"];data["sessions"][kind]=null;
@@ -274,7 +288,7 @@ class TekuTekuBeastState {
         var outcome=gameReward(win,kind);commit();return outcome;
     }
     function explore(choice){
-        tick();if(number("adventure")<1){return "EARN ENERGY";}data["adventure"]--;data["encounters"]++;
+        start();if(isSleeping()){return "Beast is asleep.";}tick();if(number("adventure")<1){return "EARN ENERGY";}data["adventure"]--;data["encounters"]++;
         var item=(number("encounters")+choice)%8;data["items"][item]++;data["discoveryMask"]=number("discoveryMask")|(1<<item);data["personality"][choice%4]++;
         if(item==0){data["snacks"]=min(12,snacks()+1);}commit();return ["BERRY","KITE","RIBBON","SHELL","LANTERN","CROWN","CRYSTAL","COMPASS"][item];
     }
@@ -283,7 +297,7 @@ class TekuTekuBeastState {
         data["charms"]--;data["rare"]=1;data["rareCollection"]|=1<<(family()-1);commit();return true;
     }
     function useItem(item){
-        tick();if(data["items"][item]<1){return false;}
+        start();if(isSleeping()){return false;}tick();if(data["items"][item]<1){return false;}
         if(item==0){if(number("fullness")>=95){return false;}data["items"][item]--;data["fullness"]=clamp(number("fullness")+10);if(number("poopDue")==0){data["poopDue"]=now()+10800;}}
         else if(item==1 || item==3 || item==6){data["happiness"]=clamp(number("happiness")+10);careReward(25,item==1?1:3);}
         else{data["equipped"]=number("equipped")==item?-1:item;}
@@ -295,7 +309,8 @@ class TekuTekuBeastState {
         if(!dev){store.write("v4.archive",store.copy(data));}
         data["petSerial"]++;data["birthEpoch"]=now();data["baseGrowth"]=0l;data["careGrowth"]=0l;data["activityBonus"]=0l;
         data["petXpBaseline"]=xp();data["stageFloor"]=0;data["evolutionPending"]=0;data["family"]=0;data["rare"]=0;
-        data["personality"]=[0,0,0,0];data["lastGrowth"]=now();data["growthRemainder"]=0l;commit();return true;
+        data["personality"]=[0,0,0,0];data["lastGrowth"]=now();data["growthRemainder"]=0l;
+        data["awakeAt"]=0l;data["awakeUntil"]=0l;data["grumpAt"]=0l;data["grumpLevel"]=0;commit();return true;
     }
     function mood(){
         return BeastSleep.mood(data,now());
@@ -309,6 +324,7 @@ class TekuTekuBeastState {
     function devSet(key,value){if(dev){data[key]=value;}}
     function simulateSleep(night){
         if(!dev){return;}data["sleepMode"]=1;
+        data["awakeAt"]=0l;data["awakeUntil"]=0l;data["grumpAt"]=0l;data["grumpLevel"]=0;
         var minute=BeastSleep.minuteAt(now());data["bedMinute"]=(minute+(night?1439:1))%1440;
         data["wakeMinute"]=(minute+(night?60:1439))%1440;data["sleepUntil"]=0l;
         data["lightsUntil"]=0l;data["nextBed"]=0l;data["nextWake"]=0l;

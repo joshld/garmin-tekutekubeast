@@ -26,6 +26,14 @@ check into a pass. Physical checks remain open unless explicitly confirmed.
 - **Games and recovery:** distinguish repeated UP cues; judge normal/Easy Bounce
   fairness and button/touch response. Complete a three-stop adventure. Pause,
   suspend, reopen and replay without duplicate energy charges or rewards.
+- **Issue #17 sleep:** during naps and scheduled night sleep, Feed/Pat/Play/Clean
+  must stay visible, show `Beast is asleep.` quietly and consume nothing. Wake Up
+  must allow care without confirmation or immediate scheduled re-sleep. Compare
+  nap wakes at 5/15/20/30 minutes, brief grumpy recovery, natural waking and next
+  night's schedule. Reopen during an override; pause a game at bedtime and resume
+  after waking with no duplicate energy/reward. Repeated Wake Up/Rest must not
+  earn extra Rest bonuses. Confirm real-watch posture, buttons, silence, time-zone
+  handling and Glance agreement; no physical Issue #17 pass yet.
 - **Real activity:** walk, reopen and reopen again; XP must increase once only.
   Check daily rollover and relevant native sleep/wake/step callbacks. On deferred
   profiles open daily for foreground catch-up; do not expect native watch-app
