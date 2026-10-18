@@ -2,6 +2,44 @@
 
 Latest source work: Issue #20 battles, following Issue #17 `74b98a6`.
 
+## Issue #20 - playable integration (milestones 2-4)
+
+- Actions > Play > Wild battles: named-move combat, temporary HP, queued daily/
+  care/adventure/genuine-step encounters, practice, postpone/decline, Battle XP,
+  technique mastery and wild journal. Separate atomic `battle.v1` owns turns and
+  claims; canonical pet data, existing reward slots and evolution are unchanged.
+  DEV uses an isolated copy. No new background work, GPS, alerts or networking.
+- Enduro 4 / SDK 9.2: all 56 native tests passed, including the original 45,
+  five deterministic-engine, five transaction/encounter and one view-lifecycle
+  tests. Coverage includes baseline/catch-up/dedup, zero-step routes, bounded queue/
+  rewards, clock rollback, atomic claims, practice, reopen, sleep and DEV isolation.
+- Actual production-renderer QA: 100 scenes, zero clipping/overlap failures,
+  all 18 forms/four choices, techniques, outcomes and sleep/motion states.
+  Peak audit heap 146,896 / 781,976 bytes (not a full-stack/battery benchmark).
+  Cached 16px vector move text enables a readable 2x2 grid; unsupported vector
+  renderers use a full-width named-move selector rather than clipping long words.
+- Computer-use skill: visually inspected the grid, button selection, signature,
+  normal damage/opponent turns and victory with +12 Battle XP in the RAM-only
+  fixture. No physical-watch validation. Pause/reopen/claims are native transaction
+  tests, not an agent-operated physical-watch pause/reopen claim.
+- Signed Enduro 4 owner/public release-mode foreground builds passed. Public DEV/
+  test symbols are absent and owner DEV retained. IDs, signing configuration,
+  version, manifest/resources and both recorded Store IQ hashes are unchanged.
+  New local programs: `bin/battle20-owner-enduro4.prg` and
+  `bin/battle20-public-enduro4.prg`; these are not Store packages.
+- All five public-input native tests passed, including a new battle save/claim
+  test with DEV absent and canonical pet data unchanged.
+- Evidence: `bin/battle20-final-final-unit-enduro4.log`,
+  `battle20-layout-verified.log`, `battle20-owner-build.log`,
+  `battle20-public-release.log`, `battle20-public-tests.log`.
+  Earlier Long/index and layout/QA-counter failures were corrected; their local
+  logs remain, not counted as passes. Structural/vector and 176 doc-link checks
+  passed. Background/Glance renderer/rules are unchanged; their prior checks are
+  reused, not rerun. The battle document is never loaded by either entry point.
+- Physical controls, text size/MIP readability, fun/pacing and battery remain
+  owner acceptance items. Other profiles/vector-font fallback were not runtime
+  tested in this Enduro-only scope. No full matrix, export, upload or publication.
+
 ## Issue #20 - milestone 1: deterministic engine
 
 - Exact 18-form/72-name roster and stable IDs, no egg battles; copy-pure seeded

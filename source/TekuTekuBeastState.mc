@@ -6,6 +6,7 @@ using Toybox.UserProfile;
 (:background)
 class TekuTekuBeastState {
     var store; var data=null; var dev=false;
+    var battleData=null; // Foreground-only cache; never part of the pet document.
     var virtualNow=0l; var anchor=0l; var speed=1;
     var testNow=null; var skipWatch=false;
     function initialize(){store=new BeastStore();}

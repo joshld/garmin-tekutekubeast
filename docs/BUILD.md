@@ -97,6 +97,13 @@ scenario; subsequent inputs use the normal production Actions/Wake Up controls.
 Stop the isolated QA VM to flush its layout/memory log. This does not touch the
 real pet or Store packages.
 
+For Issue #20, `tests/battle/monkey.jungle` uses the same isolated QA identity and
+RAM saves. Its Enduro 4 audit covers all named-move grids, effects, outcomes and
+sleep/motion states. After PASS, tap once to exercise production battle controls
+with a fixture Pip and queued encounters. Stop the QA VM to flush its counters;
+do not clear Storage. Native unit tests include deterministic battles and the
+separate encounter/claim document.
+
 ## Static checks and fixtures
 
 ```powershell

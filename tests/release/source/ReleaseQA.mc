@@ -11,6 +11,15 @@ class ReleaseFixture extends TekuTekuBeastState {
     function realNow(){return clock;}
 }
 (:test)
+function publicBattleSaveAndClaimTest(logger){
+    var s=new ReleaseFixture();s.data["sleepMode"]=2;s.data["stageFloor"]=1;s.commit();
+    var before=s.store.copy(s.store.read("v4"));var fight=new BeastBattle(s);fight.beginBattle();
+    fight.data["active"]["actors"][1]["hp"]=1;fight.battleTurn(0);fight.finishBattle();
+    Test.assertEqual(fight.battleXp(),12);Test.assert(s.store.same(before,s.store.read("v4")));
+    s.battleData=null;var reload=new BeastBattle(s);reload.finishBattle();Test.assertEqual(reload.battleXp(),12);
+    Test.assert(!(s has :enableDev));return true;
+}
+(:test)
 function publicToolsAbsentTest(logger){
     var s=new ReleaseFixture();
     Test.assert(!(s has :enableDev));Test.assert(!(s has :devSet));

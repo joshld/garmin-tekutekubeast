@@ -68,6 +68,18 @@ first. Guard/buff actions consume none. Match results stop at 20 turns. These
 contracts and the JSON roster/probes are reusable by future ports; no ANT, BLE,
 ESP-NOW or multiplayer transport is implemented.
 
+`BeastBattle` is the foreground transaction owner. Its separate atomic
+`battle.v1` document contains queue, watermarks, active snapshot, reward claim,
+Battle XP, 72 mastery values and wild-journal mask. These are never added to the
+canonical `v4` document or read in background/Glance. Discovery observes already
+reconciled genuine XP and adventure/care counters; it never grants steps or
+evolution growth. Match IDs are allocated at match start so older queued offers
+cannot be blocked by newer practice claims. Turns and final rewards commit in
+the same battle document; transient snapshot metadata stays outside pure rules.
+State's `battleData` is only a foreground cache, not a saved pet field. DEV uses
+an independent copy and never writes the real battle document. The battle view
+owns compact cached poses, button/touch input and short animation bursts only.
+
 Mini-game periods, cue durations, gaps and jumps use 250 ms logical ticks (not
 wall-clock milliseconds). Seeds use the existing modulo-65521 transitions and
 are owned by durable sessions. A loot calculation cannot consume energy, claim

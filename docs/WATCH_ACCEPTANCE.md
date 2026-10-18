@@ -38,6 +38,12 @@ check into a pass. Physical checks remain open unless explicitly confirmed.
   Check daily rollover and relevant native sleep/wake/step callbacks. On deferred
   profiles open daily for foreground catch-up; do not expect native watch-app
   Glance launch on older CIQ 3.x. See [compatibility](COMPATIBILITY.md).
+- **Issue #20 battles:** check four complete move names on the 2x2 grid, button/
+  touch choice, protection/boost/signature reactions, comfortable short pacing,
+  pause/reopen, sleep/Wake Up and one-time rewards. Verify step encounters arrive
+  silently after catch-up, and daily/care/adventure routes work at zero steps.
+  Check original pet progress, DEV discard, real memory and battery; no physical
+  battle acceptance or wider-device runtime validation is claimed yet.
 - **Personal DEV only:** accelerate/test scenarios, discard/restart, and confirm
   original progress plus genuine steps recorded during testing are restored.
   Public Settings must not expose DEV controls.

@@ -2,6 +2,79 @@ using Toybox.Test;
 using Toybox.Lang;
 
 (:test)
+function battleViewLifecycleTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;var v=new BeastBattleView(s);
+    v.burst=8;var writes=s.store.writes;v.refresh();Test.assertEqual(v.burst,8);
+    Test.assert(v.battleTimer==null);Test.assertEqual(s.store.writes,writes);
+    v.battleVisible=true;v.battle=null;v.refresh();Test.assertEqual(v.burst,0);
+    Test.assertEqual(v.battleRedraws,0);v.onHide();Test.assert(!v.battleVisible);Test.assert(v.battleTimer==null);return true;
+}
+
+(:test)
+function battleSeparateSaveAndDevTest(logger){
+    var s=TestSupport.fixture();s.data["stageFloor"]=1;s.data["sleepMode"]=2;s.commit();
+    var pet=s.store.copy(s.store.read("v4"));var fight=new BeastBattle(s);Test.assertEqual(fight.battleQueueCount(),1);
+    Test.assertEqual(fight.battleXp(),0);Test.assertEqual(fight.data["mastery"].size(),72);
+    Test.assert(TestSupport.same(pet,s.store.read("v4")));var writes=s.store.writes;
+    var again=new BeastBattle(s);Test.assertEqual(s.store.writes,writes);Test.assertEqual(again.battleQueueCount(),1);
+    var real=s.store.copy(s.store.read("battle.v1"));var dev=s.enableDev();var lab=new BeastBattle(dev);
+    lab.beginBattle();lab.data["active"]["actors"][1]["hp"]=1;lab.battleTurn(0);lab.finishBattle();
+    Test.assert(lab.battleXp()>0);Test.assert(TestSupport.same(real,s.store.read("battle.v1")));
+    Test.assert(TestSupport.same(pet,s.store.read("v4")));Test.assertEqual(fight.battleXp(),0);return true;
+}
+(:test)
+function battleStepCatchupAndDedupTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;var fight=new BeastBattle(s);s.observe(s.today(),10000);
+    var xp=s.xp();fight.discover();Test.assertEqual(fight.battleQueueCount(),3);Test.assertEqual(fight.data["stepOffers"],2);
+    var writes=s.store.writes;fight.discover();Test.assertEqual(s.store.writes,writes);Test.assertEqual(s.xp(),xp);
+    while(fight.declineEncounter()){}s.observe(s.today(),50000);fight.discover();Test.assertEqual(fight.battleQueueCount(),0);
+    Test.assertEqual(fight.data["stepMark"],20);fight.discover();Test.assertEqual(fight.battleQueueCount(),0);
+    var legacy=TestSupport.fixture();legacy.observe(legacy.today(),50000);var fresh=new BeastBattle(legacy);
+    Test.assertEqual(fresh.battleQueueCount(),1);Test.assertEqual(fresh.data["stepMark"],20);return true;
+}
+(:test)
+function battleAccessibleQueueAndRollbackTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;var fight=new BeastBattle(s);Test.assertEqual(s.xp(),0l);
+    fight.declineEncounter();s.data["careToday"]=100;fight.discover();Test.assertEqual(fight.battleQueueCount(),1);
+    s.data["encounters"]=1;fight.discover();Test.assertEqual(fight.battleQueueCount(),2);
+    var serial=fight.data["serial"];fight.postponeBattle();fight.discover();Test.assertEqual(fight.data["serial"],serial);
+    s.data["careToday"]=300;s.data["encounters"]=100;fight.discover();Test.assertEqual(fight.battleQueueCount(),4);
+    while(fight.declineEncounter()){}fight.discover();Test.assertEqual(fight.battleQueueCount(),0);
+    s.testNow-=86400;fight.discover();Test.assertEqual(fight.battleQueueCount(),0);Test.assertEqual(s.xp(),0l);
+    s.testNow+=2*86400;s.data["careToday"]=0;fight.discover();Test.assertEqual(fight.battleQueueCount(),1);return true;
+}
+(:test)
+function battleResumeClaimAndPracticeTest(logger){
+    var s=TestSupport.fixture();s.data["stageFloor"]=1;s.data["sleepMode"]=2;s.commit();
+    var pet=s.store.copy(s.store.read("v4"));var fight=new BeastBattle(s);fight.beginBattle();fight.battleTurn(1);
+    var pending=fight.battleSession();pending["actors"][0]["hp"]=0;Test.assert(fight.battleSession()["actors"][0]["hp"]>0);
+    pending=fight.battleSession();fight.postponeBattle();s.battleData=null;var resumed=new BeastBattle(s);
+    Test.assert(TestSupport.same(pending,resumed.battleSession()));Test.assert(TestSupport.same(pending,resumed.beginBattle()));
+    resumed.data["active"]["actors"][1]["hp"]=1;resumed.battleTurn(0);var outcome=resumed.finishBattle();
+    Test.assertEqual(resumed.battleXp(),12);Test.assertEqual(resumed.battleMastery(0),1);
+    var writes=s.store.writes;Test.assert(resumed.finishBattle().equals(outcome));Test.assertEqual(s.store.writes,writes);
+    s.battleData=null;var reload=new BeastBattle(s);reload.finishBattle();Test.assertEqual(reload.battleXp(),12);
+    var mastery=s.store.copy(reload.data["mastery"]);reload.practiceBattle();reload.data["active"]["actors"][1]["hp"]=1;
+    reload.battleTurn(0);reload.finishBattle();Test.assertEqual(reload.battleXp(),12);Test.assert(TestSupport.same(mastery,reload.data["mastery"]));
+    Test.assert(TestSupport.same(pet,s.store.read("v4")));return true;
+}
+(:test)
+function battleSleepAndRewardLimitsTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;var fight=new BeastBattle(s);Test.assert(fight.beginBattle()==null);
+    s.data["stageFloor"]=1;s.rest();Test.assert(fight.beginBattle()==null);Test.assert(fight.practiceBattle()==null);s.wakeUp();
+    fight.beginBattle();s.rest();var before=s.store.copy(fight.data);var writes=s.store.writes;
+    Test.assert(fight.battleTurn(0)==null);Test.assert(TestSupport.same(before,fight.data));Test.assertEqual(s.store.writes,writes);s.wakeUp();
+    s.rest();fight.data["active"]["status"]=1;fight.data["active"]["turn"]=1;var blocked=s.store.copy(fight.data);
+    Test.assert(fight.finishBattle().equals("Beast is asleep."));Test.assert(TestSupport.same(blocked,fight.data));
+    fight.data["active"]["status"]=0;fight.data["active"]["turn"]=0;s.wakeUp();
+    for(var i=0;i<6;i++){
+        if(i>0){fight.offer(0);fight.beginBattle();}fight.data["active"]["actors"][1]["hp"]=1;fight.battleTurn(0);fight.finishBattle();
+    }
+    Test.assertEqual(fight.data["rewarded"],5);Test.assertEqual(fight.battleXp(),60);Test.assertEqual(s.xp(),0l);
+    Test.assertEqual(s.number("games"),0);Test.assertEqual(s.number("adventure"),0);return true;
+}
+
+(:test)
 function battleRosterGoldenTest(logger){
     var rows=RuleVectors.battle();var seen={};var count=0;
     for(var i=0;i<rows.size();i++){

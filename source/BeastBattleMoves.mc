@@ -31,6 +31,9 @@ module BeastBattleMoves {
         return names(0);
     }
     function id(form,slot){return form*4+slot;}
+    function species(form){return ["Pip","Nimble","Mossbit","Thornbuck","Verdant Elder","Lumenhart",
+        "Cindercub","Pyrolynx","Solflare","Ashen Phoenix","Puddlefin","Currentail","Leviathan",
+        "Moonwater Kirin","Flicklet","Nocturne","Starweaver","Eclipse Eidolon"][form];}
     function name(id){return names((id/4).toNumber())[id%4];}
     function role(id){return id%4;}
 }

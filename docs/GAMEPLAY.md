@@ -1,7 +1,7 @@
 # Current gameplay and features
 
 Implemented behavior through v0.5.2, the Issue #19 refactor, Issue #21 lighting
-and Issue #17 sleep interactions (source changes, not a new Store release).
+Issue #17 sleep interactions and Issue #20 battles (source changes, not a new Store release).
 This is the current gameplay guide, not an implementation wishlist. Normal play
 is native and offline; activity is optional, with no death, lost XP, de-evolution
 or recovery-day punishment. See [current validation](VALIDATION.md) for tested
@@ -32,6 +32,43 @@ scope and [physical acceptance](WATCH_ACCEPTANCE.md) for hardware limitations.
 Normal Bounce stages use 4 / 3 / 2.25 seconds per star; Easy Mode is slower.
 Memory demonstrations include a neutral 250 ms gap between all cues, including
 repeated moves. Rounds do not consume separate daily rewarded-session slots.
+
+## Wild battles
+
+Actions > Play > Wild battles offers queued encounters, practice, Later and
+Decline next. Eggs must hatch first; a sleeping beast must explicitly Wake Up.
+UP/DOWN chooses among four actual named techniques; SELECT uses one and BACK
+pauses. Touching a move chooses/uses it. Each turn saves before its short visual
+reaction, so closing/reopening resumes the same opponent, HP, seed and turn.
+Older renderers without compact vector fonts show a full-width named-move
+selector instead of the 2x2 grid; UP/DOWN still selects all four techniques.
+HP is temporary: defeat never injures, kills, de-evolves or spends the real pet's
+energy, friendship, items or growth. No fast reactions or exercise are required.
+
+All 18 battle-capable forms have four distinct named techniques (72 stable move
+IDs). Pip/Nimble remain neutral; rare techniques require an already-earned rare
+form. Techniques cover damage, protection, two-hit boosts and signatures with
+two-action cooldowns. Family affinities, evolution, personality, friendship and
+technique experience affect small combat bonuses. Opponents match evolution
+stage; no real pet is used as an opponent. Matches usually take a handful of
+turns, aiming at 30-60 seconds without a time limit; 20 turns settles a draw.
+
+One free encounter is offered each new local day. Care growth milestones (100,
+200, 300), completed reward-bearing Tiny Adventures and genuine lifetime-step
+milestones (2,500, maximum two step offers/day) add opportunities. The queue holds
+four; excess discoveries are consumed rather than accumulating an unbounded
+backlog. Historical pre-feature steps/trails are baselined, not replayed. Opening
+the app reconciles discoveries without interrupting activities or adding any GPS,
+background work or notifications. Declining/postponing never costs anything.
+
+The first five completed wild matches/day grant separate Battle XP (12 victory,
+5 defeat, 7 draw) and up to three mastery points per used technique. The wild
+journal records encountered forms. Practice is unlimited without XP/mastery or
+journal rewards. Techniques and Wild journal in the battle menu show progress.
+Battle progression does not alter the existing evolution/step-XP ledgers or
+mini-game reward slots. Reopening cannot claim a match twice. The separate
+`battle.v1` save is isolated in Developer Mode and independent of the canonical
+pet save. There is no multiplayer or watch-to-watch communication yet.
 
 ## Separate ledgers
 
