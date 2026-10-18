@@ -55,3 +55,9 @@
 - Keep Developer Mode test changes isolated from the real pet; public-release DEV exclusion is a separate required acceptance item (see issue #18).
 - Never uninstall/reset the production app or clear Garmin Storage to simplify testing.
 - Follow the latest requested issue scope; #9/#18 release records are historical context, not authorization to restart compatibility expansion or packaging.
+
+## 8. GitHub issue management
+- [GitHub Issues](https://github.com/joshld/garmin-tekutekubeast/issues) is the authoritative backlog and progress tracker. Current guides explain behavior/procedures; validation and release records preserve evidence, not parallel TODO lists.
+- After each completed development milestone, update the relevant issue's concise checklist: mark only verified requirements `[x]`, leave outstanding/unverified acceptance `[ ]`, and link the commit and meaningful test evidence. Distinguish implementation, SDK/simulator validation, physical-watch acceptance and deferred scope.
+- Close issues when their agreed acceptance criteria are satisfied. Keep essential acceptance gaps open; create focused follow-ups for genuinely separate future work only after checking for duplicates. Preserve important decisions and historical evidence, clearly marking superseded requirements.
+- Prefer one coherent checklist/status edit per milestone over repeated progress comments or unchanged issue edits. Do not maintain duplicate task lists in repository documents.

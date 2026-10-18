@@ -56,7 +56,7 @@ where activity is deferred. GPS is never continuously enabled for scenery.
 
 ## First-watch check
 
-Use the shared [physical-watch checklist](WATCH_ACCEPTANCE.md#current-acceptance-checklist).
+Use the shared [physical-watch procedure](WATCH_ACCEPTANCE.md#physical-acceptance-procedure).
 On this model specifically confirm 0.5.2 beta in Settings, round-screen readability,
 all five-button inputs and daily foreground catch-up; launch from START/apps,
 not an unsupported native watch-app Glance.

@@ -1,6 +1,23 @@
 # Physical-watch acceptance and user reports
 
-## Current acceptance checklist
+## Physical acceptance procedure
+
+[GitHub Issues](https://github.com/joshld/garmin-tekutekubeast/issues) owns
+acceptance status and outstanding tasks. The checks below are a reusable test
+procedure, not a second backlog. Record results against the relevant issue:
+[UI/lighting contrast #15](https://github.com/joshld/garmin-tekutekubeast/issues/15),
+[sleep appearance #12](https://github.com/joshld/garmin-tekutekubeast/issues/12),
+[schedule #13](https://github.com/joshld/garmin-tekutekubeast/issues/13),
+[Wake Up #17](https://github.com/joshld/garmin-tekutekubeast/issues/17),
+[games #14](https://github.com/joshld/garmin-tekutekubeast/issues/14),
+[battles #20](https://github.com/joshld/garmin-tekutekubeast/issues/20),
+[Glance #10](https://github.com/joshld/garmin-tekutekubeast/issues/10),
+[DEV #7](https://github.com/joshld/garmin-tekutekubeast/issues/7),
+[feedback #5](https://github.com/joshld/garmin-tekutekubeast/issues/5),
+[device/battery #9](https://github.com/joshld/garmin-tekutekubeast/issues/9) and
+[release/dual installation #18](https://github.com/joshld/garmin-tekutekubeast/issues/18).
+Issue #21's focused implementation acceptance is complete; its real-watch visual
+and battery checks are tracked in #15/#9, with sleep scheduling owned by #13.
 
 Simulator evidence is in [Validation](VALIDATION.md); it is not physical-watch
 acceptance. Keep completed reports below with app version/build hash, watch

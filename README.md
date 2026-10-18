@@ -8,6 +8,12 @@ account or internet connection is required for normal gameplay.
 Issue #19 extracted deterministic rules without changing gameplay or saves.
 Existing signed IQ packages predate that cleanup; see the validation guide.
 
+[GitHub Issues](https://github.com/joshld/garmin-tekutekubeast/issues) is the
+authoritative development backlog and acceptance tracker. Guides describe current
+behavior and procedures; validation/release records preserve test evidence, not
+another roadmap. Later lighting, sleep-interaction and battle source changes do
+not imply those features are present in the existing signed 0.5.2 IQ packages.
+
 ## Documentation
 
 Read the relevant current guide, not every historical specification.
