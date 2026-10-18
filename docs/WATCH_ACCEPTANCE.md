@@ -6,6 +6,7 @@
 acceptance status and outstanding tasks. The checks below are a reusable test
 procedure, not a second backlog. Record results against the relevant issue:
 [UI/lighting contrast #15](https://github.com/joshld/garmin-tekutekubeast/issues/15),
+[Nimble/facing/crescent #22](https://github.com/joshld/garmin-tekutekubeast/issues/22),
 [sleep appearance #12](https://github.com/joshld/garmin-tekutekubeast/issues/12),
 [schedule #13](https://github.com/joshld/garmin-tekutekubeast/issues/13),
 [Wake Up #17](https://github.com/joshld/garmin-tekutekubeast/issues/17),
@@ -73,6 +74,49 @@ check into a pass. Physical checks remain open unless explicitly confirmed.
 [Fenix 6S Pro installation](INSTALL_FENIX_6S_PRO.md) adds device-specific checks.
 Outstanding hardware checks belong to their respective features; they are not
 essential unfinished code-cleanup work in Issue #19.
+
+## Current Enduro 4 acceptance build
+
+Source `118bdff64a389efff41b9c2276a5236111751d96`, including the Nimble,
+walk-facing and crescent fixes plus earlier offline battles/sleep/lighting.
+Private Developer Beta only, not a v0.6.0 release or Store upload:
+`D:\working\garmin-tekutekubeast\bin\TekuTekuBeast-Dev-Enduro4-acceptance-118bdff.prg`.
+Settings still displays **0.5.2 beta**; the filename/hash identifies this newer
+source. SHA256: `E6870E3903568545BCCCE5855A8A2C7C23D8CF59225BDF73F40825AFC9A83562`.
+The original Beta UUID/key are retained; public UUID and QA code are absent.
+
+### Owner-operated update, only after identity/filename confirmation
+
+1. Photograph the real pet's name/stage, XP/growth, friendship, inventory and
+   settings first. Record watch firmware. This is a comparison record, not a
+   recoverable save backup. Exit the game and connect Enduro 4 by USB data cable.
+2. Positively identify the **existing Developer Beta** program and its on-watch
+   filename using installed-app metadata/UUID
+   `54A4F9D3B6584CA4B01C232D20438E5B`. Do not guess a random PRG filename, select
+   the public UUID, or create a second installation. If the Store-managed file
+   cannot be identified/accessed unambiguously, **stop before copying**. Request
+   a read-only mapping check or explicit approval for a private-Beta IQ/update
+   instead; no new IQ or Store update was prepared here.
+3. For a confirmed accessible in-place USB update, use a PC copy of this PRG
+   bearing the **same existing Beta filename**, and replace only that program.
+   Garmin's [USB sideload procedure](https://developer.garmin.com/connect-iq/connect-iq-basics/your-first-app/)
+   uses `GARMIN/APPS`; it does not establish save retention for every Store/USB
+   transition. Do not delete/uninstall anything, edit/copy DATA or SETTINGS, or
+   touch the public installation. If the expected file is not exposed there,
+   stop rather than inventing another target directory or reset workaround.
+4. Safely disconnect and open the existing Beta. Compare progress before trying
+   gameplay; stop and report any new egg, duplicate app or unexpected regression.
+   Normal care, elapsed time and genuine new steps may legitimately update values.
+   Test forced forms only in isolated Developer Mode, then discard it.
+
+Owner acceptance is still pending: confirm Nimble's clean frame edges and facing
+through turns/hops, smaller Pip transitions, and the low moon without a dark
+horizon cutout. Check Pet layout/contrast/attention icons; play and interrupt
+wild battles with named moves and one-time rewards; verify reopen/step catch-up,
+DEV discard, responsiveness and ordinary-use battery. Record results in
+[#24 release readiness](https://github.com/joshld/garmin-tekutekubeast/issues/24),
+with feature-specific confirmation in #22/#15/#20/#18. No installation or
+physical acceptance is performed by preparing this file.
 
 ## Historical v0.5.0 feedback / v0.5.1 boundary
 

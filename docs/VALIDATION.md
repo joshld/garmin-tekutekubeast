@@ -2,6 +2,33 @@
 
 Latest source work: Issue #22 roaming/art fixes, following Issue #23 `17b6a3f`.
 
+## Physical acceptance preparation - source 118bdff
+
+Rebuilt the signed Enduro 4 owner program with `-Owner -Release -Device enduro4`
+from clean `118bdff64a389efff41b9c2276a5236111751d96`, without exporting an IQ,
+connecting to the watch or running any app against its saves. Artifact:
+`D:\working\garmin-tekutekubeast\bin\TekuTekuBeast-Dev-Enduro4-acceptance-118bdff.prg`
+(4,016,732 bytes), SHA256
+`E6870E3903568545BCCCE5855A8A2C7C23D8CF59225BDF73F40825AFC9A83562`.
+It is byte-identical to `bin/roaming22-owner-enduro4.prg`; reuse the existing
+69 native tests, 192 roaming scenes, 480 asset comparisons and #20 battle
+playthrough/layout evidence below. No simulator matrix was repeated.
+
+Verified original Beta UUID in the PRG, public UUID absent, expected DEV methods
+present and QA/test symbols absent. Derived public-key fingerprint matches pinned
+`276489F20EC9F9605CADE733D7F5D60FB04E8696C5E50FF8E431F873825FCA7C`;
+the SDK used the existing key, never regenerated it. Build log:
+`bin/acceptance-enduro4-118bdff-build.log`. Settings remains **0.5.2 beta**;
+this is a newer source acceptance program, not a relabelled/final v0.6.0 release.
+
+Safe conditional installation and the physical procedure are in
+[watch acceptance](WATCH_ACCEPTANCE.md#current-enduro-4-acceptance-build).
+[#24](https://github.com/joshld/garmin-tekutekubeast/issues/24) owns proposed
+v0.6.0 release gates: owner acceptance, balance disposition, targeted constrained
+renderer checks and subsequently approved versioning/all-part packaging.
+No physical result, migration, installation or publication is claimed. Existing
+public/private IQs, app IDs, gameplay, source resources and save format are unchanged.
+
 ## Issue #22 - Nimble frames, facing and night crescent
 
 SDK 9.2 / Enduro 4 only. The clean starting tree was `17b6a3f`.
