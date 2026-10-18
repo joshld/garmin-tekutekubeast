@@ -1,11 +1,13 @@
 """Trim/re-export existing pixel sprites; no generated or redrawn artwork.
 
 Keep v0.4 resources intact. v0.5.1 Pet poses use the EXACT v0.4 native
-canvases/pixels, including intentional padding; only left-facing copies are new.
+canvases/body pixels, including intentional padding. Nimble's detached atlas
+bleed is removed without changing its body; mirrored walk copies are reused.
 Retain v0.5 game and Glance resource generation unchanged.
 """
 from pathlib import Path
 from PIL import Image, ImageOps
+from pet_art_repair import repair_nimble
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -56,6 +58,8 @@ for folder, extent in variants:
             native = "resources" if folder == "resources-pet144" else folder
             canvas = Image.open(ROOT / native / f"drawables/v04/{name}{frame}.png").convert("RGBA")
             assert canvas.size == (extent, extent)
+            if name == "V4Nimble":
+                canvas = repair_nimble(canvas)
             for suffix, image in [(str(frame),canvas)]+([(str(frame)+"Left",ImageOps.mirror(canvas))] if frame<2 else []):
                 identifier="V5"+name[2:]+suffix
                 filename=f"v05/{identifier}.png"
@@ -63,4 +67,4 @@ for folder, extent in variants:
                 ET.SubElement(tree.getroot(),"bitmap",{"id":identifier,"filename":filename,"dithering":"none"})
     ET.indent(tree,space="    ")
     tree.write(resource/"drawables/drawables.xml",encoding="unicode")
-print("Restored exact v0.4 Pet pixels for 15 species, six poses and mirrored walks; games/Glance retained.")
+print("Retained v0.4 Pet body pixels/size; repaired Nimble atlas bleed; games/Glance retained.")

@@ -2,6 +2,46 @@ using Toybox.Test;
 using Toybox.Lang;
 
 (:test)
+function directionalPetPosesTest(logger){
+    var masks=[0,0,0,0,2,3,0,0,0,2,2,0,0,2,2];
+    for(var specimen=1;specimen<15;specimen++){
+        var stage=specimen<3?specimen:3+(specimen-3)%3;
+        var family=specimen<3?0:1+(specimen-3)/3;
+        for(var pose=0;pose<2;pose++){
+            var nativeRight=(masks[specimen]&(1<<pose))!=0;
+            Test.assertEqual(BeastArt.walkFrame(stage,family,pose,false),pose+(nativeRight?0:6));
+            Test.assertEqual(BeastArt.walkFrame(stage,family,pose,true),pose+(nativeRight?6:0));
+        }
+    }
+    return true;
+}
+
+(:test)
+class MoonRecordingDc {
+    var rectangles=[];var color=0;
+    function initialize(){}
+    function getWidth(){return 140;}
+    function setColor(fg,bg){color=fg;}
+    function clear(){}
+    function fillRectangle(x,y,w,h){rectangles.add([x,y,w,h,color]);}
+    function drawBitmap(x,y,bitmap){}
+}
+(:test)
+function crescentHasNoSkyCutoutTest(logger){
+    var scenery=new BeastScenery();var dc=new MoonRecordingDc();
+    for(var theme=0;theme<4;theme++){
+        for(var sample=0;sample<5;sample++){
+            dc.rectangles=[];scenery.draw(dc,theme,[3,sample/4.0,false],false);
+            Test.assertEqual(dc.rectangles.size(),12); // horizon, eight stars, three lit moon blocks
+            for(var i=9;i<12;i++){Test.assertEqual(dc.rectangles[i][4],0xFFFFAA);}
+            // No sky-colour erasing over the horizon, including low rising/setting moon.
+            for(var i=0;i<dc.rectangles.size();i++){Test.assert(dc.rectangles[i][4]!=0x000055);}
+        }
+    }
+    return true;
+}
+
+(:test)
 class FailingBattleStore extends BeastStore {
     var fail=false;
     function initialize(){BeastStore.initialize();memory={};}

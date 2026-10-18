@@ -328,12 +328,15 @@ class TekuTekuBeastView extends WatchUi.View {
             var fromX=stride<48?roamOriginX:xs[before];var fromY=stride<48?roamOriginY:ys[before];
             centerX=dc.getWidth()/2+(fromX+(xs[part]-fromX)*fraction)*dc.getWidth();
             centerY=(fromY+(ys[part]-fromY)*fraction)*dc.getHeight()-size/2;
-            moving=p<32;left=xs[part]<xs[before];
-            frame=moving?(left?6:0)+stride%2:(p<42?5:0);
+            moving=p<32;left=xs[part]<fromX;
+            frame=moving?BeastArt.walkFrame(beast.stage(),family,stride%2,left):(p<42?5:0);
             if(moving && motion==2){centerY-=stride%2==0?0:3;}
             if(family==3 && motion==2){centerY+=(stride%8<4?2:-2);}
             if(active.equals("happy") || active.equals("hop") || ((beast.number("happiness")>=85 || family==2) && p<8)){
-                if(motion==2){centerY-=hopHeights[stride%4];}frame=stride%2==0?1:4;
+                if(motion==2){centerY-=hopHeights[stride%4];}
+                // A moving hop keeps its directional pose; an idle celebration
+                // may still blink/turn. Never flip to an unmirrored hop mid-walk.
+                if(!moving){frame=stride%2==0?1:4;}
             }
             if(!moving && p==45){frame=4;}
         }

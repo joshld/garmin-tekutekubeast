@@ -1,6 +1,61 @@
 # Current source validation checkpoint
 
-Latest source work: Issue #23 resource audit, following Issue #20 `b6c3d6c`.
+Latest source work: Issue #22 roaming/art fixes, following Issue #23 `17b6a3f`.
+
+## Issue #22 - Nimble frames, facing and night crescent
+
+SDK 9.2 / Enduro 4 only. The clean starting tree was `17b6a3f`.
+The RAM-only roaming fixture reproduced Nimble's detached edge fragment and
+reversed facing. Fixed-grid atlas extraction captured neighbouring tail pixels
+in Nimble poses 1-5: 60/220/24/36/132 opaque pixels on the 96px canvases.
+Only those detached components and the corresponding mirrored walk were removed
+from generated Pet images. Body RGBA, native canvas, position, scale, source
+atlases and V4 historical evidence remain intact. No global component filter:
+other creatures can legitimately have detached hooves/effects. Other atlases
+would need individual review if similar fragments are reported.
+
+Pip/Nimble native walks face left, unlike the old selection assumption. Other
+atlases have mixed-facing poses. Small per-pose facing metadata selects existing
+mirrors; moving hops retain directional poses and first-leg direction uses its
+actual origin. World destinations, timing, circle constraints and creature size
+are unchanged. Native tests cover both poses/directions for all 14 non-egg forms.
+
+The upper-left night object is consistent with the decorative night-progress
+crescent, partly occluded by scenery. Its old sky-colour cutout painted a dark
+rectangle over the lighter horizon. Drawing only the same illuminated pixels
+removes that cutout; moon placement, sky, terrain and lighting rules stay intact.
+The owner's exact photographs are not attached to the issue; confirmation that
+this resolves the physical observation remains with #22 / #15.
+
+New evidence: **69 native tests pass**, including 20 theme/moon-progress cases;
+**192 Enduro 4 rendering scenes pass** with zero circle/footer/direction failures
+(Pip/Nimble, all eight destinations, walk/hop/pause/blink transitions, LOW/NORMAL,
+day/night and four themes). Manual simulator button previews inspected the
+Nimble repair/right-facing walk, Pip left walk/idle/blink/look and four night
+layers. The initial fixture used an incorrect 1-based scenery index and crashed;
+this QA-only error was corrected. Long interactive previews exceeded the bridge
+timeout, so the final audit exits automatically and records its complete result.
+
+`scripts/verify_v051_art.py` passes 480 historical-body/canvas comparisons with
+explicit Nimble removal counts at each size; all game/Glance images and other
+Pet pixels remain unchanged. Signed public/owner Enduro builds pass; public
+symbol checks exclude DEV and QA, owner retains DEV. Existing public-input tests,
+Glance and background-specific evidence are reused: those paths/data/assets did
+not change. No device matrix, physical-watch run or Store export was performed.
+
+Resource implications: still eight cached Pet poses and one terrain layer, no
+new runtime transforms, per-frame arrays, resources or timers; moon draws three
+blocks instead of four. Enduro Nimble PNGs shrink by 222 bytes (compressed file
+size, not a RAM saving). Instrumented audit sampled 145,104 / 781,976 bytes;
+this is not a matched baseline comparison, allocator-wide peak or battery test.
+Both identities/configuration, saves, gameplay and existing Store IQ hashes are
+unchanged. Hardware visual acceptance and physical battery measurements remain
+unverified.
+
+Evidence: `tests/roaming/monkey.jungle` (set `autoExit=false` for interactive
+previews), `bin/roaming22-audit.log`, `roaming22-final-unit-enduro4.log`,
+`roaming22-public-build.log`, `roaming22-owner-build.log`. Earlier baseline and
+interactive preview logs contain timeout markers, not automated passes.
 
 ## Issue #23 - resource efficiency and simplicity
 

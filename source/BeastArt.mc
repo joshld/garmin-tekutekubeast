@@ -2,6 +2,16 @@ using Toybox.WatchUi;
 // Generated asset catalog: cache only the current creature's six frames.
 class BeastArt {
     function initialize() {}
+    // Native poses are not consistently oriented across the original atlas.
+    // Bit 0/1 marks a right-facing walk pose; reuse the two existing mirrors.
+    static function walkFrame(stage,family,pose,left){
+        var rightMask=0;
+        if(stage==5 && family==1){rightMask=3;}
+        else if((stage==4 && (family==1 || family==3 || family==4)) ||
+                (stage==3 && family==3) || (stage==5 && family==4)){rightMask=2;}
+        var nativeRight=(rightMask&(1<<pose))!=0;
+        return pose+(left==nativeRight?6:0);
+    }
     function petFrames(stage,family){
         if(stage==0){var egg=WatchUi.loadResource(Rez.Drawables.V5Egg0);return [egg,egg,egg,egg,egg,egg,egg,egg];}
         var ids=[

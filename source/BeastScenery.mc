@@ -41,8 +41,11 @@ class BeastScenery {
         }else if(phase==3){
             for(var star=0;star<8;star++){pixel(dc,26+(star*29)%90,18+(star*11)%28,1,1,0xAAAAAA);}
             // Decorative night-progress crescent, not true lunar rise/set/phase.
-            pixel(dc,celestialX-2,celestialY-4,4,8,0xFFFFAA);pixel(dc,celestialX-4,celestialY-2,8,4,0xFFFFAA);
-            pixel(dc,celestialX,celestialY-4,3,6,skyColor);pixel(dc,celestialX+2,celestialY-2,3,4,skyColor);
+            // Draw only lit pixels. A sky-colour cutout leaves a dark rectangle
+            // when the low moon crosses the lighter horizon band.
+            pixel(dc,celestialX-2,celestialY-4,2,2,0xFFFFAA);
+            pixel(dc,celestialX-4,celestialY-2,4,4,0xFFFFAA);
+            pixel(dc,celestialX-2,celestialY+2,4,2,0xFFFFAA);
         }
         dc.drawBitmap(0,0,layer);if(audit){cachedDrawMs=System.getTimer()-renderStart;}
     }

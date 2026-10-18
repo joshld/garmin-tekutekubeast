@@ -14,6 +14,11 @@ transformations run on the watch.
 Only the current Pet's eight poses (six plus two mirrored) are loaded; the egg
 shares a single bitmap. `scripts/verify_v051_art.py` checks 480 Pet variants
 against historical v0.4 pixels and verifies unchanged game/Glance assets.
+Issue #22 removes detached neighbouring-atlas fragments from Nimble Pet poses
+only, without cropping, scaling or moving its body. The verifier checks exact
+removed-pixel counts; other Pet pixels and all game/Glance images stay unchanged.
+Walking uses per-pose facing metadata and the existing two mirrors, including
+mixed-facing atlases; moving hops no longer swap to an unmirrored pose.
 See [current source validation](../docs/VALIDATION.md) and the
 [original scenery evidence](../docs/releases/v0.5.1/V0_5_1_VALIDATION.md).
 
