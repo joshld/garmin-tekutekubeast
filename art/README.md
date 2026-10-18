@@ -49,6 +49,12 @@ with nearest-neighbour. Source artwork is not loaded by the watch. Native-size
 variants avoid an SDK restriction on affine-transforming palette bitmaps.
 
 Only the current creature's frames are cached (eight Pet / six game poses).
+Compact game/battle sprites erase individually reviewed neighbouring-atlas
+fragments at build time (`pet_art_repair.py`); body pixels, original crop/scale,
+Pet sprites and Glance art stay unchanged. `verify_game_art.py` checks the repair
+counts and protects every connected main-body pixel. Original atlas cells already
+truncate Nimble tails in some poses; no runtime clipping or new tail redraw was
+introduced. Tiny Adventures reuses existing right-facing poses without mirrors.
 Foreground animation adds
 wandering, hops, family-specific motion, blink/look, chewing, cleaning puffs,
 sleep and evolution feedback. No animation timer survives view hiding or app

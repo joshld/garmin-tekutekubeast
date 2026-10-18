@@ -1083,3 +1083,21 @@ function quietBedtimeFeedbackTest(logger){
     new FeedbackManager().cue(d,"eat");Test.assert(FeedbackManager.lastStatus.equals("FEEDBACK OFF"));
     Test.assertEqual(s.xp(),0l);return true;
 }
+(:test)
+function adventureDirectionalPoseTest(logger){
+    // Every native walk already facing right is retained; all other forms
+    // use their existing right-facing look pose, without more cached art.
+    for(var stage=1;stage<=5;stage++){
+        for(var family=stage<3?0:1;family<=(stage<3?0:4);family++){
+            for(var pose=0;pose<2;pose++){
+                var frame=BeastArt.trailFrame(stage,family,pose);
+                Test.assert(frame==pose || frame==5);
+                Test.assertEqual(frame==pose,BeastArt.walkFrame(stage,family,pose,false)<6);
+            }
+        }
+    }
+    Test.assertEqual(BeastArt.trailFrame(2,0,0),5);
+    Test.assertEqual(BeastArt.trailFrame(2,0,1),5);
+    Test.assertEqual(BeastArt.trailFrame(5,1,0),0);
+    return true;
+}

@@ -12,6 +12,12 @@ class BeastArt {
         var nativeRight=(rightMask&(1<<pose))!=0;
         return pose+(left==nativeRight?6:0);
     }
+    // Compact game sheets have no mirrored assets. Reuse their existing
+    // right-facing look pose where a native stride faces away from the route.
+    // Adventures retain their hop cadence, size and six-frame cache.
+    static function trailFrame(stage,family,pose){
+        return walkFrame(stage,family,pose,false)<6?pose:5;
+    }
     function petFrames(stage,family){
         if(stage==0){var egg=WatchUi.loadResource(Rez.Drawables.V5Egg0);return [egg,egg,egg,egg,egg,egg,egg,egg];}
         var ids=[

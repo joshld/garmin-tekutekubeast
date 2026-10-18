@@ -3,7 +3,7 @@ from pathlib import Path
 import subprocess
 from io import BytesIO
 from PIL import Image, ImageOps
-from pet_art_repair import repair_nimble
+from pet_art_repair import repair_nimble, GAME_BLEED
 
 root = Path(__file__).resolve().parents[1]
 checked = 0
@@ -13,7 +13,16 @@ for folder in ('resources', 'resources-pet144', 'resources-native144', 'resource
         name = pet.stem
         if name.startswith('V5Game') or name.endswith('SleepSmall'):
             old = subprocess.check_output(['git', 'show', f'eecb6c6:{pet.relative_to(root).as_posix()}'], cwd=root)
-            assert pet.read_bytes() == old, f'Game/Glance asset changed: {pet}'
+            species = name[6:-1] if name.startswith('V5Game') else ''
+            if species and int(name[-1]) in GAME_BLEED.get(species, {}):
+                before = Image.open(BytesIO(old)).convert('RGBA')
+                after = Image.open(pet).convert('RGBA')
+                assert before.size == after.size, f'Game canvas changed: {pet}'
+                assert all(a == b or (a[3] and b == (0, 0, 0, 0))
+                           for a, b in zip(before.getdata(), after.getdata())), f'Game body recoloured/moved: {pet}'
+                assert before.tobytes() != after.tobytes(), f'Game bleed not removed: {pet}'
+            else:
+                assert pet.read_bytes() == old, f'Unrelated Game/Glance asset changed: {pet}'
             continue
         original_name = 'V4' + name[2:].removesuffix('Left') + '.png'
         path = f'{historical}/drawables/v04/{original_name}'
@@ -37,4 +46,4 @@ qa = root / 'tests/world-preview/resources'
 qa.mkdir(parents=True, exist_ok=True)
 (qa / 'v050-pip.png').write_bytes(subprocess.check_output([
     'git', 'show', 'eecb6c6:resources-pet144/drawables/v05/V5Pip0.png'], cwd=root))
-print(f'PASS: {checked} Pet poses retain v0.4.0 body pixels/size (Nimble atlas bleed removed); games/Glance unchanged.')
+print(f'PASS: {checked} Pet poses retain v0.4.0 body pixels/size; reviewed game repairs erase only; other games/Glance unchanged.')

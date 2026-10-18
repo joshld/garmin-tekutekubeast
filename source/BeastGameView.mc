@@ -261,7 +261,8 @@ class BeastGameView extends TekuTekuBeastView {
         dc.setColor(0xFFFF55,Graphics.COLOR_TRANSPARENT);dc.fillRectangle(dc.getWidth()*0.71-1,y(dc,0.60)+6,3,4);
         var progress=phase==5?beast.min(1.0,travel/12.0):1.0;
         var cx=dc.getWidth()*(0.29+0.21*beast.max(0,node-1)+0.21*(node>0?progress:0));
-        drawPlayer(dc,cx,ground-8,phase==5?tick%2:5,phase==5 && tick%2==0?3:0);
+        var pose=phase==5?BeastArt.trailFrame(beast.stage(),beast.family(),tick%2):5;
+        drawPlayer(dc,cx,ground-8,pose,phase==5 && tick%2==0?3:0);
         // Family environments: leaves, lava sparks, waves, stars.
         pixelIcon(dc,dc.getWidth()/2+40,y(dc,0.31),trail==0?[8,28,62,127,62,28,8]:(trail==1?[8,12,28,62,127,62,28]:(trail==2?[8,8,28,28,62,62,28]:[8,8,127,62,28,54,65])),color,2);
     }
