@@ -1,6 +1,23 @@
 # Current source validation checkpoint
 
-Latest source work: Issues #14/#20 readiness, Memory replay and saved-session exits.
+## Latest validation summary
+
+Source checkpoint: [`cd24933`](https://github.com/joshld/garmin-tekutekubeast/commit/cd24933)
+(2026-10-19). Enduro 4: **84/84 native tests**, signed Owner/public builds and
+public DEV exclusion passed. Actual simulator button tests verified Memory
+replay, saved battle state, Adventure Energy/rewards and the corrected stale
+Resume label. Earlier 73 game/271 battle layout passes were reused, not rerun.
+The owner subsequently reported the Bounce countdown looked correct on-watch;
+that is not full mini-game or notification acceptance. Battle restart/abandon
+edge cases remain native-tested only; physical alerts and battery remain open.
+
+Recent evidence (historical records below remain unchanged):
+
+- [Live simulator regression and coverage limits](#issues-1420---live-enduro-4-resume-regression-2026-10-19)
+- [Resume countdown, Memory replay and saved-session corrections](#issues-1420---physical-feedback-resume-corrections-2026-10-19)
+- [Pause-menu transaction and layout checks](#issues-1420---consistent-pause-menus-2026-10-19)
+- [Registered inputs and interruption safety](#issue-14---registered-inputs-and-interruption-safety-2026-10-19)
+- [Physical-watch acceptance](WATCH_ACCEPTANCE.md) and [build/package guidance](BUILD.md)
 
 ## Physical acceptance preparation - source 118bdff
 

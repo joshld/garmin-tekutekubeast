@@ -20,13 +20,13 @@ Read the relevant current guide, not every historical specification.
 
 | Current guide | Authority |
 | --- | --- |
-| [Gameplay](docs/GAMEPLAY.md) | Features, controls, care, evolution, scenery and personal Developer Mode |
+| [Gameplay](docs/GAMEPLAY.md) | Features, controls, care, evolution, scenery and Developer Beta testing mode |
 | [Architecture](docs/ARCHITECTURE.md) | Boundaries, save/rule contracts, portability and deliberate remaining seams |
 | [Build, test and package](docs/BUILD.md) | Current public/private commands, focused testing and safe release workflow |
 | [Compatibility](docs/COMPATIBILITY.md) | Supported models, older-watch limitations and per-profile evidence |
 | [Watch acceptance](docs/WATCH_ACCEPTANCE.md) | Physical-watch checklist, confirmed reports and outstanding checks |
 | [Validation](docs/VALIDATION.md) | Latest source checkpoint and version-specific evidence |
-| [Fenix 6S Pro installation](docs/INSTALL_FENIX_6S_PRO.md) | Mum's device-specific USB/update instructions |
+| [Fenix 6S Pro installation](docs/INSTALL_FENIX_6S_PRO.md) | Standard Fenix 6S Pro USB installation and update instructions |
 
 [AGENTS.md](AGENTS.md) governs scope, testing and save safety. Routine development
 targets Enduro 4 only; documentation-only changes need links/consistency checks,

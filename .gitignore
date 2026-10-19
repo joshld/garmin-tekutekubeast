@@ -9,4 +9,8 @@ bin/
 .DS_Store
 __pycache__/
 .vscode/.monkeyc*
-developer_key
+# Generated QA output and local signing credentials (repository root only).
+/outputs/
+/developer_key
+/developer_key.der
+/developer_key.pem
