@@ -22,7 +22,7 @@ scope and [physical acceptance](WATCH_ACCEPTANCE.md) for hardware limitations.
 - Tiny Adventures: choose a destination, travel three stops, make careful/bold
   choices and discover treasure. One Adventure Energy pays for the whole trip.
   No-energy scouting is unlimited practice without loot; care/play earns energy.
-- Results offer Play Again / Exit. BACK pauses; checkpoints resume after restart
+  - Results offer Play Again / Exit. BACK pauses; checkpoints resume after reopening
   or watch inactivity without repeated energy deductions or rewards.
 - Three rewarded games/day, then unlimited practice. Games never create steps.
 - Collect food, toys and cosmetics; register normal and rare family Legendaries.
@@ -38,12 +38,19 @@ repeated moves. Rounds do not consume separate daily rewarded-session slots.
 ### Alerts and mini-game resume
 
 All three games checkpoint and stop their timer when hidden/inactive or stopped.
-Reopening shows PAUSED; SELECT confirms readiness, followed by a frozen 500ms
+BACK or reopening shows PAUSED with Resume (default), New Game and Exit.
+UP/DOWN selects; SELECT confirms. Resume preserves progress with a frozen 500ms
 interval before play. That confirmation/repeated dismissal input cannot count as
 a move, jump or adventure choice. Remaining ticks, sequence position, jump/lane,
 travel, seed and reward/energy transaction are retained. Detected inactive state
 or a timer delivery gap exceeding its expected period by more than one second
 also pauses without advancing the game. No system notification settings change.
+
+New Game discards the old session without a reward, defeat or refund. Tiny
+Adventures asks for confirmation: a new paid expedition costs one additional
+Energy; with no Energy it is a no-loot scout. Exit abandons the session and
+returns to Play, without rewards/refunds. Only an interruption preserves it
+automatically. Restart/exit invalidates the old session ID and its callbacks.
 
 Connect IQ exposes [app lifecycle callbacks](https://developer.garmin.com/connect-iq/api-docs/Toybox/Application/AppBase.html)
 and [view visibility callbacks](https://developer.garmin.com/connect-iq/api-docs/Toybox/WatchUi/View.html),
@@ -74,6 +81,17 @@ Repeated SELECT/touch input cannot skip feedback or submit extra turns; BACK
 still pauses. Reopening an unclaimed turn visually replays its saved events with
 a REPLAY marker, without applying damage or rewards again. No new save fields.
 On the compact move grid, the selected technique has a short effect hint.
+
+Battle pause uses the same UP/DOWN/SELECT menu: Resume (default), Restart Battle,
+Exit. Resume includes a frozen 500ms readiness delay. Restart confirms use of
+the next queued encounter (not a free retry); with no spare encounter the current
+match remains paused. Practice restarts stay reward-free. Exit abandons the
+current match and returns to Wild battles. Abandoning an ongoing match grants
+no consolation XP, mastery, win/loss or encounter refund, and spends no care
+Energy. Already committed victories/defeats/draws settle their normal reward
+once before removal; an unclaimed sleeping result must wait for Wake Up.
+Same-view interruptions retain the current feedback position; a cold reopen
+replays only committed events as before, without rerunning a combat turn.
 Recovering signatures show the remaining own moves without hiding other options.
 Older renderers without compact vector fonts show a full-width named-move
 selector instead of the 2x2 grid; UP/DOWN still selects all four techniques.

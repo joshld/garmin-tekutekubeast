@@ -265,6 +265,13 @@ class TekuTekuBeastState {
         if(kind==2 && !session["practice"]){data["adventure"]--;}
         data["sessions"][kind]=session;commit();return store.copy(session);
     }
+    function abandonSession(session){
+        if(session==null){return false;}
+        var kind=session["kind"];var current=data["sessions"][kind];
+        if(current==null || current["id"]!=session["id"]){return false;}
+        // Retire without completing: no result, reward, refund or daily claim.
+        data["sessions"][kind]=null;commit();return true;
+    }
     function saveSession(session){
         var kind=session["kind"];var current=data["sessions"][kind];
         if(current==null || current["id"]!=session["id"] || data["gameClaims"][kind]>=session["id"]){return false;}

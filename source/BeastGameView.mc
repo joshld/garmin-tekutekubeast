@@ -3,8 +3,8 @@ using Toybox.Graphics;
 using Toybox.System;
 using Toybox.Application;
 
-// Durable whole sessions. Rounds never award independently. BACK pauses;
-// killing/reopening resumes checkpoints without another expedition charge.
+// Durable whole sessions. BACK opens pause choices; explicit Exit abandons.
+// Interruption/reopening preserves checkpoints without another energy charge.
 class BeastGameView extends TekuTekuBeastView {
     var kind;var phase=0;var elapsed=0;var attempts=0;var hits=0;var result="";
     var sequence=[];var cursor=0;var trail=0;var scanning=false;var touchWidth=280;
@@ -14,8 +14,10 @@ class BeastGameView extends TekuTekuBeastView {
     var lastGameVisual=null;var gameRedraws=0;
     var gameHidden=false;var paused=false;var resumeTicks=0;var lastCallback=-1;
     var registeredMove=-1;var expectedMove=-1;var inputTicks=0;
+    var pauseOptions;
     function initialize(model,game){
         TekuTekuBeastView.initialize();beast=model;kind=game;
+        pauseOptions=new BeastPauseOptions();
         var settings=System.getDeviceSettings();
         if(settings has :inputButtons){scanning=(settings.inputButtons&System.BUTTON_INPUT_UP)==0;}
     }
@@ -27,7 +29,7 @@ class BeastGameView extends TekuTekuBeastView {
     function onShow(){
         if(!gameHidden && refresher!=null){return;}
         if(refresher!=null){refresher.stop();refresher=null;}
-        gameHidden=false;resumeTicks=0;
+        gameHidden=false;resumeTicks=0;pauseOptions.reset();
         Application.getApp().activeView=self;if(!beast.dev){beast.data=null;}beast.syncHistory();loadSprite();
         var saved=beast.data["sessions"][kind];
         paused=false;
@@ -44,7 +46,7 @@ class BeastGameView extends TekuTekuBeastView {
     }
     function pauseGame(){
         if(!inProgress()){return;}
-        paused=true;resumeTicks=0;lastCallback=-1;checkpoint();
+        paused=true;pauseOptions.reset();resumeTicks=0;lastCallback=-1;checkpoint();
         if(refresher!=null){refresher.stop();refresher=null;}
         WatchUi.requestUpdate();
     }
@@ -55,6 +57,26 @@ class BeastGameView extends TekuTekuBeastView {
         // against dismissal/auto-repeat input without rejecting repeated moves
         // once normal play resumes. Reuse the existing foreground timer.
         paused=false;resumeTicks=2;startGameTimer();WatchUi.requestUpdate();return true;
+    }
+    function pauseSelect(){
+        if(pauseOptions.confirming){
+            if(pauseOptions.choice==0){pauseOptions.reset();WatchUi.requestUpdate();return;}
+            restartGame();return;
+        }
+        if(pauseOptions.choice==0){resumeInput();return;}
+        if(pauseOptions.choice==1){
+            if(kind==2){pauseOptions.confirm();WatchUi.requestUpdate();return;}
+            restartGame();return;
+        }
+        beast.abandonSession(session);session=null;gameHidden=true;
+        leaveGameMenu();
+    }
+    function leaveGameMenu(){WatchUi.popView(WatchUi.SLIDE_RIGHT);}
+    function restartGame(){
+        if(sleepGate()){return;}
+        if(!beast.abandonSession(session)){return;}
+        session=null;phase=0;paused=false;resumeTicks=0;pauseOptions.reset();
+        begin();pauseGame();resumeInput(); // No restart SELECT leaks into play.
     }
     function desiredGamePeriod(){
         if(resumeTicks>0 || inputTicks>0){return 250;}
@@ -117,7 +139,7 @@ class BeastGameView extends TekuTekuBeastView {
         // A paused session is resumed, not replaced or charged twice.
         if(session["elapsed"]>0 || session["node"]>0 || session["sequence"].size()>0 || session["travel"]>0){restore(session);pauseGame();return;}
         phase=kind==2?5:1;round=0;elapsed=0;attempts=0;hits=0;score=0;combo=0;best=0;retries=0;node=0;
-        result="";choice=0;resultChoice=0;travel=0;lane=1;jumpTicks=0;caught=false;
+        result="";hint="";replayRound=false;choice=0;resultChoice=0;travel=0;lane=1;jumpTicks=0;caught=false;
         registeredMove=-1;expectedMove=-1;inputTicks=0;
         if(kind==0){target=random(3);}
         if(kind==1){makeSequence();}
@@ -246,7 +268,8 @@ class BeastGameView extends TekuTekuBeastView {
         return true;
     }
     function selectAction(){
-        if(gameHidden || resumeInput()){return;}
+        if(gameHidden || resumeTicks>0){return;}
+        if(paused){pauseSelect();return;}
         if(phase==3 && resultChoice==1){WatchUi.popView(WatchUi.SLIDE_RIGHT);return;}
         if(sleepGate()){return;}
         if(phase==0){begin();}
@@ -260,7 +283,8 @@ class BeastGameView extends TekuTekuBeastView {
         tuneGameTimer();WatchUi.requestUpdate();
     }
     function switchPage(delta){
-        if(gameHidden || paused || resumeTicks>0){return;}
+        if(gameHidden || resumeTicks>0){return;}
+        if(paused){pauseOptions.move(delta);WatchUi.requestUpdate();return;}
         if(sleepGate()){return;}
         if(phase==0){
             if(kind==2){trail=(trail+delta+4)%4;}
@@ -292,7 +316,14 @@ class BeastGameView extends TekuTekuBeastView {
         var bold=node==0?["EXPLORE","CLIMB","DIVE","CHASE"]:["DETOUR","CIRCLE","DIVE","TOUCH"];
         return "> "+(choice==0?safe[trail]:bold[trail]);
     }
-    function back(){checkpoint();WatchUi.popView(WatchUi.SLIDE_RIGHT);return true;}
+    function back(){
+        if(gameHidden){return true;}
+        if(inProgress()){
+            if(paused){pauseOptions.reset();WatchUi.requestUpdate();}else{pauseGame();}
+            return true;
+        }
+        WatchUi.popView(WatchUi.SLIDE_RIGHT);return true;
+    }
     function drawPlayer(dc,cx,ground,pose,hop){
         if(frames==null){loadSprite();}
         var bitmap=frames[pose];var size=bitmap.getWidth();
@@ -334,7 +365,8 @@ class BeastGameView extends TekuTekuBeastView {
         devBadge(dc,INK);
         label(dc,y(dc,0.12),["BEAST BOUNCE","FOLLOW ME","TINY TRAIL"][kind],Graphics.FONT_XTINY);
         if((paused || resumeTicks>0) && inProgress()){
-            label(dc,y(dc,0.27),paused?"PAUSED":"READY...",Graphics.FONT_XTINY);
+            if(paused){pauseOptions.draw(self,dc,"New Game",kind==2 && pauseOptions.confirming?(beast.number("adventure")>0?"COST: 1 MORE ENERGY":"SCOUT: NO LOOT"):"PROGRESS KEPT");return;}
+            label(dc,y(dc,0.27),"READY...",Graphics.FONT_XTINY);
             drawPlayer(dc,dc.getWidth()/2,y(dc,0.65),0,0);
             label(dc,y(dc,0.72),"PROGRESS KEPT",Graphics.FONT_XTINY);
             label(dc,y(dc,0.80),paused?"SELECT: RESUME":"GET READY",Graphics.FONT_XTINY);return;

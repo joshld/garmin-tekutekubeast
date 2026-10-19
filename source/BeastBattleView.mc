@@ -12,12 +12,15 @@ class BeastBattleView extends TekuTekuBeastView {
     var battleResult="";var battleRedraws=0;var fight;
     var moveFont=null;var fontChecked=false;var compactGrid=false;
     var battleVisible=false;var replaying=false;
-    function initialize(model){TekuTekuBeastView.initialize();beast=model;fight=new BeastBattle(beast);}
+    var paused=false;var pauseOptions;var resumeTicks=0;
+    function initialize(model){TekuTekuBeastView.initialize();beast=model;fight=new BeastBattle(beast);pauseOptions=new BeastPauseOptions();}
     function onShow(){
-        battleVisible=true;burst=0;
+        var retained=paused && battle!=null;
+        battleVisible=true;resumeTicks=0;pauseOptions.reset();
         Application.getApp().activeView=self;
         if(!beast.dev){beast.data=null;}beast.syncHistory();fight.discover();
-        battle=fight.battleSession();battleSleeping=beast.isSleeping();
+        if(retained){loadBattleArt();WatchUi.requestUpdate();return;}
+        burst=0;battle=fight.battleSession();battleSleeping=beast.isSleeping();
         battlePhase=battle==null?0:(battle["status"]==0?1:3);
         replaying=false;
         // Replay the existing committed events after interruption, never execute
@@ -26,24 +29,27 @@ class BeastBattleView extends TekuTekuBeastView {
         if(battle!=null && battle["events"].size()>0 && !battle["claimed"]){
             replaying=true;beginPresentation();
         }else if(battlePhase==3){battleResult=fight.finishBattle();}
+        paused=battle!=null && !battle["claimed"];
         loadBattleArt();tuneBattleTimer();
     }
     function onHide(){
         battleVisible=false;
+        if(battle!=null && !battle["claimed"]){paused=true;pauseOptions.reset();}resumeTicks=0;
         stopBattleTimer();fight.postponeBattle();
         battlePictures=null;battleForms=null;beast.commit();
     }
     function stopBattleTimer(){if(battleTimer!=null){battleTimer.stop();battleTimer=null;}}
     function tuneBattleTimer(){
-        if(!battleVisible){stopBattleTimer();return;}
+        if(!battleVisible || paused){stopBattleTimer();return;}
         if(battleTimer==null){battleTimer=new Timer.Timer();}else{battleTimer.stop();}
         // Four bounded callbacks for a two-action exchange. Timing is readable
         // even with Motion OFF; no continuous animation loop during a turn.
-        var period=burst>0?(burst%2==0?800:1200):5000;
-        battleTimer.start(method(:refresh),period,burst==0);
+        var period=resumeTicks>0?500:(burst>0?(burst%2==0?800:1200):5000);
+        battleTimer.start(method(:refresh),period,resumeTicks==0 && burst==0);
     }
     function refresh() as Void {
-        if(!battleVisible){return;}
+        if(!battleVisible || paused){return;}
+        if(resumeTicks>0){resumeTicks=0;tuneBattleTimer();WatchUi.requestUpdate();return;}
         if(battle==null){burst=0;}
         var sleeping=beast.isSleeping();var changed=sleeping!=battleSleeping;
         battleSleeping=sleeping;
@@ -64,6 +70,8 @@ class BeastBattleView extends TekuTekuBeastView {
         battleSleeping=true;battleNotice="Beast is asleep.";WatchUi.requestUpdate();return true;
     }
     function selectAction(){
+        if(!battleVisible || resumeTicks>0){return;}
+        if(paused){pauseSelect();return;}
         // Button repeats/taps must neither skip feedback nor restart its timer.
         if(battlePhase==2){return;}
         if(battlePhase==3){WatchUi.popView(WatchUi.SLIDE_RIGHT);return;}
@@ -85,10 +93,41 @@ class BeastBattleView extends TekuTekuBeastView {
         tuneBattleTimer();WatchUi.requestUpdate();
     }
     function switchPage(delta){
+        if(!battleVisible || resumeTicks>0){return;}
+        if(paused){pauseOptions.move(delta);WatchUi.requestUpdate();return;}
         if(battlePhase==1 && !beast.isSleeping()){battleNotice="";moveChoice=(moveChoice+delta+4)%4;WatchUi.requestUpdate();}
     }
-    function back(){fight.postponeBattle();WatchUi.popView(WatchUi.SLIDE_RIGHT);return true;}
+    function pauseBattle(){
+        paused=true;resumeTicks=0;pauseOptions.reset();stopBattleTimer();fight.postponeBattle();WatchUi.requestUpdate();
+    }
+    function resumeBattle(){paused=false;resumeTicks=1;tuneBattleTimer();WatchUi.requestUpdate();}
+    function pauseSelect(){
+        if(pauseOptions.confirming){
+            if(pauseOptions.choice==0){pauseOptions.reset();WatchUi.requestUpdate();return;}
+            if(asleepNotice()){return;}
+            var practice=battle["practice"];
+            if(!practice && fight.battleQueueCount()==0){pauseOptions.reset();battleNotice="No encounters";WatchUi.requestUpdate();return;}
+            if(!fight.abandonBattle(battle["id"])){return;}
+            battle=practice?fight.practiceBattle():fight.beginBattle();
+            battlePhase=battle==null?0:1;burst=0;replaying=false;moveChoice=0;battleNotice="";battleResult="";
+            loadBattleArt();pauseOptions.reset();resumeBattle();return;
+        }
+        if(pauseOptions.choice==0){resumeBattle();return;}
+        if(pauseOptions.choice==1){pauseOptions.confirm();WatchUi.requestUpdate();return;}
+        if(!fight.abandonBattle(battle["id"])){battleNotice="Wake to save result";WatchUi.requestUpdate();return;}
+        battle=null;battleVisible=false;stopBattleTimer();leaveGameMenu();
+    }
+    function leaveGameMenu(){WatchUi.popView(WatchUi.SLIDE_RIGHT);}
+    function back(){
+        if(!battleVisible){return true;}
+        if(battle!=null && !battle["claimed"]){
+            if(paused){pauseOptions.reset();WatchUi.requestUpdate();}else{pauseBattle();}return true;
+        }
+        WatchUi.popView(WatchUi.SLIDE_RIGHT);return true;
+    }
     function touch(point){
+        if(!battleVisible || resumeTicks>0){return;}
+        if(paused){selectAction();return;}
         if(battlePhase==1 && point[1]>=battleHeight*0.60 && point[1]<battleHeight*0.86){
             moveChoice=(point[0]<battleWidth/2?0:1)+(point[1]>=battleHeight*0.73?2:0);
         }
@@ -209,6 +248,8 @@ class BeastBattleView extends TekuTekuBeastView {
         prepareMoveFont();
         battleWidth=dc.getWidth();battleHeight=dc.getHeight();sceneInk=INK;
         dc.setColor(BG,BG);dc.clear();
+        if(paused){pauseOptions.draw(self,dc,"Restart Battle",pauseOptions.confirming?(battle["practice"]?"NO REWARDS":"USES NEXT ENCOUNTER"):(battleNotice.length()>0?battleNotice:"PROGRESS KEPT"));return;}
+        if(resumeTicks>0){label(dc,y(dc,0.42),"READY...",Graphics.FONT_XTINY);return;}
         if(battle==null){
             label(dc,y(dc,0.08),"BATTLE",Graphics.FONT_XTINY);
             label(dc,y(dc,0.28),fight.battleQueueCount()+" WAITING",Graphics.FONT_XTINY);

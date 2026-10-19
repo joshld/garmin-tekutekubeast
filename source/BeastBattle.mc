@@ -116,6 +116,18 @@ class BeastBattle {
         match["claimed"]=true;data["claim"]=match["id"];commit();return match["outcome"];
     }
     function postponeBattle(){commit();}
+    function abandonBattle(id){
+        var current=data["active"];
+        if(current==null || current["id"]!=id){return false;}
+        // A committed KO/draw is already a genuine result, not a forfeit.
+        // Settle it once rather than letting menu actions erase earned rewards.
+        if(current["status"]!=0){
+            finishBattle();if(!current["claimed"]){return false;}
+        }
+        // Encounter was spent on entry. No consolation XP, mastery, win/loss,
+        // refund or requeued opponent for an abandoned match.
+        data["claim"]=beast.max(data["claim"],id);data["active"]=null;commit();return true;
+    }
     function declineEncounter(){
         if(data["queue"].size()>0){data["queue"].remove(data["queue"][0]);commit();return true;}return false;
     }

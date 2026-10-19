@@ -216,6 +216,7 @@ function battleFeedbackReopenAndClaimTest(logger){
     view.onHide();var reopened=new BeastBattleView(s);reopened.onShow();
     Test.assert(reopened.replaying);Test.assertEqual(reopened.burst,4);Test.assertEqual(reopened.battle["turn"],saved["turn"]);
     Test.assert(TestSupport.same(saved,reopened.fight.data["active"]));
+    Test.assert(reopened.paused);reopened.selectAction();reopened.refresh();
     for(var i=0;i<4;i++){reopened.refresh();}Test.assertEqual(reopened.battlePhase,1);
     Test.assert(TestSupport.same(saved,reopened.fight.data["active"]));
     // One-action lethal turn: reconstruct exact pre-hit HP, then claim once
@@ -225,7 +226,8 @@ function battleFeedbackReopenAndClaimTest(logger){
     Test.assertEqual(reopened.displayHp(1),1);
     reopened.onHide();var result=new BeastBattleView(s);result.onShow();
     Test.assert(result.replaying);Test.assertEqual(result.burst,2);var xp=result.fight.battleXp();
-    result.selectAction();result.refresh();Test.assertEqual(result.displayHp(1),0);
+    Test.assert(result.paused);result.selectAction();result.refresh();
+    result.refresh();Test.assertEqual(result.displayHp(1),0);
     result.refresh();Test.assertEqual(result.battlePhase,3);Test.assert(result.fight.battleXp()>xp);
     var claimed=result.fight.battleXp();result.onHide();var again=new BeastBattleView(s);again.onShow();
     Test.assertEqual(again.battlePhase,3);Test.assert(!again.replaying);Test.assertEqual(again.fight.battleXp(),claimed);
@@ -1007,6 +1009,7 @@ function gameNotificationLifecycleTest(logger){
         Test.assertEqual(game.phase,phase);Test.assertEqual(game.elapsed,5);Test.assertEqual(game.session["id"],id);Test.assertEqual(game.session["seed"],seed);
         Test.assert(TestSupport.same(saved,s.data["sessions"][kind]));
         game.switchPage(1);game.refresh();Test.assertEqual(game.elapsed,5);
+        Test.assertEqual(game.pauseOptions.choice,1);game.switchPage(-1);
         game.selectAction();Test.assert(!game.paused);Test.assertEqual(game.resumeTicks,2);
         game.selectAction();game.switchPage(1);Test.assertEqual(game.elapsed,5);
         game.refresh();game.refresh();Test.assertEqual(game.resumeTicks,0);Test.assertEqual(game.elapsed,5);
@@ -1045,6 +1048,82 @@ function activeBalanceAndArchiveTest(logger){
     var steps=s.xp();Test.assert(s.newEgg());Test.assertEqual(s.stage(),0);Test.assertEqual(s.xp(),steps);Test.assertEqual(s.growth(),0l);
     Test.assert(s.store.read("v4.archive")!=null);Test.assert(s.number("collection")>0);
     s.testNow+=86400;s.tick();Test.assertEqual(s.stage(),1);return true;
+}
+(:test)
+class PauseGameFixture extends GameClockFixture {
+    var left=false;
+    function initialize(b,k){GameClockFixture.initialize(b,k);}
+    function leaveGameMenu(){left=true;}
+}
+(:test)
+class PauseBattleFixture extends BeastBattleView {
+    var left=false;
+    function initialize(b){BeastBattleView.initialize(b);}
+    function leaveGameMenu(){left=true;}
+}
+(:test)
+function pauseMiniGameRestartAndExitTest(logger){
+    for(var kind=0;kind<3;kind++){
+        var s=TestSupport.fixture();s.data["sleepMode"]=2;s.data["haptics"]=0;s.data["adventure"]=3;s.commit();
+        var v=new PauseGameFixture(s,kind);v.onShow();v.begin();v.elapsed=7;v.checkpoint();
+        var old=s.store.copy(v.session);var energy=s.number("adventure");v.back();
+        Test.assert(v.paused);Test.assertEqual(v.pauseOptions.choice,0);v.refresh();Test.assertEqual(v.elapsed,7);
+        v.switchPage(-1);Test.assertEqual(v.pauseOptions.choice,2);v.switchPage(-1);v.selectAction();
+        if(kind==2){
+            Test.assert(v.pauseOptions.confirming);Test.assertEqual(v.pauseOptions.choice,0);
+            v.selectAction();Test.assert(!v.pauseOptions.confirming);Test.assertEqual(v.session["id"],old["id"]);
+            v.switchPage(1);v.selectAction();v.switchPage(1);v.selectAction();
+        }
+        Test.assert(v.session["id"]>old["id"]);Test.assertEqual(v.elapsed,0);Test.assertEqual(v.resumeTicks,2);
+        var id=v.session["id"];v.selectAction();v.switchPage(1);Test.assertEqual(v.session["id"],id);
+        Test.assert(!s.saveSession(old));s.completeSession(old,true);Test.assertEqual(s.number("games"),0);
+        Test.assertEqual(s.number("adventure"),kind==2?energy-1:energy);
+        v.refresh();v.refresh();v.back();v.switchPage(-1);v.selectAction();
+        Test.assert(v.left);Test.assert(s.data["sessions"][kind]==null);var writes=s.store.writes;
+        v.refresh();v.selectAction();v.back();Test.assertEqual(s.store.writes,writes);
+        Test.assertEqual(s.number("games"),0);Test.assertEqual(s.xp(),0l);v.onHide();
+    }
+    return true;
+}
+(:test)
+function pauseAdventureScoutAndAbandonTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;s.data["haptics"]=0;s.data["adventure"]=0;
+    var v=new PauseGameFixture(s,2);v.begin();v.pauseGame();v.switchPage(1);v.selectAction();v.switchPage(1);v.selectAction();
+    Test.assert(v.session["practice"]);Test.assertEqual(s.number("adventure"),0);
+    Test.assertEqual(s.number("encounters"),0);var id=v.session["id"];v.onHide();
+    var cold=new PauseGameFixture(s,2);cold.onShow();Test.assert(cold.paused);Test.assertEqual(cold.session["id"],id);
+    Test.assertEqual(cold.pauseOptions.choice,0);cold.onHide();return true;
+}
+(:test)
+function pauseBattleRestartAndExitTest(logger){
+    var s=TestSupport.fixture();s.data["stageFloor"]=2;s.data["sleepMode"]=2;s.commit();
+    var v=new PauseBattleFixture(s);v.onShow();v.selectAction();v.selectAction();v.refresh();
+    var saved=s.store.copy(v.battle);var burst=v.burst;v.back();Test.assert(v.paused);Test.assertEqual(v.pauseOptions.choice,0);
+    v.refresh();Test.assertEqual(v.burst,burst);v.selectAction();v.selectAction();Test.assertEqual(v.resumeTicks,1);
+    v.refresh();Test.assertEqual(v.burst,burst);Test.assert(TestSupport.same(saved,v.battle));
+    v.onHide();v.onShow();Test.assert(v.paused);Test.assertEqual(v.burst,burst);
+    v.switchPage(1);v.selectAction();Test.assert(v.pauseOptions.confirming);Test.assertEqual(v.pauseOptions.choice,0);
+    v.switchPage(1);v.selectAction();Test.assert(v.paused);Test.assertEqual(v.battle["id"],saved["id"]); // no spare encounter
+    v.fight.offer(3);v.fight.commit();var queue=v.fight.battleQueueCount();
+    v.switchPage(1);v.selectAction();v.switchPage(1);v.selectAction();
+    Test.assert(v.battle["id"]>saved["id"]);Test.assertEqual(v.battle["turn"],0);Test.assertEqual(v.burst,0);
+    Test.assertEqual(v.fight.battleQueueCount(),queue-1);Test.assertEqual(v.fight.battleXp(),0);
+    Test.assertEqual(v.fight.data["wins"],0);Test.assertEqual(v.fight.data["rewarded"],0);
+    Test.assert(!v.fight.abandonBattle(saved["id"]));v.refresh();v.back();v.switchPage(-1);v.selectAction();
+    Test.assert(v.left);Test.assert(v.fight.battleSession()==null);var writes=s.store.writes;
+    v.refresh();v.selectAction();v.back();Test.assertEqual(s.store.writes,writes);v.onHide();return true;
+}
+(:test)
+function pauseBattlePracticeAndTerminalTest(logger){
+    var s=TestSupport.fixture();s.data["stageFloor"]=2;s.data["sleepMode"]=2;s.commit();
+    var v=new PauseBattleFixture(s);v.battle=v.fight.practiceBattle();v.battleVisible=true;v.battlePhase=1;
+    v.pauseBattle();v.switchPage(1);v.selectAction();v.switchPage(1);v.selectAction();
+    Test.assert(v.battle["practice"]);Test.assertEqual(v.fight.battleXp(),0);v.onHide();
+    var f=new BeastBattle(s);f.abandonBattle(f.battleSession()["id"]);var m=f.beginBattle();
+    while(m["status"]==0){m=f.battleTurn(BeastBattleRules.available(m,3)?3:0);}
+    var id=m["id"];Test.assert(f.abandonBattle(id));var xp=f.battleXp();Test.assert(xp>0);
+    Test.assert(!f.abandonBattle(id));f.finishBattle();Test.assertEqual(f.battleXp(),xp);
+    Test.assertEqual(f.data["rewarded"],1);return true;
 }
 (:test)
 function devInventoryAndItemsTest(logger){

@@ -116,7 +116,8 @@ UUID, never either real app. The harness supplies encounters for playtesting;
 native tests, not this fixture supply, verify genuine discovery limits.
 
 For Issue #14, `tests/game-feedback/monkey.jungle` is an isolated RAM-only
-Enduro 4 fixture: 44 input/error/demo/repeated-cue and pause/readiness layouts.
+Enduro 4 fixture: 55 input/error/demo/repeated-cue and pause/readiness layouts,
+including all three pause selections and Adventure restart confirmation.
 It reports and exits after 30 seconds; SELECT during the audit/report opens the
 existing repeated-memory/Bounce/Adventure manual menu. Use the simulator's Force
 onHide/onShow to inspect pause/resume. BACK returns from game to menu, menu to

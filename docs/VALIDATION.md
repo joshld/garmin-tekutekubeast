@@ -1,6 +1,6 @@
 # Current source validation checkpoint
 
-Latest source work: Issue #14 mini-game input feedback and interruption handling.
+Latest source work: Issues #14/#20 consistent pause menus and safe abandonment.
 
 ## Physical acceptance preparation - source 118bdff
 
@@ -567,3 +567,37 @@ Evidence: `bin/game14-native.log`, `game14-layout.log`,
 `game14-{unit,layout,public}-build.log`; `game14-manual.log` is timeout-marked.
 Reproduce the RAM-only visual/button fixture using
 `tests/game-feedback/monkey.jungle` as described in [BUILD.md](BUILD.md).
+
+## Issues #14/#20 - consistent pause menus (2026-10-19)
+
+Enduro 4 SDK 9.2: **80/80 native tests PASS**, **55 mini-game layout scenes**
+and **266 battle scenes**, both zero failures. Signed Owner release-mode and
+public release-mode foreground builds PASS; public exclusion guard confirms
+DEV absent. Initial 79/80 run exposed an uncommitted test fixture's Energy
+setup being correctly reloaded away on reopen; fixture fixed, final 80/80 above.
+
+Shared lightweight UP/DOWN/SELECT choices default to Resume; all timers stop
+while paused. Resume retains gameplay state and a frozen 500ms readiness gate.
+BACK opens the menu; explicit Exit now abandons rather than postpones. New Game
+invalidates the old session without a reward/refund; Tiny Adventures confirms
+the additional Energy (or no-loot scouting). Battle restart confirms/spends
+the next encounter, refusing when none is available; practice stays reward-free.
+An ongoing abandonment gives no consolation XP, mastery or result. A committed
+terminal battle settles its existing normal reward once before removal.
+
+New native checks cover navigation/cancel, restart/exit, hidden/repeated input,
+old-ID rejection, additional/no Energy, no spare encounter, no free retries,
+practice, saved reopen, frozen turn/feedback and terminal claim deduplication.
+Existing rule/golden, save, sleep, step-ledger and DEV-isolation tests also pass.
+No battle rules/72 moves, save schema, IDs/key, assets, DND or Store IQ changes.
+Sampled QA heap: games 159,776 / 781,976; battles 158,544 / 781,976 bytes (not
+production peaks or matched before/after battery measurements). No new bitmap
+cache/timer or background task; battle readiness reuses its bounded timer.
+
+Evidence: `bin/pause-native.log`, `pause-games-layout.log`,
+`pause-battle-layout.log`, `pause-{unit,games,battle,owner,public}-build.log`.
+These are native SDK/simulator assertions/render checks, not physical input or
+notification delivery acceptance. Owner still needs to check pause navigation,
+restart cost/exit clarity and alert dismissal on Enduro 4; cold battle reopen
+replays committed feedback without executing turns, while same-view interruption
+retains its feedback position. No full matrix, IQ export or publication.

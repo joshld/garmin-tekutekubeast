@@ -7,7 +7,7 @@ using Toybox.System;
 // Set autoExit=false for the interactive report/production battle controls.
 class BattleAudit extends BeastBattleView {
     var auditTimer=null;var audited=false;var interactive=false;var cursor=0;
-    var failures=[];var boxes=[];var peakMemory=0;var totalMemory=0;var scenes=258;var autoExit=true;
+    var failures=[];var boxes=[];var peakMemory=0;var totalMemory=0;var scenes=266;var autoExit=true;
     function initialize(){
         BeastBattleView.initialize(new ArtPreviewState());
         beast.data["sleepMode"]=2;beast.data["sleepUntil"]=0l;
@@ -82,6 +82,13 @@ class BattleAudit extends BeastBattleView {
         }
     }
     function fixture(){
+        paused=false;resumeTicks=0;
+        if(cursor>=258){
+            battle=BeastBattleRules.create(1,17,fighterForm(1),fighterForm(1));battle["practice"]=cursor>=263;
+            paused=cursor<265;resumeTicks=paused?0:1;pauseOptions.reset();
+            pauseOptions.confirming=cursor>=261 && cursor<265;
+            pauseOptions.choice=cursor<261?cursor-258:(cursor-261)%2;return;
+        }
         replaying=false;
         if(cursor>=100){feedbackFixture();return;}
         var form=cursor<72?(cursor/4).toNumber():(cursor<90?cursor-72:0);
