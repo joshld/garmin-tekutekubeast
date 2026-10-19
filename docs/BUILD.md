@@ -116,12 +116,14 @@ UUID, never either real app. The harness supplies encounters for playtesting;
 native tests, not this fixture supply, verify genuine discovery limits.
 
 For Issue #14, `tests/game-feedback/monkey.jungle` is an isolated RAM-only
-Enduro 4 fixture: 55 input/error/demo/repeated-cue and pause/readiness layouts,
-including all three pause selections and Adventure restart confirmation.
+Enduro 4 fixture: 73 input/error/demo/repeated-cue and pause/readiness layouts,
+including all four pause selections, restart/abandon confirmation, countdown
+numbers and resumed Memory sequence replay. The battle fixture covers 271 scenes.
 It reports and exits after 30 seconds; SELECT during the audit/report opens the
 existing repeated-memory/Bounce/Adventure manual menu. Use the simulator's Force
-onHide/onShow to inspect pause/resume. BACK returns from game to menu, menu to
-report, then exits. These are lifecycle simulations, not actual OS notifications.
+onHide/onShow to inspect pause/resume. BACK opens pause; Exit saves/returns to
+the QA chooser (Pet in the real app); BACK from chooser returns to report, then
+exits. These are lifecycle simulations, not actual OS notifications.
 
 `tests/runtime/monkey.jungle` is the bounded, RAM-only resource audit. Build with
 `-Owner -Device enduro4` to an ignored `bin/matrix-resource*.prg`, use Normal

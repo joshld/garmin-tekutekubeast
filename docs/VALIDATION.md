@@ -1,6 +1,6 @@
 # Current source validation checkpoint
 
-Latest source work: Issues #14/#20 consistent pause menus and safe abandonment.
+Latest source work: Issues #14/#20 readiness, Memory replay and saved-session exits.
 
 ## Physical acceptance preparation - source 118bdff
 
@@ -601,3 +601,46 @@ notification delivery acceptance. Owner still needs to check pause navigation,
 restart cost/exit clarity and alert dismissal on Enduro 4; cold battle reopen
 replays committed feedback without executing turns, while same-view interruption
 retains its feedback position. No full matrix, IQ export or publication.
+
+## Issues #14/#20 - physical-feedback resume corrections (2026-10-19)
+
+Enduro 4 SDK 9.2: **83/83 native tests PASS**, **73 mini-game scenes** and
+**271 battle scenes**, zero layout failures; signed Owner/public release-mode
+foreground builds PASS with public DEV exclusion. No matrix or IQ export.
+Initial run passed all 83 real tests but also auto-invoked a top-level test helper;
+moving that helper into a test-only module fixed registration for the final run.
+
+The former 500ms READY gate was not a visible numerical countdown. It is now a
+shared monotonic-clock 3-2-1 gate: no elapsed gameplay, turns, jumps, travel,
+timeout, input or rewards advance during it; queued callbacks cannot shorten it.
+Memory then demonstrates the existing sequence before accepting more input,
+preserving cursor/round/difficulty/remaining response time/retries/seed/score.
+Replaying or interrupting a replay does not regenerate or reward a sequence.
+
+Fresh-battle Resume root cause: the parent menu created a match before opening
+the view, which interpreted it as a resumed save. Entry now distinguishes fresh
+matches from valid unfinished saves; only the latter pause on entry. Claimed or
+claim-watermarked stale records clear, terminal results settle once and clear,
+and terminal/claimed state cannot submit another turn. Versioned combat rules,
+72 moves, progression and identity/signing formats are unchanged.
+
+Exit now checkpoints and returns directly to the existing Pet view (page 0,
+no menu); reopening restores the same session without extra Energy/encounter
+charges. Separate confirmed Abandon defaults to Cancel, retires the old ID and
+grants no reward/refund. New Game/Restart Battle labels and additional-resource
+confirmation remain. No save-schema changes, new assets or background tasks.
+Existing timers are reused; countdown redraws only when its number changes and
+Memory replay redraws at cue/gap boundaries rather than every timer tick.
+
+New/updated assertions cover clock boundaries/queued callbacks, partially
+completed Memory and interrupted replay, real parent-view navigation state,
+saved Exit/reopen, confirmed/cancelled Abandon, fresh versus resumed battles,
+victory/defeat/claimed cleanup, duplicate claims and existing reward/DEV/save
+regressions. Sampled QA heaps: games **161,968 / 781,976**, battles
+**160,328 / 781,976** bytes (not production peaks or battery measurements).
+Evidence: `bin/resume-native.log`, `resume-{games,battle}-layout.log`,
+`resume-{unit,games,battle,owner,public}-build.log`.
+
+Owner Enduro 4 acceptance remains: countdown readability/frozen play, Memory
+continuation clarity, fresh-match entry, Exit-to-Pet and Abandon confirmation,
+alerts/reopen and battery. No physical-watch testing, release or publication claimed.

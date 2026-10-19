@@ -38,19 +38,26 @@ repeated moves. Rounds do not consume separate daily rewarded-session slots.
 ### Alerts and mini-game resume
 
 All three games checkpoint and stop their timer when hidden/inactive or stopped.
-BACK or reopening shows PAUSED with Resume (default), New Game and Exit.
-UP/DOWN selects; SELECT confirms. Resume preserves progress with a frozen 500ms
-interval before play. That confirmation/repeated dismissal input cannot count as
+BACK or reopening shows PAUSED with Resume (default), New Game, Exit and Abandon.
+UP/DOWN selects; SELECT confirms. Resume shows a frozen **3, 2, 1** readiness
+countdown, measured by the monotonic clock rather than callback counts. Queued
+callbacks cannot shorten it. That confirmation/repeated dismissal input cannot count as
 a move, jump or adventure choice. Remaining ticks, sequence position, jump/lane,
 travel, seed and reward/energy transaction are retained. Detected inactive state
 or a timer delivery gap exceeding its expected period by more than one second
 also pauses without advancing the game. No system notification settings change.
+Follow My Lead then replays the current sequence, including neutral gaps,
+before accepting input. Round, difficulty, correct-input cursor, remaining
+response time, retries, score and seed are preserved with no penalty. Interrupted
+replays can be shown again; they never regenerate the sequence or award progress.
 
 New Game discards the old session without a reward, defeat or refund. Tiny
 Adventures asks for confirmation: a new paid expedition costs one additional
-Energy; with no Energy it is a no-loot scout. Exit abandons the session and
-returns to Play, without rewards/refunds. Only an interruption preserves it
-automatically. Restart/exit invalidates the old session ID and its callbacks.
+Energy; with no Energy it is a no-loot scout. Exit **saves** the session and returns
+directly to the main Pet screen. Reopening resumes that same ID without another
+Energy charge. The separate Abandon action defaults to Cancel, requires explicit
+confirmation, discards the saved session without reward/refund and returns to Pet.
+Only New Game/Abandon invalidates the old session ID and its callbacks.
 
 Connect IQ exposes [app lifecycle callbacks](https://developer.garmin.com/connect-iq/api-docs/Toybox/Application/AppBase.html)
 and [view visibility callbacks](https://developer.garmin.com/connect-iq/api-docs/Toybox/WatchUi/View.html),
@@ -83,15 +90,20 @@ a REPLAY marker, without applying damage or rewards again. No new save fields.
 On the compact move grid, the selected technique has a short effect hint.
 
 Battle pause uses the same UP/DOWN/SELECT menu: Resume (default), Restart Battle,
-Exit. Resume includes a frozen 500ms readiness delay. Restart confirms use of
+Exit and Abandon. Resume includes the frozen 3-2-1 countdown. Restart confirms use of
 the next queued encounter (not a free retry); with no spare encounter the current
-match remains paused. Practice restarts stay reward-free. Exit abandons the
-current match and returns to Wild battles. Abandoning an ongoing match grants
+match remains paused. Practice restarts stay reward-free. Exit saves the current
+match and returns directly to Pet; no second encounter is consumed on return.
+Abandon explicitly confirms discard and returns to Pet. Abandoning an ongoing match grants
 no consolation XP, mastery, win/loss or encounter refund, and spends no care
 Energy. Already committed victories/defeats/draws settle their normal reward
 once before removal; an unclaimed sleeping result must wait for Wake Up.
 Same-view interruptions retain the current feedback position; a cold reopen
 replays only committed events as before, without rerunning a combat turn.
+Freshly created matches start normally, not at a Resume prompt. Resume is offered
+only for valid unfinished matches. Terminal unclaimed results are shown/settled
+instead; claimed results and abandoned records are cleared while retaining the
+claim watermark, XP and mastery so no stale result can be replayed for rewards.
 Recovering signatures show the remaining own moves without hiding other options.
 Older renderers without compact vector fonts show a full-width named-move
 selector instead of the 2x2 grid; UP/DOWN still selects all four techniques.

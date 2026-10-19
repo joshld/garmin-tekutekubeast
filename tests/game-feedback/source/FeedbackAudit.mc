@@ -14,7 +14,7 @@ class FeedbackScene extends AuditGame {
 // RAM-only fixtures and the existing isolated QA identity. No system alerts,
 // DND settings, actual watch activity, real pet saves or session rewards.
 class FeedbackAudit extends ArtLayoutAuditView {
-    function initialize(){TekuTekuBeastView.initialize();beast=new ArtPreviewState();sceneCount=55;}
+    function initialize(){TekuTekuBeastView.initialize();beast=new ArtPreviewState();sceneCount=73;}
     function onShow(){
         if(!audited){refresher=new Toybox.Timer.Timer();refresher.start(method(:refresh),70,true);}
     }
@@ -32,13 +32,18 @@ class FeedbackAudit extends ArtLayoutAuditView {
         }
         var model=beast as ArtPreviewState;model.previewStage=2;model.data["sleepMode"]=2;model.data["sleepUntil"]=0l;
         model.data["haptics"]=0;model.data["energy"]=80;model.data["motion"]=2;
-        var kind=cursor>=44?(cursor>=53?2:((cursor-44)/3).toNumber()):(cursor<26?1:(cursor<32?((cursor-26)/2).toNumber():(cursor<43?((cursor-32)/4).toNumber():1)));
+        var kind=cursor>=67?1:(cursor>=64?0:(cursor>=58?((cursor-58)/2).toNumber():(cursor>=56?2:(cursor>=44?((cursor-44)/4).toNumber():(cursor<26?1:(cursor<32?((cursor-26)/2).toNumber():(cursor<43?((cursor-32)/4).toNumber():1)))))));
         var game=new FeedbackScene(beast,kind,self);game.sequence=[0,0,1,2];game.phase=2;game.hint="GREAT!";
         var expectedMask=-1;
-        if(cursor>=44){
+        if(cursor>=67){
+            game.memoryReplay=true;game.cursor=1;game.replayElapsed=[0,game.tempo(),game.tempo()+game.cueGap(),2*game.tempo()+game.cueGap(),2*(game.tempo()+game.cueGap()),3*(game.tempo()+game.cueGap())][cursor-67];
+            var cue=game.displayedMove();expectedMask=cue<0?0:1<<cue;
+        }else if(cursor>=64){
+            game.session=model.beginSession(kind);game.resumeTicks=67-cursor;
+        }else if(cursor>=44){
             game.session=model.beginSession(kind);game.paused=true;
-            game.pauseOptions.choice=cursor>=53?cursor-53:(cursor-44)%3;
-            game.pauseOptions.confirming=cursor>=53;
+            game.pauseOptions.choice=cursor>=56?(cursor-56)%2:(cursor-44)%4;
+            game.pauseOptions.confirming=cursor>=56;game.pauseOptions.abandoning=cursor>=58;
         }else if(cursor<12){
             game.expectedMove=(cursor/4).toNumber();game.registeredMove=cursor%4-1;
             game.phase=game.expectedMove==game.registeredMove?2:4;game.inputTicks=2;

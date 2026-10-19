@@ -3,7 +3,7 @@ using Toybox.Graphics;
 using Toybox.System;
 using Toybox.Application;
 
-// Durable whole sessions. BACK opens pause choices; explicit Exit abandons.
+// Durable whole sessions. Exit saves; only explicit Abandon/New Game discards.
 // Interruption/reopening preserves checkpoints without another energy charge.
 class BeastGameView extends TekuTekuBeastView {
     var kind;var phase=0;var elapsed=0;var attempts=0;var hits=0;var result="";
@@ -15,6 +15,7 @@ class BeastGameView extends TekuTekuBeastView {
     var gameHidden=false;var paused=false;var resumeTicks=0;var lastCallback=-1;
     var registeredMove=-1;var expectedMove=-1;var inputTicks=0;
     var pauseOptions;
+    var memoryReplay=false;var replayElapsed=0;
     function initialize(model,game){
         TekuTekuBeastView.initialize();beast=model;kind=game;
         pauseOptions=new BeastPauseOptions();
@@ -29,7 +30,7 @@ class BeastGameView extends TekuTekuBeastView {
     function onShow(){
         if(!gameHidden && refresher!=null){return;}
         if(refresher!=null){refresher.stop();refresher=null;}
-        gameHidden=false;resumeTicks=0;pauseOptions.reset();
+        gameHidden=false;resumeTicks=0;pauseOptions.reset();memoryReplay=false;
         Application.getApp().activeView=self;if(!beast.dev){beast.data=null;}beast.syncHistory();loadSprite();
         var saved=beast.data["sessions"][kind];
         paused=false;
@@ -56,22 +57,26 @@ class BeastGameView extends TekuTekuBeastView {
         // Consume SELECT as readiness only. A short frozen interval protects
         // against dismissal/auto-repeat input without rejecting repeated moves
         // once normal play resumes. Reuse the existing foreground timer.
-        paused=false;resumeTicks=2;startGameTimer();WatchUi.requestUpdate();return true;
+        paused=false;resumeTicks=3;pauseOptions.startReady(gameClock());
+        if(kind==1 && (phase==1 || phase==2)){memoryReplay=true;replayElapsed=0;}
+        startGameTimer();WatchUi.requestUpdate();return true;
     }
     function pauseSelect(){
         if(pauseOptions.confirming){
             if(pauseOptions.choice==0){pauseOptions.reset();WatchUi.requestUpdate();return;}
+            if(pauseOptions.abandoning){
+                if(!beast.abandonSession(session)){return;}session=null;onHide();returnToPet();return;
+            }
             restartGame();return;
         }
         if(pauseOptions.choice==0){resumeInput();return;}
         if(pauseOptions.choice==1){
-            if(kind==2){pauseOptions.confirm();WatchUi.requestUpdate();return;}
+            if(kind==2){pauseOptions.confirm(false);WatchUi.requestUpdate();return;}
             restartGame();return;
         }
-        beast.abandonSession(session);session=null;gameHidden=true;
-        leaveGameMenu();
+        if(pauseOptions.choice==3){pauseOptions.confirm(true);WatchUi.requestUpdate();return;}
+        onHide();returnToPet();
     }
-    function leaveGameMenu(){WatchUi.popView(WatchUi.SLIDE_RIGHT);}
     function restartGame(){
         if(sleepGate()){return;}
         if(!beast.abandonSession(session)){return;}
@@ -79,7 +84,7 @@ class BeastGameView extends TekuTekuBeastView {
         begin();pauseGame();resumeInput(); // No restart SELECT leaks into play.
     }
     function desiredGamePeriod(){
-        if(resumeTicks>0 || inputTicks>0){return 250;}
+        if(resumeTicks>0 || inputTicks>0 || memoryReplay){return 250;}
         if(phase==0 || phase==3){return beast.number("motion")==0 && kind!=2?5000:1000;}
         if(phase==2 && kind==2){return 5000;}
         if(phase==2 && kind==1 && !scanning){return 1000;}return 250;
@@ -165,9 +170,20 @@ class BeastGameView extends TekuTekuBeastView {
         }
         lastCallback=now;
         if(resumeTicks>0){
-            resumeTicks--;if(resumeTicks==0){tuneGameTimer();lastGameVisual=null;WatchUi.requestUpdate();}return;
+            var left=pauseOptions.countdown(now);
+            if(left!=resumeTicks){resumeTicks=left;tuneGameTimer();lastGameVisual=null;WatchUi.requestUpdate();}return;
         }
         if(sleepGate()){return;}
+        if(memoryReplay){
+            replayElapsed++;
+            if(replayElapsed>=sequence.size()*(tempo()+cueGap())){
+                memoryReplay=false;
+                if(phase==1){phase=2;cursor=0;elapsed=0;checkpoint();}
+                tuneGameTimer();
+            }
+            var replayKey=gameVisualKey();
+            if(lastGameVisual==null || !lastGameVisual.equals(replayKey)){lastGameVisual=replayKey;WatchUi.requestUpdate();}return;
+        }
         var step=timerPeriod/250;tick+=step;if(phase==1 || phase==2 || phase==4 || phase==5){elapsed+=step;}
         if(inputTicks>0){inputTicks=beast.max(0,inputTicks-step);}
         if(kind==0 && phase==1){
@@ -188,6 +204,7 @@ class BeastGameView extends TekuTekuBeastView {
         if(lastGameVisual==null || !lastGameVisual.equals(key)){lastGameVisual=key;gameRedraws++;WatchUi.requestUpdate();}
     }
     function gameVisualKey(){
+        if(memoryReplay){return "REPLAY:"+displayedMove()+":"+(replayElapsed/(tempo()+cueGap())).toNumber();}
         var motion=beast.number("motion");var artTick=0;
         if(kind==0 && phase==1 || kind==2 && phase==5){artTick=tick;}
         else if(kind==1 && phase==1){artTick=displayedMove()+10*(elapsed/(tempo()+cueGap())).toNumber();}
@@ -205,7 +222,7 @@ class BeastGameView extends TekuTekuBeastView {
     function tempo(){return BeastGameRules.tempo(beast.number("easy")==1);}
     function cueGap(){return BeastGameRules.cueGap();} // includes UP -> UP
     function displayedMove(){
-        return BeastGameRules.displayedMove(sequence,phase,elapsed,beast.number("easy")==1);
+        return BeastGameRules.displayedMove(sequence,memoryReplay?1:phase,memoryReplay?replayElapsed:elapsed,beast.number("easy")==1);
     }
     function jumpDuration(){return BeastGameRules.jumpDuration(beast.number("easy")==1,round);}
     function starPosition(){return elapsed.toFloat()/period();}
@@ -229,7 +246,7 @@ class BeastGameView extends TekuTekuBeastView {
         checkpoint();
     }
     function memoryInput(value){
-        if(gameHidden || paused || resumeTicks>0 || phase!=2 || kind!=1){return;}
+        if(gameHidden || paused || resumeTicks>0 || memoryReplay || phase!=2 || kind!=1){return;}
         registeredMove=value;expectedMove=sequence[cursor];inputTicks=2;
         if(sequence[cursor]!=value){
             retries++;cursor=0;phase=4;elapsed=0;replayRound=retries<2;
@@ -270,6 +287,7 @@ class BeastGameView extends TekuTekuBeastView {
     function selectAction(){
         if(gameHidden || resumeTicks>0){return;}
         if(paused){pauseSelect();return;}
+        if(memoryReplay){return;}
         if(phase==3 && resultChoice==1){WatchUi.popView(WatchUi.SLIDE_RIGHT);return;}
         if(sleepGate()){return;}
         if(phase==0){begin();}
@@ -285,6 +303,7 @@ class BeastGameView extends TekuTekuBeastView {
     function switchPage(delta){
         if(gameHidden || resumeTicks>0){return;}
         if(paused){pauseOptions.move(delta);WatchUi.requestUpdate();return;}
+        if(memoryReplay){return;}
         if(sleepGate()){return;}
         if(phase==0){
             if(kind==2){trail=(trail+delta+4)%4;}
@@ -338,7 +357,7 @@ class BeastGameView extends TekuTekuBeastView {
     function drawArrow(dc,x,top,move,chosen){
         var rows=move==0?[8,28,62,8,8,8,8]:(move==1?[0,28,62,62,62,28,0]:[8,8,8,8,62,28,8]);
         var scale=beast.max(2,(dc.getWidth()/140).toNumber());x-=(7*scale-14)/2;
-        var response=chosen && phase!=1 && (inputTicks>0 || phase==4);
+        var response=chosen && phase!=1 && !memoryReplay && (inputTicks>0 || phase==4);
         if(chosen){dc.setColor(response?INK:LIGHT,Graphics.COLOR_TRANSPARENT);dc.fillRoundedRectangle(x-7,top-6,7*scale+14,7*scale+14,5);}
         pixelIcon(dc,x,top,rows,response?BG:INK,scale);
     }
@@ -366,7 +385,7 @@ class BeastGameView extends TekuTekuBeastView {
         label(dc,y(dc,0.12),["BEAST BOUNCE","FOLLOW ME","TINY TRAIL"][kind],Graphics.FONT_XTINY);
         if((paused || resumeTicks>0) && inProgress()){
             if(paused){pauseOptions.draw(self,dc,"New Game",kind==2 && pauseOptions.confirming?(beast.number("adventure")>0?"COST: 1 MORE ENERGY":"SCOUT: NO LOOT"):"PROGRESS KEPT");return;}
-            label(dc,y(dc,0.27),"READY...",Graphics.FONT_XTINY);
+            label(dc,y(dc,0.27),"READY "+resumeTicks,Graphics.FONT_XTINY);
             drawPlayer(dc,dc.getWidth()/2,y(dc,0.65),0,0);
             label(dc,y(dc,0.72),"PROGRESS KEPT",Graphics.FONT_XTINY);
             label(dc,y(dc,0.80),paused?"SELECT: RESUME":"GET READY",Graphics.FONT_XTINY);return;
@@ -395,13 +414,14 @@ class BeastGameView extends TekuTekuBeastView {
             label(dc,y(dc,0.74),caught?hint:"SELECT: HOP!",Graphics.FONT_XTINY);
             label(dc,y(dc,0.85),hits+" / "+attempts+" STARS",Graphics.FONT_XTINY);
         }else if(kind==1){
+            var demo=phase==1 || memoryReplay;
             var mistake=phase==4 && expectedMove>=0 && registeredMove!=expectedMove;
-            label(dc,y(dc,0.23),mistake?"NEED: "+inputName(expectedMove):"ROUND "+(round+1)+"/3  "+(phase==1?"BEAST":"YOU"),Graphics.FONT_XTINY);
-            var move=phase==1?displayedMove():(inputTicks>0 || mistake?registeredMove:-1);
+            label(dc,y(dc,0.23),mistake?"NEED: "+inputName(expectedMove):"ROUND "+(round+1)+"/3  "+(memoryReplay?"REPLAY":(demo?"BEAST":"YOU")),Graphics.FONT_XTINY);
+            var move=demo?displayedMove():(inputTicks>0 || mistake?registeredMove:-1);
             var lift=move==0?12:(move==2?0:5);
             drawPlayer(dc,dc.getWidth()/2+(move<0?0:(move-1)*12),y(dc,0.66),move<0?0:(move==0?1:(move==1?4:5)),move<0?0:lift);
-            for(var i=0;i<3;i++){drawArrow(dc,dc.getWidth()/2+(i-1)*42-7,y(dc,0.70),i,phase==1?move==i:(inputTicks>0 || mistake?registeredMove==i:(scanning && (tick/6)%3==i)));}
-            label(dc,y(dc,0.83),mistake?"GOT: "+inputName(registeredMove):(phase==4?hint:(phase==1?"WATCH / COPY":cursor+"/"+sequence.size()+"  TRY "+(retries+1)+"/2")),Graphics.FONT_XTINY);
+            for(var i=0;i<3;i++){drawArrow(dc,dc.getWidth()/2+(i-1)*42-7,y(dc,0.70),i,demo?move==i:(inputTicks>0 || mistake?registeredMove==i:(scanning && (tick/6)%3==i)));}
+            label(dc,y(dc,0.83),mistake?"GOT: "+inputName(registeredMove):(phase==4?hint:(demo?"WATCH / COPY":cursor+"/"+sequence.size()+"  TRY "+(retries+1)+"/2")),Graphics.FONT_XTINY);
         }else{
             label(dc,y(dc,0.23),["GROVE","EMBER","TIDE","WISP"][trail]+"  STOP "+(node+1)+"/3",Graphics.FONT_XTINY);
             drawMap(dc);

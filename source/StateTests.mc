@@ -211,12 +211,12 @@ function battleSpatialFeedbackTest(logger){
 (:test)
 function battleFeedbackReopenAndClaimTest(logger){
     var s=TestSupport.fixture();s.data["sleepMode"]=2;s.data["stageFloor"]=2;s.commit();
-    var view=new BeastBattleView(s);view.battle=view.fight.beginBattle();view.battlePhase=1;view.battleVisible=true;
+    var view=new PauseBattleFixture(s);view.battle=view.fight.beginBattle();view.battlePhase=1;view.battleVisible=true;
     view.selectAction();view.refresh();var saved=s.store.copy(view.fight.data["active"]);
-    view.onHide();var reopened=new BeastBattleView(s);reopened.onShow();
+    view.onHide();var reopened=new PauseBattleFixture(s);reopened.onShow();
     Test.assert(reopened.replaying);Test.assertEqual(reopened.burst,4);Test.assertEqual(reopened.battle["turn"],saved["turn"]);
     Test.assert(TestSupport.same(saved,reopened.fight.data["active"]));
-    Test.assert(reopened.paused);reopened.selectAction();reopened.refresh();
+    Test.assert(reopened.paused);reopened.selectAction();ReadinessTestSupport.finish(reopened);
     for(var i=0;i<4;i++){reopened.refresh();}Test.assertEqual(reopened.battlePhase,1);
     Test.assert(TestSupport.same(saved,reopened.fight.data["active"]));
     // One-action lethal turn: reconstruct exact pre-hit HP, then claim once
@@ -226,11 +226,10 @@ function battleFeedbackReopenAndClaimTest(logger){
     Test.assertEqual(reopened.displayHp(1),1);
     reopened.onHide();var result=new BeastBattleView(s);result.onShow();
     Test.assert(result.replaying);Test.assertEqual(result.burst,2);var xp=result.fight.battleXp();
-    Test.assert(result.paused);result.selectAction();result.refresh();
-    result.refresh();Test.assertEqual(result.displayHp(1),0);
+    Test.assert(!result.paused);result.refresh();Test.assertEqual(result.displayHp(1),0);
     result.refresh();Test.assertEqual(result.battlePhase,3);Test.assert(result.fight.battleXp()>xp);
     var claimed=result.fight.battleXp();result.onHide();var again=new BeastBattleView(s);again.onShow();
-    Test.assertEqual(again.battlePhase,3);Test.assert(!again.replaying);Test.assertEqual(again.fight.battleXp(),claimed);
+    Test.assertEqual(again.battlePhase,0);Test.assert(!again.paused);Test.assert(!again.replaying);Test.assertEqual(again.fight.battleXp(),claimed);
     again.onHide();return true;
 }
 
@@ -1010,9 +1009,9 @@ function gameNotificationLifecycleTest(logger){
         Test.assert(TestSupport.same(saved,s.data["sessions"][kind]));
         game.switchPage(1);game.refresh();Test.assertEqual(game.elapsed,5);
         Test.assertEqual(game.pauseOptions.choice,1);game.switchPage(-1);
-        game.selectAction();Test.assert(!game.paused);Test.assertEqual(game.resumeTicks,2);
+        game.selectAction();Test.assert(!game.paused);Test.assertEqual(game.resumeTicks,3);
         game.selectAction();game.switchPage(1);Test.assertEqual(game.elapsed,5);
-        game.refresh();game.refresh();Test.assertEqual(game.resumeTicks,0);Test.assertEqual(game.elapsed,5);
+        ReadinessTestSupport.finish(game);Test.assertEqual(game.resumeTicks,0);Test.assertEqual(game.elapsed,5);
         if(kind==1){Test.assertEqual(game.cursor,1);Test.assertEqual(game.inputTicks,1);}
         if(kind==0){Test.assertEqual(game.jumpTicks,3);Test.assertEqual(game.lane,2);Test.assertEqual(game.target,2);}
         if(kind==2){Test.assertEqual(game.travel,5);Test.assertEqual(game.node,1);}
@@ -1035,7 +1034,7 @@ function gameStalledTimerAndResumeInputTest(logger){
     var s=TestSupport.fixture();s.data["haptics"]=0;s.data["sleepMode"]=2;s.data["adventure"]=2;
     var trip=new GameClockFixture(s,2);trip.begin();trip.phase=2;trip.choice=1;trip.pauseGame();
     var finds=trip.session["finds"];var risk=trip.session["risk"];var seed=trip.session["seed"];
-    trip.selectAction();trip.selectAction();trip.refresh();trip.refresh();
+    trip.selectAction();trip.selectAction();ReadinessTestSupport.finish(trip);
     Test.assertEqual(trip.session["finds"],finds);Test.assertEqual(trip.session["risk"],risk);Test.assertEqual(trip.session["seed"],seed);
     Test.assertEqual(s.number("adventure"),1);trip.selectAction();Test.assertEqual(trip.phase,4);trip.onHide();
     Test.assertEqual(s.number("adventure"),1);Test.assertEqual(s.number("games"),0);return true;
@@ -1057,31 +1056,42 @@ class PauseGameFixture extends GameClockFixture {
 }
 (:test)
 class PauseBattleFixture extends BeastBattleView {
-    var left=false;
+    var left=false;var milliseconds=10000;
     function initialize(b){BeastBattleView.initialize(b);}
     function leaveGameMenu(){left=true;}
+    function battleClock(){return milliseconds;}
+}
+(:test)
+module ReadinessTestSupport {
+    function finish(view){for(var i=0;i<12;i++){view.milliseconds+=250;view.refresh();}}
 }
 (:test)
 function pauseMiniGameRestartAndExitTest(logger){
     for(var kind=0;kind<3;kind++){
         var s=TestSupport.fixture();s.data["sleepMode"]=2;s.data["haptics"]=0;s.data["adventure"]=3;s.commit();
         var v=new PauseGameFixture(s,kind);v.onShow();v.begin();v.elapsed=7;v.checkpoint();
+        var home=new TekuTekuBeastView();home.beast=s;home.menu="Play";home.page=2;v.petView=home;
         var old=s.store.copy(v.session);var energy=s.number("adventure");v.back();
         Test.assert(v.paused);Test.assertEqual(v.pauseOptions.choice,0);v.refresh();Test.assertEqual(v.elapsed,7);
-        v.switchPage(-1);Test.assertEqual(v.pauseOptions.choice,2);v.switchPage(-1);v.selectAction();
+        v.switchPage(-1);Test.assertEqual(v.pauseOptions.choice,3);v.switchPage(2);v.selectAction();
         if(kind==2){
             Test.assert(v.pauseOptions.confirming);Test.assertEqual(v.pauseOptions.choice,0);
             v.selectAction();Test.assert(!v.pauseOptions.confirming);Test.assertEqual(v.session["id"],old["id"]);
             v.switchPage(1);v.selectAction();v.switchPage(1);v.selectAction();
         }
-        Test.assert(v.session["id"]>old["id"]);Test.assertEqual(v.elapsed,0);Test.assertEqual(v.resumeTicks,2);
+        Test.assert(v.session["id"]>old["id"]);Test.assertEqual(v.elapsed,0);Test.assertEqual(v.resumeTicks,3);
         var id=v.session["id"];v.selectAction();v.switchPage(1);Test.assertEqual(v.session["id"],id);
         Test.assert(!s.saveSession(old));s.completeSession(old,true);Test.assertEqual(s.number("games"),0);
         Test.assertEqual(s.number("adventure"),kind==2?energy-1:energy);
-        v.refresh();v.refresh();v.back();v.switchPage(-1);v.selectAction();
-        Test.assert(v.left);Test.assert(s.data["sessions"][kind]==null);var writes=s.store.writes;
+        ReadinessTestSupport.finish(v);v.back();v.switchPage(2);v.selectAction();
+        Test.assert(v.left);Test.assert(home.menu==null);Test.assertEqual(home.page,0);
+        Test.assert(s.data["sessions"][kind]!=null);var writes=s.store.writes;
         v.refresh();v.selectAction();v.back();Test.assertEqual(s.store.writes,writes);
         Test.assertEqual(s.number("games"),0);Test.assertEqual(s.xp(),0l);v.onHide();
+        var cold=new PauseGameFixture(s,kind);cold.onShow();Test.assert(cold.paused);
+        Test.assertEqual(cold.session["id"],id);cold.switchPage(-1);cold.selectAction();
+        Test.assert(cold.pauseOptions.abandoning);cold.switchPage(1);cold.selectAction();
+        Test.assert(cold.left);Test.assert(s.data["sessions"][kind]==null);
     }
     return true;
 }
@@ -1098,9 +1108,10 @@ function pauseAdventureScoutAndAbandonTest(logger){
 function pauseBattleRestartAndExitTest(logger){
     var s=TestSupport.fixture();s.data["stageFloor"]=2;s.data["sleepMode"]=2;s.commit();
     var v=new PauseBattleFixture(s);v.onShow();v.selectAction();v.selectAction();v.refresh();
+    var home=new TekuTekuBeastView();home.beast=s;home.menu="Wild battles";home.page=2;v.petView=home;
     var saved=s.store.copy(v.battle);var burst=v.burst;v.back();Test.assert(v.paused);Test.assertEqual(v.pauseOptions.choice,0);
-    v.refresh();Test.assertEqual(v.burst,burst);v.selectAction();v.selectAction();Test.assertEqual(v.resumeTicks,1);
-    v.refresh();Test.assertEqual(v.burst,burst);Test.assert(TestSupport.same(saved,v.battle));
+    v.refresh();Test.assertEqual(v.burst,burst);v.selectAction();v.selectAction();Test.assertEqual(v.resumeTicks,3);
+    ReadinessTestSupport.finish(v);Test.assertEqual(v.burst,burst);Test.assert(TestSupport.same(saved,v.battle));
     v.onHide();v.onShow();Test.assert(v.paused);Test.assertEqual(v.burst,burst);
     v.switchPage(1);v.selectAction();Test.assert(v.pauseOptions.confirming);Test.assertEqual(v.pauseOptions.choice,0);
     v.switchPage(1);v.selectAction();Test.assert(v.paused);Test.assertEqual(v.battle["id"],saved["id"]); // no spare encounter
@@ -1109,9 +1120,82 @@ function pauseBattleRestartAndExitTest(logger){
     Test.assert(v.battle["id"]>saved["id"]);Test.assertEqual(v.battle["turn"],0);Test.assertEqual(v.burst,0);
     Test.assertEqual(v.fight.battleQueueCount(),queue-1);Test.assertEqual(v.fight.battleXp(),0);
     Test.assertEqual(v.fight.data["wins"],0);Test.assertEqual(v.fight.data["rewarded"],0);
-    Test.assert(!v.fight.abandonBattle(saved["id"]));v.refresh();v.back();v.switchPage(-1);v.selectAction();
-    Test.assert(v.left);Test.assert(v.fight.battleSession()==null);var writes=s.store.writes;
-    v.refresh();v.selectAction();v.back();Test.assertEqual(s.store.writes,writes);v.onHide();return true;
+    Test.assert(!v.fight.abandonBattle(saved["id"]));ReadinessTestSupport.finish(v);v.back();v.switchPage(2);v.selectAction();
+    Test.assert(v.left);Test.assert(home.menu==null);Test.assertEqual(home.page,0);
+    Test.assert(v.fight.hasUnfinishedBattle());var writes=s.store.writes;
+    v.refresh();v.selectAction();v.back();Test.assertEqual(s.store.writes,writes);v.onHide();
+    var cold=new PauseBattleFixture(s);cold.onShow();Test.assert(cold.paused);var id=cold.battle["id"];
+    cold.switchPage(-1);cold.selectAction();Test.assert(cold.pauseOptions.abandoning);
+    cold.selectAction();Test.assertEqual(cold.battle["id"],id); // Cancel is default.
+    cold.switchPage(-1);cold.selectAction();cold.switchPage(1);cold.selectAction();
+    Test.assert(cold.left);Test.assert(!cold.fight.hasUnfinishedBattle());Test.assert(cold.fight.battleSession()==null);
+    Test.assertEqual(cold.fight.battleXp(),0);return true;
+}
+(:test)
+function visibleReadinessClockTest(logger){
+    for(var kind=0;kind<3;kind++){
+        var s=TestSupport.fixture();s.data["sleepMode"]=2;s.data["haptics"]=0;
+        var v=new GameClockFixture(s,kind);v.begin();v.elapsed=4;v.pauseGame();v.selectAction();
+        var saved=s.store.copy(v.session);Test.assertEqual(v.resumeTicks,3);
+        v.refresh();v.refresh();Test.assertEqual(v.resumeTicks,3); // queued callbacks cannot shorten it
+        for(var second=0;second<3;second++){
+            for(var tick=0;tick<4;tick++){v.milliseconds+=250;v.refresh();}
+            Test.assertEqual(v.resumeTicks,2-second);Test.assertEqual(v.elapsed,4);
+            Test.assert(TestSupport.same(saved,v.session));
+        }
+        v.onHide();
+    }
+    var options=new BeastPauseOptions();options.startReady(10000);
+    Test.assertEqual(options.countdown(10999),3);Test.assertEqual(options.countdown(11000),2);
+    Test.assertEqual(options.countdown(12000),1);Test.assertEqual(options.countdown(13000),0);
+    return true;
+}
+(:test)
+function memoryResumeReplayProgressTest(logger){
+    for(var initial=1;initial<=2;initial++){
+        var s=TestSupport.fixture();s.data["sleepMode"]=2;s.data["haptics"]=0;
+        var v=new GameClockFixture(s,1);v.begin();v.phase=initial;v.elapsed=4;v.cursor=initial==2?1:0;
+        v.round=1;v.score=30;v.hits=1;v.retries=1;v.sequence=[0,0,1,2];v.checkpoint();
+        var seed=v.session["seed"];v.pauseGame();v.selectAction();ReadinessTestSupport.finish(v);
+        Test.assert(v.memoryReplay);Test.assertEqual(v.replayElapsed,0);
+        v.selectAction();v.switchPage(1);v.memoryInput(2);Test.assertEqual(v.cursor,initial==2?1:0);
+        var length=v.sequence.size()*(v.tempo()+v.cueGap());
+        for(var cue=0;cue<length;cue++){v.milliseconds+=250;v.refresh();}
+        Test.assert(!v.memoryReplay);Test.assertEqual(v.phase,2);Test.assertEqual(v.round,1);
+        Test.assertEqual(v.score,30);Test.assertEqual(v.hits,1);Test.assertEqual(v.retries,1);
+        Test.assertEqual(v.cursor,initial==2?1:0);Test.assertEqual(v.elapsed,initial==2?4:0);
+        Test.assertEqual(v.session["seed"],seed);Test.assertEqual(s.number("games"),0);
+        v.pauseGame();v.selectAction();ReadinessTestSupport.finish(v);v.milliseconds+=250;v.refresh();v.onHide();
+        var cold=new GameClockFixture(s,1);cold.onShow();Test.assert(cold.paused);
+        Test.assertEqual(cold.cursor,v.cursor);Test.assertEqual(cold.elapsed,v.elapsed);
+        cold.selectAction();ReadinessTestSupport.finish(cold);Test.assert(cold.memoryReplay);Test.assertEqual(cold.replayElapsed,0);cold.onHide();
+    }
+    return true;
+}
+(:test)
+function battleFreshResumeAndCleanupTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;s.data["stageFloor"]=2;s.commit();
+    var f=new BeastBattle(s);f.beginBattle();
+    var fresh=new PauseBattleFixture(s);fresh.freshBattle=true;fresh.onShow();
+    Test.assert(!fresh.paused);Test.assertEqual(fresh.battlePhase,1);var id=fresh.battle["id"];
+    fresh.onHide();var cold=new PauseBattleFixture(s);cold.onShow();
+    Test.assert(cold.paused);Test.assertEqual(cold.battle["id"],id);
+    cold.selectAction();var turn=cold.battle["turn"];
+    cold.refresh();Test.assertEqual(cold.resumeTicks,3);ReadinessTestSupport.finish(cold);
+    Test.assertEqual(cold.battle["turn"],turn);cold.onHide();
+    Test.assert(f.abandonBattle(id));Test.assert(!f.hasUnfinishedBattle());
+    var none=new PauseBattleFixture(s);none.onShow();Test.assert(!none.paused);Test.assert(none.battle==null);none.onHide();
+    // Terminal matches and stale claimed records never advertise Resume.
+    for(var loser=0;loser<2;loser++){
+        f.offer(3);f.commit();var m=f.beginBattle();f.data["active"]["actors"][loser]["hp"]=1;
+        while(m["status"]==0){m=f.battleTurn(0);}
+        Test.assert(!f.hasUnfinishedBattle());f.finishBattle();var xp=f.battleXp();
+        var terminal=new PauseBattleFixture(s);terminal.onShow();
+        Test.assert(!terminal.paused);Test.assert(f.battleSession()==null);Test.assertEqual(f.battleXp(),xp);terminal.onHide();
+    }
+    f.offer(3);f.commit();f.beginBattle();f.data["active"]["claimed"]=true;f.commit();
+    Test.assert(!f.hasUnfinishedBattle());Test.assert(f.clearFinishedBattle());Test.assert(f.battleSession()==null);
+    return true;
 }
 (:test)
 function pauseBattlePracticeAndTerminalTest(logger){

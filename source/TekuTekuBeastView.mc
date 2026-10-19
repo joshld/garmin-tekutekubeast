@@ -8,7 +8,7 @@ using Toybox.Application;
 class TekuTekuBeastView extends WatchUi.View {
     var beast;var page=0;var refresher=null;var sprite=null;var spriteStage=-1;
     var tick=0;var notice=null;var noticeTicks=0;
-    var menu=null;var selection=0;var rows=[];var live=null;
+    var menu=null;var selection=0;var rows=[];var live=null;var petView=null;
     var animation="idle";var animationTicks=0;
     var frames=null;var spriteFamily=-1;
     var artScale=1.0;var timerPeriod=250;
@@ -83,6 +83,11 @@ class TekuTekuBeastView extends WatchUi.View {
     }
     function toast(text,action){page=0;notice=text;noticeTicks=12;animation=action;animationTicks=12;loadSprite();if(!action.equals("idle")){new FeedbackManager().cue(beast,action);}if(refresher!=null){timerPeriod=desiredPeriod();refresher.stop();refresher.start(method(:refresh),timerPeriod,true);}WatchUi.requestUpdate();}
     function openMenu(name){menu=name;selection=0;updateRows();WatchUi.requestUpdate();}
+    function returnToPet(){
+        if(petView!=null){petView.menu=null;petView.page=0;petView.selection=0;petView.notice=null;}
+        leaveGameMenu();
+    }
+    function leaveGameMenu(){WatchUi.popView(WatchUi.SLIDE_RIGHT);}
     function updateRows(){
         if(menu.equals("Actions")){rows=beast.number("poop")>0?["Clean","Feed","Play","Pat","Rest","Collection","Settings"]:["Feed","Clean","Play","Pat","Rest","Collection","Settings"];rows.add("Lights: "+lightingLabel());lightingStamp=lightingKey();if(beast.isSleeping()){rows.add("Wake Up");}if(beast.dev){rows.add("Dev Tools");}}
         else if(menu.equals("Lighting")){
@@ -108,7 +113,7 @@ class TekuTekuBeastView extends WatchUi.View {
         else if(menu.equals("Animations")){rows=["idle","wander","hop","blink","look","eat","happy","clean","sleep","evolve","sound test","vibration test"];}
         else if(menu.equals("Balance settings")){rows=["Passive: "+beast.number("passiveRate"),"Care cap: "+beast.number("careCap"),"Hatch hours: "+beast.number("hatchHours"),"Legend days: "+beast.number("legendDays")];}
         else if(menu.equals("Play")){rows=["Beast Bounce","Follow My Lead","Tiny Adventures","Wild battles"];}
-        else if(menu.equals("Wild battles")){var fight=new BeastBattle(beast);var match=fight.battleSession();rows=[match!=null && !match["claimed"]?"Resume battle":"Meet: "+fight.battleQueueCount()+" waiting","Practice match","Later","Decline next","Battle XP: "+fight.battleXp(),"Techniques","Wild journal","Walk, care or explore","5 rewarded matches/day"];}
+        else if(menu.equals("Wild battles")){var fight=new BeastBattle(beast);fight.clearFinishedBattle();var match=fight.battleSession();rows=[fight.hasUnfinishedBattle()?"Resume battle":(match!=null?"View result":"Meet: "+fight.battleQueueCount()+" waiting"),"Practice match","Later","Decline next","Battle XP: "+fight.battleXp(),"Techniques","Wild journal","Walk, care or explore","5 rewarded matches/day"];}
         else if(menu.equals("Techniques")){var fight=new BeastBattle(beast);rows=[];var moves=BeastBattleMoves.names(BeastBattleMoves.form(beast.stage(),beast.family(),beast.number("rare")));for(var i=0;i<moves.size();i++){rows.add(moves[i]+": "+fight.battleMastery(i));}if(rows.size()==0){rows.add("Hatch before battling");}}
         else if(menu.equals("Wild journal")){var fight=new BeastBattle(beast);rows=[];for(var form=0;form<18;form++){if((fight.data["seen"]&(1<<form))!=0){rows.add(BeastBattleMoves.species(form));}}if(rows.size()==0){rows.add("Meet your first wild beast");}}
         else if(menu.equals("Collection")){rows=["Discoveries","Rare evolution","Archive / new egg","Toys / accessories","Museum"];}
@@ -232,14 +237,15 @@ class TekuTekuBeastView extends WatchUi.View {
             if(n==0 || n==1){
                 if(beast.isSleeping()){menu=null;toast("Beast is asleep.","idle");return;}
                 if(beast.stage()==0){menu=null;toast("Hatch before battling","idle");return;}
+                var resuming=fight.hasUnfinishedBattle();
                 if(n==0){fight.beginBattle();}else{fight.practiceBattle();}
                 frames=null;sprite=null;spriteStage=-1; // Do not retain two art sets on small heaps.
-                var battle=new BeastBattleView(beast);WatchUi.pushView(battle,new BeastBattleInput(battle),WatchUi.SLIDE_LEFT);return;
+                var battle=new BeastBattleView(beast);battle.petView=self;battle.freshBattle=!resuming;WatchUi.pushView(battle,new BeastBattleInput(battle),WatchUi.SLIDE_LEFT);return;
             }
             if(n==2){menu=null;return;}if(n==3){fight.declineEncounter();updateRows();}
             if(n==5){openMenu("Techniques");return;}if(n==6){openMenu("Wild journal");return;}WatchUi.requestUpdate();return;
         }
-        if(context.equals("Play")){if(n==3){openMenu("Wild battles");return;}var game=new BeastGameView(beast,n);WatchUi.pushView(game,new TekuTekuBeastInput(game),WatchUi.SLIDE_LEFT);return;}
+        if(context.equals("Play")){if(n==3){openMenu("Wild battles");return;}var game=new BeastGameView(beast,n);game.petView=self;WatchUi.pushView(game,new TekuTekuBeastInput(game),WatchUi.SLIDE_LEFT);return;}
         WatchUi.requestUpdate();
     }
     function worldAction(context,name,n){

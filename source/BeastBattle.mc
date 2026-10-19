@@ -58,6 +58,19 @@ class BeastBattle {
         commit();
     }
     function battleSession(){return data["active"]==null?null:beast.store.copy(data["active"]);}
+    function hasUnfinishedBattle(){
+        var m=data["active"];
+        return BeastBattleRules.versioned(m) && m.hasKey("status") && m["status"]==0 &&
+            m.hasKey("claimed") && !m["claimed"] && m.hasKey("id") && m["id"]>data["claim"] &&
+            m.hasKey("actors") && m["actors"] instanceof Toybox.Lang.Array && m["actors"].size()==2 &&
+            BeastBattleRules.validActor(m["actors"][0]) && BeastBattleRules.validActor(m["actors"][1]) &&
+            m["actors"][0]["hp"]>0 && m["actors"][1]["hp"]>0;
+    }
+    function clearFinishedBattle(){
+        var m=data["active"];
+        if(m!=null && (m["claimed"] || m["id"]<=data["claim"])){data["active"]=null;commit();return true;}
+        return false;
+    }
     function battleQueueCount(){return data["queue"].size();}
     function battleXp(){return data["xp"];}
     function battleMastery(slot){var form=BeastBattleMoves.form(beast.stage(),beast.family(),beast.number("rare"));return form<0?0:data["mastery"][form*4+slot];}
@@ -72,6 +85,7 @@ class BeastBattle {
     }
     function beginBattle(){
         if(beast.isSleeping() || beast.stage()==0){return null;}
+        clearFinishedBattle();
         if(data["active"]!=null){
             if(data["active"]["status"]==0 || !data["active"]["claimed"]){return battleSession();}
             data["active"]=null;
@@ -83,6 +97,7 @@ class BeastBattle {
     }
     function practiceBattle(){
         if(beast.isSleeping() || beast.stage()==0){return null;}
+        clearFinishedBattle();
         if(data["active"]!=null && !data["active"]["claimed"]){return battleSession();}
         data["serial"]++;var encounter={"id"=>data["serial"],"seed"=>(data["serial"]*719)%65521};
         data["active"]=makeBattle(encounter,true);commit();return battleSession();
@@ -90,6 +105,7 @@ class BeastBattle {
     function battleTurn(slot){
         var current=data["active"];
         if(beast.isSleeping() || current==null){return null;}
+        if(current["claimed"] || current["id"]<=data["claim"] || current["status"]!=0){return battleSession();}
         if(!BeastBattleRules.available(current,slot)){return battleSession();}
         var next=BeastBattleRules.turn(current,slot);
         // UI/persistence metadata is outside the deterministic combat protocol.
