@@ -9,6 +9,7 @@ class TekuTekuBeastApp extends Application.AppBase {
     var launchedFromGlance=false;
     function onInactive(state) { if(activeView!=null){activeView.onHide();} }
     function onActive(state) { if(activeView!=null && activeView.refresher==null){activeView.onShow();} }
+    function onStop(state) { if(activeView!=null){activeView.onHide();} }
     function initialize() { AppBase.initialize(); }
     function onStart(state) {
         if(state!=null && state.hasKey(:launchedFromGlance)){launchedFromGlance=state[:launchedFromGlance];}

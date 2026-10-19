@@ -16,7 +16,9 @@ scope and [physical acceptance](WATCH_ACCEPTANCE.md) for hardware limitations.
 - Beast Bounce: move UP/DOWN between platforms and SELECT to hop into falling
   stars; fifteen targets, three increasing stages, combos and scores.
 - Follow My Lead: copy the beast's hop/smile/look, progressive 3/4/5 sequences,
-  two chances per round, button/touch/timed-SELECT input.
+  two chances per round, button/touch/timed-SELECT input. BEAST marks the demo;
+  YOU marks responses. Dark highlights show registered UP/SELECT/DOWN input,
+  with progress counting repeated presses. Mistakes show NEED versus GOT.
 - Tiny Adventures: choose a destination, travel three stops, make careful/bold
   choices and discover treasure. One Adventure Energy pays for the whole trip.
   No-energy scouting is unlimited practice without loot; care/play earns energy.
@@ -32,6 +34,30 @@ scope and [physical acceptance](WATCH_ACCEPTANCE.md) for hardware limitations.
 Normal Bounce stages use 4 / 3 / 2.25 seconds per star; Easy Mode is slower.
 Memory demonstrations include a neutral 250 ms gap between all cues, including
 repeated moves. Rounds do not consume separate daily rewarded-session slots.
+
+### Alerts and mini-game resume
+
+All three games checkpoint and stop their timer when hidden/inactive or stopped.
+Reopening shows PAUSED; SELECT confirms readiness, followed by a frozen 500ms
+interval before play. That confirmation/repeated dismissal input cannot count as
+a move, jump or adventure choice. Remaining ticks, sequence position, jump/lane,
+travel, seed and reward/energy transaction are retained. Detected inactive state
+or a timer delivery gap exceeding its expected period by more than one second
+also pauses without advancing the game. No system notification settings change.
+
+Connect IQ exposes [app lifecycle callbacks](https://developer.garmin.com/connect-iq/api-docs/Toybox/Application/AppBase.html)
+and [view visibility callbacks](https://developer.garmin.com/connect-iq/api-docs/Toybox/WatchUi/View.html),
+but they are not a promise that every OS banner/alert will report lost activity.
+An overlay leaving both app activity and timer delivery unchanged is not
+reliably detectable. [Notifications](https://developer.garmin.com/connect-iq/api-docs/Toybox/Notifications.html)
+posts/manages the app's own notifications; no supported all-alert suppression
+or global DND setter was identified. This applies regardless of alert source.
+
+Optional owner-controlled quieting on Enduro 4: from the watch face, hold MENU,
+then Watch Settings > System > Do Not Disturb; turn it back off yourself after
+playing if desired. See Garmin's [Enduro 4 System Settings](https://www8.garmin.com/manuals/webhelp/GUID-25EFCCBC-D0EB-4E1B-AE9F-B4B900891C20/EN-US/GUID-DB1A9D65-27AA-4762-84B4-2A9C52C75D12.html).
+Actual phone messages/calls, native alarms and other overlays still require
+owner hardware testing; simulator lifecycle tests cannot prove universal coverage.
 
 ## Wild battles
 

@@ -964,6 +964,80 @@ function miniGamesTest(logger){
     timeout.refresh();Test.assertEqual(s.number("games"),3);return true;
 }
 (:test)
+class GameClockFixture extends BeastGameView {
+    var milliseconds=10000;
+    function initialize(model,game){BeastGameView.initialize(model,game);}
+    function gameClock(){return milliseconds;}
+}
+(:test)
+function memoryRegisteredButtonFeedbackTest(logger){
+    var s=TestSupport.fixture();s.data["haptics"]=0;
+    var game=new BeastGameView(s,1);game.scanning=false;game.begin();game.phase=2;game.sequence=[0,0,1];
+    var input=new TekuTekuBeastInput(game);
+    input.onPreviousPage();Test.assertEqual(game.registeredMove,0);Test.assertEqual(game.cursor,1);
+    input.onPreviousPage();Test.assertEqual(game.registeredMove,0);Test.assertEqual(game.cursor,2);Test.assertEqual(game.inputTicks,2);
+    input.onSelect();Test.assertEqual(game.registeredMove,1);Test.assertEqual(game.cursor,3);Test.assertEqual(game.hits,1);Test.assertEqual(game.phase,4);
+    game.continueMemory();game.phase=2;game.sequence=[2,1,0];
+    input.onNextPage();Test.assertEqual(game.registeredMove,2);Test.assertEqual(game.cursor,1);
+    input.onPreviousPage();Test.assertEqual(game.expectedMove,1);Test.assertEqual(game.registeredMove,0);Test.assertEqual(game.phase,4);
+    Test.assert(game.hint.equals("NEED SELECT / GOT UP"));var retries=game.retries;
+    input.onSelect();Test.assertEqual(game.phase,4);Test.assertEqual(game.retries,retries); // retain brief error explanation
+    game.timerPeriod=250;game.refresh();game.refresh();Test.assertEqual(game.inputTicks,0);
+    game.checkpoint();var reopened=new BeastGameView(s,1);reopened.restore(s.data["sessions"][1]);
+    Test.assertEqual(reopened.expectedMove,1);Test.assertEqual(reopened.registeredMove,0);Test.assert(reopened.hint.equals(game.hint));
+    var old=s.store.copy(s.data["sessions"][1]);old.remove("memoryNeed");old.remove("memoryGot");old.remove("memoryFlash");
+    reopened.restore(old);Test.assertEqual(reopened.expectedMove,-1);Test.assertEqual(reopened.registeredMove,-1);
+    Test.assertEqual(s.number("games"),0);Test.assertEqual(s.xp(),0l);return true;
+}
+(:test)
+function gameNotificationLifecycleTest(logger){
+    var app=Toybox.Application.getApp();var prior=app.activeView;
+    for(var kind=0;kind<3;kind++){
+        var s=TestSupport.fixture();s.data["haptics"]=0;s.data["sleepMode"]=2;s.data["adventure"]=3;s.commit();
+        var game=new GameClockFixture(s,kind);game.onShow();game.begin();
+        if(kind==1){game.phase=2;game.sequence=[0,0,1];game.cursor=1;game.registeredMove=0;game.expectedMove=0;game.inputTicks=1;}
+        if(kind==0){game.lane=2;game.target=2;game.jumpTicks=3;}
+        if(kind==2){game.node=1;game.travel=5;}
+        game.elapsed=5;var phase=game.phase;var id=game.session["id"];var seed=game.session["seed"];
+        var energy=s.number("adventure");app.onInactive(null);
+        Test.assert(game.gameHidden);Test.assert(game.refresher==null);var saved=s.store.copy(s.data["sessions"][kind]);var writes=s.store.writes;
+        game.refresh();game.selectAction();game.switchPage(1);game.touch([100,180]);app.onInactive(null);
+        Test.assertEqual(game.elapsed,5);Test.assertEqual(s.store.writes,writes);
+        game.milliseconds+=60000;app.onActive(null);Test.assert(game.paused);Test.assert(game.refresher==null);
+        Test.assertEqual(game.phase,phase);Test.assertEqual(game.elapsed,5);Test.assertEqual(game.session["id"],id);Test.assertEqual(game.session["seed"],seed);
+        Test.assert(TestSupport.same(saved,s.data["sessions"][kind]));
+        game.switchPage(1);game.refresh();Test.assertEqual(game.elapsed,5);
+        game.selectAction();Test.assert(!game.paused);Test.assertEqual(game.resumeTicks,2);
+        game.selectAction();game.switchPage(1);Test.assertEqual(game.elapsed,5);
+        game.refresh();game.refresh();Test.assertEqual(game.resumeTicks,0);Test.assertEqual(game.elapsed,5);
+        if(kind==1){Test.assertEqual(game.cursor,1);Test.assertEqual(game.inputTicks,1);}
+        if(kind==0){Test.assertEqual(game.jumpTicks,3);Test.assertEqual(game.lane,2);Test.assertEqual(game.target,2);}
+        if(kind==2){Test.assertEqual(game.travel,5);Test.assertEqual(game.node,1);}
+        game.onHide();var cold=new GameClockFixture(s,kind);cold.onShow();Test.assert(cold.paused);
+        Test.assertEqual(cold.session["id"],id);Test.assertEqual(s.number("adventure"),energy);
+        Test.assertEqual(s.number("games"),0);Test.assertEqual(s.xp(),0l);app.onStop(null);
+        Test.assert(cold.gameHidden);Test.assert(cold.refresher==null);
+    }
+    app.activeView=prior;return true;
+}
+(:test)
+function gameStalledTimerAndResumeInputTest(logger){
+    for(var kind=0;kind<3;kind++){
+        var s=TestSupport.fixture();s.data["haptics"]=0;s.data["sleepMode"]=2;s.data["adventure"]=2;
+        var game=new GameClockFixture(s,kind);game.begin();game.elapsed=4;
+        game.lastCallback=1000;game.milliseconds=10000;game.refresh();
+        Test.assert(game.paused);Test.assertEqual(game.elapsed,4);Test.assert(game.refresher==null);
+        game.onHide();
+    }
+    var s=TestSupport.fixture();s.data["haptics"]=0;s.data["sleepMode"]=2;s.data["adventure"]=2;
+    var trip=new GameClockFixture(s,2);trip.begin();trip.phase=2;trip.choice=1;trip.pauseGame();
+    var finds=trip.session["finds"];var risk=trip.session["risk"];var seed=trip.session["seed"];
+    trip.selectAction();trip.selectAction();trip.refresh();trip.refresh();
+    Test.assertEqual(trip.session["finds"],finds);Test.assertEqual(trip.session["risk"],risk);Test.assertEqual(trip.session["seed"],seed);
+    Test.assertEqual(s.number("adventure"),1);trip.selectAction();Test.assertEqual(trip.phase,4);trip.onHide();
+    Test.assertEqual(s.number("adventure"),1);Test.assertEqual(s.number("games"),0);return true;
+}
+(:test)
 function activeBalanceAndArchiveTest(logger){
     var s=TestSupport.fixture();
     for(var i=0;i<21;i++){s.testNow+=86400;s.tick();s.observe(s.today(),10000);}

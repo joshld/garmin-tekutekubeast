@@ -41,10 +41,10 @@ class FeedbackMenu extends WatchUi.View {
         var v=selection==0?new RepeatedMemory(beast):(selection==3?new BeastGameView(beast,2):new TimedBounce(beast));
         WatchUi.pushView(v,new TekuTekuBeastInput(v),WatchUi.SLIDE_LEFT);}
     function switchPage(delta){selection=(selection+delta+4)%4;WatchUi.requestUpdate();}
-    function back(){return false;}function touch(point){selectAction();}
+    function back(){WatchUi.popView(WatchUi.SLIDE_RIGHT);return true;}function touch(point){selectAction();}
 }
 (:background,:glance)
 class MatrixApp extends TekuTekuBeastApp {
     function initialize(){TekuTekuBeastApp.initialize();}
-    function getInitialView(){var v=new FeedbackMenu();return [v,new TekuTekuBeastInput(v)];}
+    function getInitialView(){var v=new FeedbackAudit();return [v,new TekuTekuBeastInput(v)];}
 }

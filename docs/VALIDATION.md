@@ -1,6 +1,6 @@
 # Current source validation checkpoint
 
-Latest source work: Issue #20 battle UI feedback, following Issue #22 game sprites.
+Latest source work: Issue #14 mini-game input feedback and interruption handling.
 
 ## Physical acceptance preparation - source 118bdff
 
@@ -527,3 +527,43 @@ Evidence: `bin/battleui20-native.log`, `battleui20-layout.log`,
 timeout-marked visual observation, not an automated pass. Reproduce with
 `tests/battle/monkey.jungle`; SELECT during audit enters the RAM-only Nimble
 scenario, while an untouched run exits after all 258 scenes.
+
+## Issue #14 - registered inputs and interruption safety (2026-10-19)
+
+Enduro 4 SDK 9.2 native suite: **76/76 PASS**. New tests exercise the actual
+UP/SELECT/DOWN delegate mappings, repeated UP cues, expected/received failures,
+old sessions without feedback fields, all three games' inactive/active/hide/stop
+paths, stalled timers, saved timing/seed/cursor, consumed resume input and the
+500 ms frozen readiness gate. Repeated callbacks do not deduct energy or award
+rewards again. Existing rules, save upgrades, step reconciliation and sleep
+tests remain passing. No game-rule or pet-save version change.
+
+Focused rendering audit: **44 scenes, zero failures**, including all expected /
+received input combinations, timeout, repeated cues, legacy sessions and all
+three pause/readiness screens. Sampled audit heap: **156,472 / 781,976 bytes**
+(not a production peak measurement). An initial pause-footer truncation was
+fixed before the final passing run. Signed public Enduro 4 compile passed with
+Developer Mode excluded. No device matrix, IQ export or release change.
+
+Manual simulator observation confirmed BEAST versus YOU phases, two UP presses
+advancing separately to 1/3 and 2/3 with dark UP highlights, and an incorrect
+DOWN displaying NEED: SELECT / GOT: DOWN beside the actual DOWN highlight.
+The manual runner timed out while navigating simulator interruption controls;
+it is visual evidence only, not an automated interruption pass. Lifecycle,
+reopen and timer-stall assertions above ran natively in the simulator. Real
+notifications, calls, alarms, dismissal-button behaviour and watch readability
+still require physical Enduro 4 acceptance.
+
+Garmin documents lifecycle/activity callbacks, but no universal alert-suppression
+API. Timers stop while hidden/paused, and restored sessions require SELECT;
+overlays that leave activity and timer delivery unchanged cannot reliably be
+detected. See [gameplay/API limitations](GAMEPLAY.md#alerts-and-mini-game-resume).
+No DND writes, new sensors, bitmaps, background work or independent timers.
+Brief input/readiness feedback reuses the existing 250 ms foreground timer;
+unchanged visuals avoid redraws. Three optional memory-feedback fields use
+backward-compatible session defaults. Hardware battery impact is unmeasured.
+
+Evidence: `bin/game14-native.log`, `game14-layout.log`,
+`game14-{unit,layout,public}-build.log`; `game14-manual.log` is timeout-marked.
+Reproduce the RAM-only visual/button fixture using
+`tests/game-feedback/monkey.jungle` as described in [BUILD.md](BUILD.md).
