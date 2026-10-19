@@ -28,6 +28,7 @@ class TekuTekuBeastView extends WatchUi.View {
         if(refresher!=null){refresher.stop();refresher=null;}
         Application.getApp().activeView=self;if(!beast.dev){beast.data=null;}
         beast.syncHistory();new BeastBattle(beast);loadSprite();ensureWorld();world.readWatch(beast.realNow(),beast.skipWatch);refresher=new Timer.Timer();timerPeriod=desiredPeriod();refresher.start(method(:refresh),timerPeriod,true);consumeEvolution();
+        if(menu!=null && menu.equals("Wild battles")){updateRows();}
     }
     function onHide(){if(refresher!=null){refresher.stop();refresher=null;}if(scenery!=null){scenery.release();}beast.commit();}
     function ensureWorld(){if(world==null || world.dev!=beast.dev){world=new BeastWorld(beast);}if(scenery==null){scenery=new BeastScenery();}}

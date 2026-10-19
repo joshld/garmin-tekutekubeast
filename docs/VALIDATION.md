@@ -644,3 +644,40 @@ Evidence: `bin/resume-native.log`, `resume-{games,battle}-layout.log`,
 Owner Enduro 4 acceptance remains: countdown readability/frozen play, Memory
 continuation clarity, fresh-match entry, Exit-to-Pet and Abandon confirmation,
 alerts/reopen and battery. No physical-watch testing, release or publication claimed.
+
+## Issues #14/#20 - live Enduro 4 resume regression (2026-10-19)
+
+Actual SDK 9.2 Enduro 4 GUI execution against `7281654`, using physical-button
+key mappings and the production views/delegates/rules. An isolated QA identity
+and `qa.reg728.*` Storage namespace held a fixture pet; no production saves,
+steps, identities or release packages were changed. A read-only observer logged
+session IDs, HP, seeds, ticks, readiness and reward counters.
+
+- **PASS, live:** visible READY 3/2/1 in Memory, battles and Adventures. Memory
+  elapsed=34/cursor=1 and battle turn=1/HP=29:36 remained frozen throughout.
+- **PASS, live:** Memory DOWN/UP/DOWN, one correct input, pause/Exit to Pet/reopen,
+  same session/seed/round/partial cursor, full sequence replay before input;
+  New Game created a fresh session; confirmed Abandon gave no reward.
+- **PASS, live:** fresh wild encounter opened without Resume; saved battle
+  restored opponent/seed/turn and YOU 29/46, WILD 36/46. Victory awarded 12 XP
+  once; a second battle ended in defeat for 5 consolation XP (total 17).
+- **FAIL then fixed/retested PASS, live:** after a completed match, the parent
+  menu retained cached `Resume battle` text. Refresh its rows on returning to
+  Wild battles; the retest showed `Meet: 0 waiting`. Add a native regression for
+  completed-session cleanup, menu refresh and unchanged XP after repeated show.
+- **PASS, live:** Adventure stop 2/3, ID/seed/ticks and Energy=2 survived Exit and
+  a full QA VM restart. Resume cost nothing. New Game displayed `COST: 1 MORE
+  ENERGY`, confirmation deducted exactly one, and the new expedition awarded
+  one shell. Reopen showed START/Energy=1, not a stale expedition or extra loot.
+- **NOT TESTED live:** Bounce countdown/input, battle Restart/Abandon confirmation
+  edge cases, forced termination mid-write and actual OS notification delivery.
+  Existing native regressions cover these game/session transaction paths; those
+  assertions are not manual simulator or physical-watch acceptance.
+
+The focused native suite passed **84/84**; signed Enduro 4 Owner/public builds
+passed, including public DEV exclusion. Existing 73 game/271 battle layout
+passes are reused: only parent-menu refresh changed; no geometry, timing,
+combat rules or resources changed. No device matrix or IQ export.
+Local GUI logs: workspace `outputs/regression-7281654/manual{,-fixed}.log`;
+native/build logs: repository `bin/live728-*.log`. Physical Enduro 4 alert,
+button-comfort and battery acceptance remains open.

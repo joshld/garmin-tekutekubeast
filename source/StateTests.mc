@@ -1198,6 +1198,21 @@ function battleFreshResumeAndCleanupTest(logger){
     return true;
 }
 (:test)
+function battleParentMenuRefreshAfterResultTest(logger){
+    var app=Toybox.Application.getApp();var prior=app.activeView;
+    var s=TestSupport.fixture();s.data["stageFloor"]=2;s.data["sleepMode"]=2;s.commit();
+    var home=new TekuTekuBeastView();home.beast=s;
+    var fight=new BeastBattle(s);fight.beginBattle();home.openMenu("Wild battles");
+    Test.assert(home.rows[0].equals("Resume battle"));
+    fight.data["active"]["actors"][1]["hp"]=1;fight.battleTurn(0);fight.finishBattle();fight.clearFinishedBattle();
+    var xp=fight.battleXp();Test.assertEqual(xp,12);
+    home.onShow();Test.assert(!home.rows[0].equals("Resume battle"));
+    Test.assert(home.rows[4].equals("Battle XP: 12"));home.onHide();
+    home.onShow();Test.assert(!home.rows[0].equals("Resume battle"));
+    var reloaded=new BeastBattle(s);Test.assertEqual(reloaded.battleXp(),xp);home.onHide();
+    app.activeView=prior;return true;
+}
+(:test)
 function pauseBattlePracticeAndTerminalTest(logger){
     var s=TestSupport.fixture();s.data["stageFloor"]=2;s.data["sleepMode"]=2;s.commit();
     var v=new PauseBattleFixture(s);v.battle=v.fight.practiceBattle();v.battleVisible=true;v.battlePhase=1;
