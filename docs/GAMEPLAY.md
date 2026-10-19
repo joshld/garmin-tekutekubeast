@@ -40,6 +40,13 @@ Decline next. Eggs must hatch first; a sleeping beast must explicitly Wake Up.
 UP/DOWN chooses among four actual named techniques; SELECT uses one and BACK
 pauses. Touching a move chooses/uses it. Each turn saves before its short visual
 reaction, so closing/reopening resumes the same opponent, HP, seed and turn.
+YOU/WILD labels remain above the HP bars, including identical creatures. Each
+committed exchange shows your named move/result, then the wild move/result:
+800ms action and 1200ms result per actor, independent of Motion setting. Damage
+stays below its recipient; guard/buff feedback stays below the acting creature.
+Repeated SELECT/touch input cannot skip feedback or submit extra turns; BACK
+still pauses. Reopening an unclaimed turn visually replays its saved events with
+a REPLAY marker, without applying damage or rewards again. No new save fields.
 On the compact move grid, the selected technique has a short effect hint.
 Recovering signatures show the remaining own moves without hiding other options.
 Older renderers without compact vector fonts show a full-width named-move

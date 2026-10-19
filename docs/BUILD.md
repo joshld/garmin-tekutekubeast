@@ -99,8 +99,10 @@ real pet or Store packages.
 
 For Issue #20, `tests/battle/monkey.jungle` uses the same isolated QA identity and
 RAM saves. Its Enduro 4 audit covers all named-move grids, effects, outcomes and
-sleep/motion states. After PASS, tap once to exercise production battle controls
-with a fixture Pip and queued encounters. Stop the QA VM to flush its counters;
+sleep/motion states and identical-fighter sequential feedback. It exits after its
+report; SELECT during the audit skips to production controls with identical
+Nimble fighters and RAM-only encounters (`autoExit=false` retains the report).
+Stop the QA VM to flush interactive counters;
 do not clear Storage. Native unit tests include deterministic battles and the
 separate encounter/claim document.
 

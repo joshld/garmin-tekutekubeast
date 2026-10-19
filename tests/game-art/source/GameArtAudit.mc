@@ -47,8 +47,8 @@ class GameArtAudit extends ArtLayoutAuditView {
         if(pose==2){view.battle["status"]=1;view.battleResult="+20 BATTLE XP";}
         view.onUpdate(dc);
         for(var actor=0;actor<2;actor++){
-            var bitmap=view.battlePictures[actor][pose==2 && actor==1?0:pose];
-            checkGraphic(dc,view.battleSpriteBox(dc,actor,bitmap,pose==1?(actor==0?3:-3):0),"Battle creature");
+            var bitmap=view.battlePictures[actor][view.battlePose(actor)];
+            checkGraphic(dc,view.battleSpriteBox(dc,actor,bitmap,view.battleBump(actor)),"Battle creature");
         }
     }
     function renderGame(dc,model,specimen,scenario){

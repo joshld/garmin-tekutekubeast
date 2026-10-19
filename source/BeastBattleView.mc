@@ -11,7 +11,7 @@ class BeastBattleView extends TekuTekuBeastView {
     var battleWidth=280;var battleHeight=280;var battleSleeping=false;
     var battleResult="";var battleRedraws=0;var fight;
     var moveFont=null;var fontChecked=false;var compactGrid=false;
-    var battleVisible=false;
+    var battleVisible=false;var replaying=false;
     function initialize(model){TekuTekuBeastView.initialize();beast=model;fight=new BeastBattle(beast);}
     function onShow(){
         battleVisible=true;burst=0;
@@ -19,7 +19,13 @@ class BeastBattleView extends TekuTekuBeastView {
         if(!beast.dev){beast.data=null;}beast.syncHistory();fight.discover();
         battle=fight.battleSession();battleSleeping=beast.isSleeping();
         battlePhase=battle==null?0:(battle["status"]==0?1:3);
-        if(battlePhase==3){battleResult=fight.finishBattle();}
+        replaying=false;
+        // Replay the existing committed events after interruption, never execute
+        // them again. The journal has actual (including lethal) damage, so HP
+        // can be presented sequentially without copying or changing the save.
+        if(battle!=null && battle["events"].size()>0 && !battle["claimed"]){
+            replaying=true;beginPresentation();
+        }else if(battlePhase==3){battleResult=fight.finishBattle();}
         loadBattleArt();tuneBattleTimer();
     }
     function onHide(){
@@ -29,9 +35,12 @@ class BeastBattleView extends TekuTekuBeastView {
     }
     function stopBattleTimer(){if(battleTimer!=null){battleTimer.stop();battleTimer=null;}}
     function tuneBattleTimer(){
-        stopBattleTimer();if(!battleVisible){return;}battleTimer=new Timer.Timer();
-        var period=burst>0?(beast.number("motion")==0?1000:(beast.number("motion")==1?500:250)):5000;
-        battleTimer.start(method(:refresh),period,true);
+        if(!battleVisible){stopBattleTimer();return;}
+        if(battleTimer==null){battleTimer=new Timer.Timer();}else{battleTimer.stop();}
+        // Four bounded callbacks for a two-action exchange. Timing is readable
+        // even with Motion OFF; no continuous animation loop during a turn.
+        var period=burst>0?(burst%2==0?800:1200):5000;
+        battleTimer.start(method(:refresh),period,burst==0);
     }
     function refresh() as Void {
         if(!battleVisible){return;}
@@ -43,9 +52,10 @@ class BeastBattleView extends TekuTekuBeastView {
             burst--;changed=true;
             if(burst==0){
                 battlePhase=battle["status"]==0?1:3;
+                replaying=false;
                 if(battlePhase==3){battleResult=fight.finishBattle();}
-                tuneBattleTimer();
             }
+            tuneBattleTimer();
         }
         if(changed){battleRedraws++;WatchUi.requestUpdate();}
     }
@@ -54,6 +64,8 @@ class BeastBattleView extends TekuTekuBeastView {
         battleSleeping=true;battleNotice="Beast is asleep.";WatchUi.requestUpdate();return true;
     }
     function selectAction(){
+        // Button repeats/taps must neither skip feedback nor restart its timer.
+        if(battlePhase==2){return;}
         if(battlePhase==3){WatchUi.popView(WatchUi.SLIDE_RIGHT);return;}
         if(asleepNotice()){return;}battleNotice="";
         if(battlePhase==0){
@@ -67,7 +79,7 @@ class BeastBattleView extends TekuTekuBeastView {
             battle=fight.battleTurn(moveChoice);
             if(battle==null){battlePhase=0;battleNotice="Battle paused";}
             else{
-                battlePhase=2;burst=beast.number("motion")==0?2:(beast.number("motion")==1?4:8);
+                replaying=false;beginPresentation();
             }
         }
         tuneBattleTimer();WatchUi.requestUpdate();
@@ -121,11 +133,49 @@ class BeastBattleView extends TekuTekuBeastView {
         if(moveChoice==3){var cooldown=battle["actors"][0]["cooldown"];return cooldown>0?"Ready in "+cooldown+" moves":"Strong hit";}
         return ["Hit the wild beast","Soften next hit","Boost next 2 hits"][moveChoice];
     }
-    function hpBar(dc,x,top,width,actor){
+    function beginPresentation(){battlePhase=2;burst=battle["events"].size()*2;}
+    function eventIndex(){return beast.max(0,(battle["events"].size()-(burst+1)/2).toNumber());}
+    function resultVisible(){return burst%2==1;}
+    function feedbackTarget(event){
+        return event["damage"]<0 || event["effect"]==1 || event["effect"]==2?event["actor"]:1-event["actor"];
+    }
+    function feedbackText(event){
+        if(event["damage"]>0){return "-"+event["damage"]+" HP";}
+        if(event["damage"]<0){return "+"+(-event["damage"])+" HP";}
+        return event["effect"]==1?"GUARD UP":(event["effect"]==2?"POWER UP":"MISS");
+    }
+    function displayHp(index){
+        var actor=battle["actors"][index];var hp=actor["hp"];
+        if(battlePhase!=2 || burst==0){return hp;}
+        var events=battle["events"];var applied=eventIndex()+(resultVisible()?1:0);
+        for(var i=applied;i<events.size();i++){
+            var event=events[i];
+            if(feedbackTarget(event)==index){hp+=event["damage"];}
+        }
+        return beast.max(0,beast.min(actor["maxHp"],hp));
+    }
+    function fighterLabel(dc,index){
+        battleText(dc,dc.getWidth()*(index==0?0.30:0.70),y(dc,0.11),dc.getWidth()*0.24,index==0?"YOU":"WILD");
+    }
+    function battleFeedback(dc){
+        var events=battle["events"];var current=eventIndex();var youRows=0;var wildRows=0;
+        for(var i=0;i<=current;i++){
+            if(i==current && !resultVisible()){break;}
+            var event=events[i];var target=feedbackTarget(event);var row=target==0?youRows:wildRows;
+            if(target==0){youRows++;}else{wildRows++;}
+            battleText(dc,dc.getWidth()*(target==0?0.30:0.70),y(dc,0.59+row*0.06),dc.getWidth()*0.30,feedbackText(event));
+        }
+        var action=events[current];
+        battleText(dc,dc.getWidth()/2,y(dc,0.71),dc.getWidth()*0.58,
+            (action["actor"]==0?"YOU":"WILD")+(resultVisible()?" RESULT":" MOVE"));
+        battleText(dc,dc.getWidth()/2,y(dc,0.78),dc.getWidth()*0.54,BeastBattleMoves.name(action["move"]));
+    }
+    function hpBar(dc,x,top,width,index){
+        var actor=battle["actors"][index];var hp=displayHp(index);
         dc.setColor(INK,Graphics.COLOR_TRANSPARENT);dc.drawRectangle(x,top,width,6);
-        var fill=((width-2)*actor["hp"].toFloat()/actor["maxHp"]).toNumber();
+        var fill=((width-2)*hp.toFloat()/actor["maxHp"]).toNumber();
         dc.fillRectangle(x+1,top+1,fill,4);
-        dc.drawText(x+width/2,top+7,Graphics.FONT_XTINY,actor["hp"]+"/"+actor["maxHp"],Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(x+width/2,top+7,Graphics.FONT_XTINY,hp+"/"+actor["maxHp"],Graphics.TEXT_JUSTIFY_CENTER);
     }
     function battleSpriteBox(dc,index,bitmap,bump){
         var ground=y(dc,0.58);var top=ground-bitmap.getHeight();
@@ -136,25 +186,31 @@ class BeastBattleView extends TekuTekuBeastView {
         cx=beast.max(dc.getWidth()/2-half,beast.min(dc.getWidth()/2+half,cx));
         return [(cx-bitmap.getWidth()/2).toNumber(),top,bitmap.getWidth(),bitmap.getHeight()];
     }
+    function movingFighter(index){
+        return beast.number("motion")>0 && battlePhase==2 && burst>0 && !resultVisible() && battle["events"][eventIndex()]["actor"]==index;
+    }
+    function battlePose(index){return movingFighter(index)?1:(battlePhase==3 && battle["status"]==1 && index==0?2:0);}
+    function battleBump(index){return movingFighter(index)?(index==0?3:-3):0;}
     function battleSprite(dc,index){
         if(battlePictures==null){return;}
-        var moving=beast.number("motion")>0 && battlePhase==2 && burst>0;
-        var pose=moving?1:(battlePhase==3 && battle["status"]==1 && index==0?2:0);
+        var pose=battlePose(index);
         var bitmap=battlePictures[index][pose];
-        var bump=moving && burst%2==0?(index==0?3:-3):0;
+        var bump=battleBump(index);
         var box=battleSpriteBox(dc,index,bitmap,bump);var cx=box[0]+box[2]/2;
         var ground=y(dc,0.58);dc.setColor(LIGHT,Graphics.COLOR_TRANSPARENT);
         dc.fillRectangle(cx-bitmap.getWidth()*0.35,ground,bitmap.getWidth()*0.70,2);
         dc.drawBitmap(box[0],box[1],bitmap);
-        if(moving && ((burst%4>=2 && index==1)||(burst%4<2 && index==0))){
+        if(beast.number("motion")>0 && battlePhase==2 && resultVisible() &&
+                feedbackTarget(battle["events"][eventIndex()])==index && battle["events"][eventIndex()]["damage"]>0){
             pixelIcon(dc,cx+12,ground-bitmap.getHeight()/2,[8,42,28,127,28,42,8],INK,2);
         }
     }
     function onUpdate(dc){
         prepareMoveFont();
         battleWidth=dc.getWidth();battleHeight=dc.getHeight();sceneInk=INK;
-        dc.setColor(BG,BG);dc.clear();label(dc,y(dc,0.08),"BATTLE",Graphics.FONT_XTINY);
+        dc.setColor(BG,BG);dc.clear();
         if(battle==null){
+            label(dc,y(dc,0.08),"BATTLE",Graphics.FONT_XTINY);
             label(dc,y(dc,0.28),fight.battleQueueCount()+" WAITING",Graphics.FONT_XTINY);
             label(dc,y(dc,0.40),"BATTLE XP "+fight.battleXp(),Graphics.FONT_XTINY);
             label(dc,y(dc,0.57),battleNotice.length()>0?battleNotice:"SELECT: MEET A BEAST",Graphics.FONT_XTINY);
@@ -162,8 +218,10 @@ class BeastBattleView extends TekuTekuBeastView {
             label(dc,y(dc,0.83),"BACK: LATER",Graphics.FONT_XTINY);return;
         }
         loadBattleArt();var actors=battle["actors"];
-        hpBar(dc,dc.getWidth()*0.17,y(dc,0.18),dc.getWidth()*0.27,actors[0]);
-        hpBar(dc,dc.getWidth()*0.56,y(dc,0.18),dc.getWidth()*0.27,actors[1]);
+        if(replaying && battlePhase==2){battleText(dc,dc.getWidth()/2,y(dc,0.04),dc.getWidth()*0.26,"REPLAY");}
+        fighterLabel(dc,0);fighterLabel(dc,1);
+        hpBar(dc,dc.getWidth()*0.17,y(dc,0.18),dc.getWidth()*0.27,0);
+        hpBar(dc,dc.getWidth()*0.56,y(dc,0.18),dc.getWidth()*0.27,1);
         battleSprite(dc,0);battleSprite(dc,1);
         if(battleSleeping || battleNotice.length()>0){
             label(dc,y(dc,0.62),battleSleeping?"Beast is asleep.":battleNotice,Graphics.FONT_XTINY);
@@ -174,14 +232,11 @@ class BeastBattleView extends TekuTekuBeastView {
             label(dc,y(dc,0.72),battleResult,Graphics.FONT_XTINY);
             label(dc,y(dc,0.81),"SELECT: EXIT",Graphics.FONT_XTINY);return;
         }
-        var names=BeastBattleMoves.names(actors[0]["form"]);
         if(battlePhase==2){
-            var events=battle["events"];var half=beast.number("motion")==0?1:(beast.number("motion")==1?2:4);
-            var event=events[events.size()>1 && burst<=half?1:0];
-            battleText(dc,dc.getWidth()/2,y(dc,0.61),dc.getWidth()*0.76,(event["actor"]==0?"YOU: ":"WILD: ")+BeastBattleMoves.name(event["move"]));
-            label(dc,y(dc,0.80),event["damage"]>0?"-"+event["damage"]+" HP":(event["effect"]==1?"PROTECTED":"POWER UP"),Graphics.FONT_XTINY);
+            battleFeedback(dc);
             return;
         }
+        var names=BeastBattleMoves.names(actors[0]["form"]);
         var rowHeight=dc.getHeight()*0.13;
         if(!compactGrid){
             battleText(dc,dc.getWidth()/2,y(dc,0.61),dc.getWidth()*0.76,names[moveChoice]);

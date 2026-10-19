@@ -169,6 +169,68 @@ function battleViewLifecycleTest(logger){
     v.battleVisible=true;v.battle=null;v.refresh();Test.assertEqual(v.burst,0);
     Test.assertEqual(v.battleRedraws,0);v.onHide();Test.assert(!v.battleVisible);Test.assert(v.battleTimer==null);return true;
 }
+(:test)
+function battleReadableSequenceTest(logger){
+    for(var move=0;move<4;move++){
+        var s=TestSupport.fixture();s.data["sleepMode"]=2;s.data["stageFloor"]=2;s.commit();
+        var view=new BeastBattleView(s);view.battle=view.fight.beginBattle();view.battlePhase=1;view.battleVisible=true;
+        var you=view.battle["actors"][0]["hp"];var wild=view.battle["actors"][1]["hp"];
+        view.moveChoice=move;view.selectAction();
+        var committed=s.store.copy(view.battle);var writes=s.store.writes;var timer=view.battleTimer;
+        Test.assertEqual(view.burst,4);Test.assertEqual(view.eventIndex(),0);Test.assert(!view.resultVisible());
+        Test.assertEqual(view.displayHp(0),you);Test.assertEqual(view.displayHp(1),wild);
+        for(var press=0;press<5;press++){view.selectAction();view.touch([200,220]);view.switchPage(1);}
+        Test.assertEqual(view.moveChoice,move);Test.assertEqual(view.burst,4);Test.assertEqual(s.store.writes,writes);Test.assert(view.battleTimer==timer);
+        view.refresh();Test.assertEqual(view.eventIndex(),0);Test.assert(view.resultVisible());
+        Test.assertEqual(view.displayHp(1),wild-view.battle["events"][0]["damage"]);
+        Test.assertEqual(view.displayHp(0),you);
+        view.refresh();Test.assertEqual(view.eventIndex(),1);Test.assert(!view.resultVisible());
+        Test.assertEqual(view.displayHp(0),you);
+        view.refresh();Test.assertEqual(view.eventIndex(),1);Test.assert(view.resultVisible());
+        Test.assertEqual(view.displayHp(0),view.battle["actors"][0]["hp"]);
+        Test.assertEqual(view.displayHp(1),view.battle["actors"][1]["hp"]);
+        Test.assert(TestSupport.same(committed,view.battle));Test.assertEqual(s.store.writes,writes);
+        view.refresh();Test.assertEqual(view.burst,0);Test.assertEqual(view.battlePhase,1);Test.assert(view.battleTimer==timer);
+        view.onHide();Test.assert(view.battleTimer==null);
+    }
+    return true;
+}
+(:test)
+function battleSpatialFeedbackTest(logger){
+    var view=new BeastBattleView(TestSupport.fixture());
+    var hit={"actor"=>0,"damage"=>12,"effect"=>0};
+    Test.assertEqual(view.feedbackTarget(hit),1);Test.assert(view.feedbackText(hit).equals("-12 HP"));
+    hit["actor"]=1;Test.assertEqual(view.feedbackTarget(hit),0);
+    hit["damage"]=0;Test.assert(view.feedbackText(hit).equals("MISS"));
+    hit["effect"]=1;Test.assertEqual(view.feedbackTarget(hit),1);Test.assert(view.feedbackText(hit).equals("GUARD UP"));
+    hit["actor"]=0;hit["effect"]=2;Test.assertEqual(view.feedbackTarget(hit),0);Test.assert(view.feedbackText(hit).equals("POWER UP"));
+    // Rendering fallback only: v1 rules currently generate no healing/misses.
+    hit["effect"]=0;hit["damage"]=-5;Test.assertEqual(view.feedbackTarget(hit),0);Test.assert(view.feedbackText(hit).equals("+5 HP"));
+    return true;
+}
+(:test)
+function battleFeedbackReopenAndClaimTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;s.data["stageFloor"]=2;s.commit();
+    var view=new BeastBattleView(s);view.battle=view.fight.beginBattle();view.battlePhase=1;view.battleVisible=true;
+    view.selectAction();view.refresh();var saved=s.store.copy(view.fight.data["active"]);
+    view.onHide();var reopened=new BeastBattleView(s);reopened.onShow();
+    Test.assert(reopened.replaying);Test.assertEqual(reopened.burst,4);Test.assertEqual(reopened.battle["turn"],saved["turn"]);
+    Test.assert(TestSupport.same(saved,reopened.fight.data["active"]));
+    for(var i=0;i<4;i++){reopened.refresh();}Test.assertEqual(reopened.battlePhase,1);
+    Test.assert(TestSupport.same(saved,reopened.fight.data["active"]));
+    // One-action lethal turn: reconstruct exact pre-hit HP, then claim once
+    // after replay, never execute a second opponent action after a KO.
+    reopened.fight.data["active"]["actors"][1]["hp"]=1;reopened.fight.commit();
+    reopened.selectAction();Test.assertEqual(reopened.burst,2);
+    Test.assertEqual(reopened.displayHp(1),1);
+    reopened.onHide();var result=new BeastBattleView(s);result.onShow();
+    Test.assert(result.replaying);Test.assertEqual(result.burst,2);var xp=result.fight.battleXp();
+    result.selectAction();result.refresh();Test.assertEqual(result.displayHp(1),0);
+    result.refresh();Test.assertEqual(result.battlePhase,3);Test.assert(result.fight.battleXp()>xp);
+    var claimed=result.fight.battleXp();result.onHide();var again=new BeastBattleView(s);again.onShow();
+    Test.assertEqual(again.battlePhase,3);Test.assert(!again.replaying);Test.assertEqual(again.fight.battleXp(),claimed);
+    again.onHide();return true;
+}
 
 (:test)
 function battleMoveHintsAndResumedDiscoveryTest(logger){

@@ -3,11 +3,11 @@ using Toybox.Graphics;
 using Toybox.System;
 
 // Isolated matrix identity + RAM-only state. Does not touch either real pet.
-// 72 named-move grids, 18 technique exchanges, results/sleep/motion/intro.
-// Tap the completed report once to exercise normal production battle controls.
+// Named grids + sequential action/results, identical fighters, replay and KO.
+// Set autoExit=false for the interactive report/production battle controls.
 class BattleAudit extends BeastBattleView {
     var auditTimer=null;var audited=false;var interactive=false;var cursor=0;
-    var failures=[];var boxes=[];var peakMemory=0;var totalMemory=0;var scenes=100;
+    var failures=[];var boxes=[];var peakMemory=0;var totalMemory=0;var scenes=258;var autoExit=true;
     function initialize(){
         BeastBattleView.initialize(new ArtPreviewState());
         beast.data["sleepMode"]=2;beast.data["sleepUntil"]=0l;
@@ -50,19 +50,18 @@ class BattleAudit extends BeastBattleView {
         }
         return lines;
     }
-    function hpBar(dc,x,top,width,actor){
-        BeastBattleView.hpBar(dc,x,top,width,actor);
+    function hpBar(dc,x,top,width,index){
+        BeastBattleView.hpBar(dc,x,top,width,index);
         if(!audited){
-            var text=actor["hp"]+"/"+actor["maxHp"];var w=dc.getTextWidthInPixels(text,Graphics.FONT_XTINY);
+            var text=displayHp(index)+"/"+battle["actors"][index]["maxHp"];var w=dc.getTextWidthInPixels(text,Graphics.FONT_XTINY);
             boxes.add([x+width/2-w/2,top+7,w,dc.getFontHeight(Graphics.FONT_XTINY),"HP "+text]);
         }
     }
     function battleSprite(dc,index){
         BeastBattleView.battleSprite(dc,index);
         if(!audited && battlePictures!=null){
-            var moving=beast.number("motion")>0 && battlePhase==2 && burst>0;
-            var pose=moving?1:(battlePhase==3 && battle["status"]==1 && index==0?2:0);
-            var box=battleSpriteBox(dc,index,battlePictures[index][pose],moving && burst%2==0?(index==0?3:-3):0);
+            var pose=battlePose(index);
+            var box=battleSpriteBox(dc,index,battlePictures[index][pose],battleBump(index));
             boxes.add([box[0],box[1],box[2],box[3],"Fighter "+index]);
         }
     }
@@ -83,6 +82,8 @@ class BattleAudit extends BeastBattleView {
         }
     }
     function fixture(){
+        replaying=false;
+        if(cursor>=100){feedbackFixture();return;}
         var form=cursor<72?(cursor/4).toNumber():(cursor<90?cursor-72:0);
         var player=fighterForm(form);var foe=fighterForm((form+5)%18);
         battle=BeastBattleRules.create(1,17,player,foe);battlePhase=1;moveChoice=cursor%4;
@@ -96,9 +97,32 @@ class BattleAudit extends BeastBattleView {
         else if(cursor==94){battleNotice="Technique recovering";}
         else if(cursor==95){battle=null;}
         else if(cursor>=96){
-            battlePhase=2;burst=cursor-94;beast.data["motion"]=(cursor-96)%3;
+            battlePhase=2;burst=1+(cursor-96)%4;beast.data["motion"]=(cursor-96)%3;
             battle["events"]=[{"actor"=>0,"move"=>3,"damage"=>16,"effect"=>3},
                 {"actor"=>1,"move"=>foe["form"]*4,"damage"=>7,"effect"=>0}];
+        }
+    }
+    function feedbackFixture(){
+        var sample=cursor-100;var form=sample<144?(sample/8).toNumber():1;
+        var slot=sample<144?((sample%8)/2).toNumber():(sample<152?(sample-144)/4:0).toNumber();
+        var player=fighterForm(form);var foe=fighterForm(form); // identical art/stats
+        battle=BeastBattleRules.create(1,17,player,foe);battlePhase=2;
+        battleSleeping=false;battleNotice="";battleResult="+12 BATTLE XP";
+        beast.data["motion"]=sample%3;burst=sample<144?(sample%2==0?4:3):4-(sample-144)%4;
+        replaying=sample>=144 && sample<152;
+        var enemySlot=(slot+1)%4;
+        battle["events"]=[{"actor"=>0,"move"=>form*4+slot,"damage"=>slot==1 || slot==2?0:12,"effect"=>slot},
+            {"actor"=>1,"move"=>form*4+enemySlot,"damage"=>enemySlot==1 || enemySlot==2?0:11,"effect"=>enemySlot}];
+        battle["actors"][1]["hp"]-=battle["events"][0]["damage"];
+        battle["actors"][0]["hp"]-=battle["events"][1]["damage"];
+        if(sample>=152 && sample<156){
+            // Presentation-only fallback; v1 rules do not generate heals/misses.
+            battle["events"][0]["damage"]=sample<154?-5:0;
+            battle["actors"][0]["hp"]=30;battle["actors"][1]["hp"]=30;burst=sample%2==0?4:3;
+        }
+        if(sample>=156){
+            battle["status"]=1;battle["events"]=[battle["events"][0]];
+            battle["actors"][1]["hp"]=0;burst=sample==156?2:1;
         }
     }
     function runAudit(dc){
@@ -110,9 +134,11 @@ class BattleAudit extends BeastBattleView {
             System.println("BATTLE_LAYOUT: "+cursor+" scenes; "+failures.size()+" failures");
             System.println("BATTLE_MEMORY: peak="+peakMemory+" total="+totalMemory);
             for(var i=0;i<failures.size();i++){System.println(failures[i]);}
+            if(autoExit){auditTimer.start(method(:exitAudit),100,false);}
             WatchUi.requestUpdate();
         }
     }
+    function exitAudit() as Void {System.exit();}
     function onUpdate(dc){
         if(!audited){runAudit(dc);return;}
         if(interactive){BeastBattleView.onUpdate(dc);return;}
@@ -123,15 +149,22 @@ class BattleAudit extends BeastBattleView {
         label(dc,y(dc,0.72),failures.size()+" OVERLAPS / CLIPS",Graphics.FONT_XTINY);
     }
     function selectAction(){
-        if(!audited){return;}
+        // SELECT may enter a RAM-only manual scenario without repeating the
+        // complete layout audit. No summary is printed for a skipped audit.
+        if(!audited){audited=true;auditTimer.stop();autoExit=false;}
         if(!interactive){
-            interactive=true;var state=beast as ArtPreviewState;state.previewStage=1;state.previewFamily=0;
+            interactive=true;var state=beast as ArtPreviewState;state.previewStage=2;state.previewFamily=0;
             beast.data["motion"]=2;fight.data["active"]=null;fight.data["queue"]=[];
             fight.offer(0);fight.offer(2);fight.offer(3);fight.commit();
             battle=null;burst=0;battleVisible=true;battlePhase=0;battleSleeping=false;battleNotice="";
             tuneBattleTimer();WatchUi.requestUpdate();return;
         }
         BeastBattleView.selectAction();
+        if(battle!=null){System.println("BATTLE_UI_INPUT: turn="+battle["turn"]+" phase="+battlePhase+" burst="+burst+" at="+System.getTimer());}
+    }
+    function refresh() as Void {
+        BeastBattleView.refresh();
+        if(interactive && battle!=null){System.println("BATTLE_UI_STEP: turn="+battle["turn"]+" phase="+battlePhase+" burst="+burst+" YOU="+displayHp(0)+" WILD="+displayHp(1)+" at="+System.getTimer());}
     }
     function back(){if(!interactive){return true;}return BeastBattleView.back();}
     function switchPage(delta){if(interactive){BeastBattleView.switchPage(delta);}}

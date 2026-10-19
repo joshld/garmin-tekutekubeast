@@ -1,6 +1,6 @@
 # Current source validation checkpoint
 
-Latest source work: Issue #22 roaming/art fixes, following Issue #23 `17b6a3f`.
+Latest source work: Issue #20 battle UI feedback, following Issue #22 game sprites.
 
 ## Physical acceptance preparation - source 118bdff
 
@@ -479,3 +479,51 @@ hashes/recorded numbers and the Markdown-only diff were checked; no SDK build,
 simulator, matrix, artifact export or watch/Store change was performed.
 Issue #19 has no essential remaining cleanup work; deliberate future seams
 and physical acceptance remain separate from this completed scope.
+
+## Issue #20 - physical battle UI feedback (2026-10-19)
+
+Enduro 4 / SDK 9.2 only. Persistent YOU/WILD labels identify identical fighters.
+Committed turns are presented as YOU MOVE → YOU RESULT → WILD MOVE → WILD
+RESULT, using unchanged actual move names. Damage remains below its recipient;
+guard/buff results stay below the actor, with two rows when results share a side.
+HP bars reveal each saved event at its result stage instead of jumping together.
+Action/result dwell is 800/1200ms; Motion OFF disables movement, not readability.
+SELECT/tap repeats neither advance the sequence nor restart its timer. BACK/
+hide stops timers; reopen visually replays the last unclaimed committed exchange
+with REPLAY. No recalculated turns, new save fields or presentation save writes.
+
+**73 native tests pass**, including all four move roles, staged HP, repeated
+input/timer reuse, interrupted replay, exact lethal HP and single reward claims.
+**258 simulator layout scenes pass**: all 72 named selections/action/results,
+identical art/stats, guards/buffs, both actors, Motion OFF/LOW/NORMAL, replay,
+KO, results, sleep and defensive healing/miss display fixtures. The v1 engine
+still has no healing/miss mechanics; only their rendering fallback is tested.
+Public Enduro 4 compilation passes with DEV excluded. No device matrix/export.
+
+Computer-use simulator button observations: identical Nimble fighters, six-turn
+victory ending YOU 9/46, WILD 0/46 and +12 Battle XP. Exercised Brave Bounce,
+Whirlwind Dash, Quick Pounce and Swift Dodge. Observed signature damage -18 HP
+under WILD before its named Quick Pounce and -15 HP under YOU; guard and its
+following -3 HP remain stacked under YOU. Long names, bars and all four moves
+were readable. The manual bridge exceeded its 180-second bound during tool-
+driven interaction; its timeout is **not** an automated pass or a measured watch
+battle duration. The separate native/layout logs contain complete passing results.
+Stopped the isolated QA app afterwards; no real pet/watch storage was accessed.
+
+Resource impact: same three compact poses per fighter, cached font, no new
+bitmaps/buffers or background work. One Timer is reused for four one-shot
+transitions per normal exchange (previous NORMAL animation used eight callbacks),
+then the existing 5-second idle sleep check. HP reconstruction visits at most
+two committed events; no snapshot copies per frame. The move-list allocation is
+skipped during feedback. QA sampled heap 153,000 / 781,976 bytes; the expanded
+harness is not a matched baseline, allocator-wide peak or hardware battery test.
+Rules, 72 names/data/goldens, AI, rewards, storage schema, identities, signing
+and existing Store packages are unchanged. Prior physical persistence acceptance
+was reported by the owner; this new UI still needs owner readability/pacing and
+battery acceptance. Multiplayer and balance decisions remain open in #20.
+
+Evidence: `bin/battleui20-native.log`, `battleui20-layout.log`,
+`battleui20-{unit,layout,manual,public}-build.log`; `battleui20-manual.log` is
+timeout-marked visual observation, not an automated pass. Reproduce with
+`tests/battle/monkey.jungle`; SELECT during audit enters the RAM-only Nimble
+scenario, while an untouched run exits after all 258 scenes.
