@@ -22,12 +22,13 @@ class TekuTekuBeastView extends WatchUi.View {
     var nightTint={:tintColor=>0xAAAAAA};
     var roamTicks=0.0;var petX=0.5;var petFoot=0.70;var roamOriginX=0.0;var roamOriginY=0.70;var wasSleeping=false;
     var creatureHeaderBottom=0;var petBounds=[0,0,0,0];var petFrame=0;var darkScene=false;
+    var poopRows=[8,28,30,62,127,127];
     const BG=0xAAFFAA;const INK=0x005500;const LIGHT=0x55AA55;
     function initialize(){View.initialize();beast=new TekuTekuBeastState();}
     function onShow(){
         if(refresher!=null){refresher.stop();refresher=null;}
         Application.getApp().activeView=self;if(!beast.dev){beast.data=null;}
-        beast.syncHistory();new BeastBattle(beast);loadSprite();ensureWorld();world.readWatch(beast.realNow(),beast.skipWatch);refresher=new Timer.Timer();timerPeriod=desiredPeriod();refresher.start(method(:refresh),timerPeriod,true);consumeEvolution();
+        beast.syncHistory();new BeastBattle(beast);loadSprite();ensureWorld();world.beginVisit(beast.today());world.readWatch(beast.realNow(),beast.skipWatch);refresher=new Timer.Timer();timerPeriod=desiredPeriod();refresher.start(method(:refresh),timerPeriod,true);consumeEvolution();
         if(menu!=null && menu.equals("Wild battles")){updateRows();}
     }
     function onHide(){if(refresher!=null){refresher.stop();refresher=null;}if(scenery!=null){scenery.release();}beast.commit();}
@@ -125,8 +126,8 @@ class TekuTekuBeastView extends WatchUi.View {
     }
     function updateWorldRows(){
         ensureWorld();
-        if(menu.equals("Outdoor world")){rows=["Environment: "+["AUTO","FOREST","MEADOW","LAKESIDE","GARDEN"][world.prefs["environment"]],"Sun / location"];if(beast.dev){rows.add("Sky preview");}}
-        else if(menu.equals("Environment")){rows=["Family / neutral AUTO","Forest","Meadow","Lakeside","Garden"];}
+        if(menu.equals("Outdoor world")){rows=["Environment: "+world.environmentName(),"Sun / location"];if(beast.dev){rows.add("Sky preview");}}
+        else if(menu.equals("Environment")){rows=["Family / neutral AUTO","Forest","Meadow","Lakeside","Garden","Autumn Woodland","Countryside","AUTO: change daily"];}
         else if(menu.equals("Sun / location")){world.update(beast.realNow(),!beast.skipWatch);rows=["Location: "+["AUTO","SAVED","MANUAL","FIXED"][world.prefs["locationMode"]],world.source,"Rise "+world.eventText(0)+" Set "+world.eventText(1),"Read watch cache","Approx latitude","Approx longitude","No GPS activation","Moon: decorative arc",world.engine(),world.fixAge(beast.realNow())];}
         else if(menu.equals("Approx latitude") || menu.equals("Approx longitude")){var coord=menu.equals("Approx latitude")?world.draftLat:world.draftLon;rows=[coord.toFloat().format("%.1f")+" degrees","+1 degree","-1 degree","+0.1 degree","-0.1 degree","+10 degrees","-10 degrees","Use this location"];}
         else if(menu.equals("Sky preview")){rows=["Real local sky","Dawn","Day","Dusk","Night"];}
@@ -144,7 +145,7 @@ class TekuTekuBeastView extends WatchUi.View {
             if(name.equals("Wake Up")){var woke=beast.wakeUp();menu=null;toast(woke?"Waking up.":"Already awake.","wake");return;}
             if(name.find("Lights: ")==0){openMenu("Lighting");return;}
             if(name.equals("Pat")){menu=null;toast(beast.pat()?"HAPPY BEAST!":"PATS: 3/3","happy");}
-            else if(name.equals("Clean")){menu=null;toast(beast.clean()?"ALL CLEAN!":"ALL CLEAN","clean");}
+            else if(name.equals("Clean")){menu=null;var cleaned=beast.clean();toast(beast.number("poop")>0?"POOP LEFT: "+beast.number("poop"):(cleaned?"ALL CLEAN!":"ALL CLEAN"),"clean");}
             else if(name.equals("Rest")){beast.rest();menu=null;toast("RESTING","sleep");}
             else{openMenu(name);}return;
         }
@@ -251,7 +252,7 @@ class TekuTekuBeastView extends WatchUi.View {
     }
     function worldAction(context,name,n){
         if(context.equals("Outdoor world")){openMenu(n==0?"Environment":(n==1?"Sun / location":"Sky preview"));return true;}
-        if(context.equals("Environment")){world.setTheme(n);menu=null;toast("WORLD SET","look");return true;}
+        if(context.equals("Environment")){if(n==7){world.setDailyRotation();}else{world.setTheme(n);}menu=null;toast("WORLD SET","look");return true;}
         if(context.equals("Sky preview")){world.preview=n-1;world.invalidate();menu=null;toast(n==0?"REAL SKY":"SKY PREVIEW","look");return true;}
         if(context.equals("Sun / location")){
             if(n==0){world.prefs["locationMode"]=(world.prefs["locationMode"]+1)%4;world.invalidate();world.save();}
@@ -408,10 +409,24 @@ class TekuTekuBeastView extends WatchUi.View {
         if(beast.number("energy")<20 && !visualState().equals("sleep")){pixelIcon(dc,dc.getWidth()/2+6*scale,y(dc,0.12),[14,24,48,48,56,30,15],color,scale);}
         devBadge(dc,color);
         creature(dc);
-        // Poop is a fixed floor object, not attached to the moving creature.
-        if(beast.number("poop")>0){pixelIcon(dc,dc.getWidth()*0.73,y(dc,0.73),[8,28,30,62,127,127],darkScene?0xFFAA55:0xAA5500,scale);}
+        drawPoop(dc);
         bar(dc,y(dc,0.80),beast.progress(),dc.getWidth()/2);
         label(dc,y(dc,0.83),notice!=null?notice:todayLabel(),Graphics.FONT_XTINY);
+    }
+    function poopScale(width){return beast.max(1,(width/140).toNumber());}
+    function poopX(width,slot){return (width*(0.26+0.12*slot)-7*poopScale(width)/2.0).toNumber();}
+    function poopTop(height){return (height*0.75).toNumber();}
+    function drawPoop(dc){
+        // Persist slot occupancy, not pixels: positions survive reopening and
+        // scale with the display. This grass strip is below every roaming pose
+        // and above the growth bar; no collision solver or per-frame arrays.
+        var mask=beast.poopMask();if(mask==0){return;}
+        var scale=poopScale(dc.getWidth());var top=poopTop(dc.getHeight());
+        // Darker brown separates waste from the new warm leaf/field palettes.
+        var color=darkScene?0xFFAA55:(world!=null && world.theme>=4?0x550000:0xAA5500);
+        for(var slot=0;slot<5;slot++){
+            if((mask&(1<<slot))!=0){pixelIcon(dc,poopX(dc.getWidth(),slot),top,poopRows,color,scale);}
+        }
     }
     function devBadge(dc,color){
         if(beast.dev){

@@ -68,8 +68,38 @@ class TekuTekuBeastState {
         var defaults={"sleepMode"=>0,"bedMinute"=>1320,"wakeMinute"=>420,"watchBed"=>1320,"watchWake"=>420,
             "nextBed"=>0l,"nextWake"=>0l,"scheduleAt"=>0l,"sleepSource"=>"FALLBACK","autoLights"=>1,"lights"=>0,"lightsUntil"=>0l,"vibeStyle"=>0,
             "gameSerial"=>0,"gameDone"=>0,"session"=>null,"sessions"=>[null,null,null],"gameClaims"=>[0,0,0],"easy"=>0,"v5"=>1,"profileZone"=>null,
-            "awakeAt"=>0l,"awakeUntil"=>0l,"awakeZone"=>null,"grumpAt"=>0l,"grumpLevel"=>0};
+            "awakeAt"=>0l,"awakeUntil"=>0l,"awakeZone"=>null,"grumpAt"=>0l,"grumpLevel"=>0,
+            "poopSlots"=>0,"lastCleanReward"=>0l};
         var keys=defaults.keys();for(var i=0;i<keys.size();i++){if(!data.hasKey(keys[i])){data[keys[i]]=defaults[keys[i]];}}
+        repairPoop();
+        // Old saves without a pending meal start a new interval, not retroactive
+        // waste for time before this feature existed. Keep an already-due meal.
+        if(number("poopDue")==0){data["poopDue"]=max(now(),number("lastPoop"))+14400;}
+    }
+    function poopMask(){
+        var mask=number("poopSlots")&31;var count=0;
+        for(var i=0;i<5;i++){if((mask&(1<<i))!=0){count++;}}
+        var wanted=min(5,max(0,number("poop")));
+        return count==wanted?mask:(1<<wanted)-1;
+    }
+    function repairPoop(){data["poop"]=min(5,max(0,number("poop")));data["poopSlots"]=poopMask();}
+    function advancePoop(t){
+        repairPoop();var due=number("poopDue");
+        if(due==0){data["poopDue"]=max(t,number("lastPoop"))+14400;return;}
+        due=max(due,number("lastPoop")+14400);if(t<due){return;}
+        var events=((t-due)/14400).toLong()+1;
+        var added=min(5-number("poop"),events).toNumber();var mask=number("poopSlots");
+        for(var i=0;i<5 && added>0;i++){
+            if((mask&(1<<i))==0){mask|=1<<i;data["poop"]++;added--;data["cleanliness"]=max(0,number("cleanliness")-15);}
+        }
+        data["poopSlots"]=mask;
+        // Advance the watermark even at capacity: no hidden backlog refills a
+        // freshly cleaned slot. Catch-up is bounded to five slots, not hours.
+        data["lastPoop"]=due+(events-1)*14400;data["poopDue"]=number("lastPoop")+14400;
+    }
+    function scheduleFoodPoop(){
+        var due=max(now()+10800,number("lastPoop")+14400);
+        if(number("poopDue")==0 || due<number("poopDue")){data["poopDue"]=due;}
     }
     function refreshSleep(){
         if(dev || skipWatch || number("sleepMode")!=0){return;}
@@ -166,8 +196,7 @@ class TekuTekuBeastState {
             }
             data["lastCare"]=care>86400?t:number("lastCare")+h*3600;
         }
-        if(number("poopDue")>0 && t>=number("poopDue") && number("poop")<2 && t-number("lastPoop")>=14400){
-            data["poop"]++;data["cleanliness"]=max(0,number("cleanliness")-15);data["poopDue"]=0l;data["lastPoop"]=t;}
+        advancePoop(t);
         var prior=number("stageFloor");var s=stage();data["stageFloor"]=max(prior,s);
         if(s>prior && !(dev && number("forcedStage")>=0)){data["evolutionPending"]=1;}
         if(s>=3){family();}if(s==5){var flag=1<<(family()-1);
@@ -238,12 +267,20 @@ class TekuTekuBeastState {
     function feedFood(meal){
         start();if(isSleeping()){return false;}tick();var key=meal?"meals":"snacks";if(number(key)<1 || number("fullness")>=95){return false;}
         data[key]--;data["fullness"]=clamp(number("fullness")+(meal?30:10));data["happiness"]=clamp(number("happiness")+6);
-        data["friendship"]=clamp(friendship()+5);if(number("poopDue")==0){data["poopDue"]=now()+10800;}
+        data["friendship"]=clamp(friendship()+5);scheduleFoodPoop();
         careReward(25,0);commit();return true;
     }
     function clean(){
-        start();if(isSleeping()){return false;}tick();if(number("poop")==0){return false;}data["poop"]=0;data["cleanliness"]=100;
-        data["happiness"]=clamp(number("happiness")+10);data["friendship"]=clamp(friendship()+3);careReward(30,2);commit();return true;
+        start();if(isSleeping()){return false;}tick();if(number("poop")==0){return false;}
+        var mask=number("poopSlots");for(var i=0;i<5;i++){if((mask&(1<<i))!=0){mask&=~(1<<i);break;}}
+        data["poop"]--;data["poopSlots"]=mask;
+        data["cleanliness"]=number("poop")==0?100:min(100-15*number("poop"),number("cleanliness")+15);
+        // A backlog takes several actions, not several happiness/bond rewards.
+        if(now()-number("lastCleanReward")>=14400){
+            data["lastCleanReward"]=now();data["happiness"]=clamp(number("happiness")+10);
+            data["friendship"]=clamp(friendship()+3);careReward(30,2);
+        }
+        commit();return true;
     }
     function rest(){
         start();if(isSleeping()){return;}tick();data["awakeAt"]=0l;data["awakeUntil"]=0l;
@@ -306,7 +343,7 @@ class TekuTekuBeastState {
     }
     function useItem(item){
         start();if(isSleeping()){return false;}tick();if(data["items"][item]<1){return false;}
-        if(item==0){if(number("fullness")>=95){return false;}data["items"][item]--;data["fullness"]=clamp(number("fullness")+10);if(number("poopDue")==0){data["poopDue"]=now()+10800;}}
+        if(item==0){if(number("fullness")>=95){return false;}data["items"][item]--;data["fullness"]=clamp(number("fullness")+10);scheduleFoodPoop();}
         else if(item==1 || item==3 || item==6){data["happiness"]=clamp(number("happiness")+10);careReward(25,item==1?1:3);}
         else{data["equipped"]=number("equipped")==item?-1:item;}
         commit();return true;
@@ -329,7 +366,7 @@ class TekuTekuBeastState {
     }
     function setSpeed(value){virtualNow=now();anchor=realNow();speed=value;}
     function jump(seconds){virtualNow=now()+seconds;anchor=realNow();tick();}
-    function devSet(key,value){if(dev){data[key]=value;}}
+    function devSet(key,value){if(dev){data[key]=value;if(key.equals("poop")){repairPoop();}}}
     function simulateSleep(night){
         if(!dev){return;}data["sleepMode"]=1;
         data["awakeAt"]=0l;data["awakeUntil"]=0l;data["grumpAt"]=0l;data["grumpLevel"]=0;

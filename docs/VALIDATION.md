@@ -1,8 +1,97 @@
 # Current source validation checkpoint
 
+## Scenery prototype and daily AUTO (2026-10-24)
+
+First approved scenery milestone: Autumn Woodland and Countryside, alongside
+the four original themes. Original terrain PNGs are unchanged. Two new generated
+transparent sources compile to four time palettes at six native sizes; the
+48 asset checks pass (dimensions, supported RGB/15-colour limit, binary alpha,
+transparent sky and opaque waste slots). Enduro 4's eight added PNGs total
+42,771 bytes compressed; this is package input, not decoded RAM.
+
+Optional `AUTO: change daily` cycles six scenes by local calendar date; family
+AUTO/manual choices keep their original meaning and existing saves default to
+rotation off. Selection stays fixed while playing, including midnight, and
+updates when Pet is shown again on a different date. One additive `world.v1`
+preference, no daily write/timer/GPS or pet-save change. Manual choice turns
+rotation off. Sky, sleep, lights and Glance/background logic are unchanged.
+
+Enduro 4 SDK native **91/91 PASS**, including date/reopen stability, month
+boundary, manual override, old IDs, menu selection, pet-state purity and DEV
+isolation. Production-renderer QA **192 scenes / zero failures** covers six
+themes x four phases x ON/OFF x Pip/Nimble x zero/five poops; cached redraw
+retains the same terrain handle and five slots clear the beast/growth bar.
+Final audit sampled 154,408 / 781,976 bytes; not a production peak/battery test.
+Actual simulator watch buttons selected Autumn, Countryside and AUTO DAILY.
+Warm-scene waste uses darker brown for visibility; original four themes retain
+their previous waste colours. Existing one-layer cache/lifecycle cadence retained.
+
+Reproduce with `tests/scenery/monkey.jungle` (`-Owner -Device enduro4`): isolated
+QA identity/RAM DEV state. After audit, normal Environment menu; BACK on Pet
+reopens it, Pet UP cycles sky, DOWN toggles virtual lighting. Asset check:
+`tests/scenery/verify_assets.py`. Logs: `bin/world-expansion-native.log`,
+`world-expansion-unit-build.log`, `scenery-expansion-{qa-build,live,final}.log`,
+`scenery-{owner,public}-build.log`. Follow-up visual/build verification uses the
+final darker waste ink; signed Owner/public builds and public DEV exclusion pass.
+No claim of other-device runtime or physical testing.
+
+Bamboo, Coastal Beach, Japanese Garden and Winter are later prototypes, not
+implemented in this milestone. New weather effects are also deferred. Owner
+approved committing/pushing scenery and poop together; no IQ, release,
+installation or publication. Physical MIP contrast/comfort/battery
+acceptance remains open; art mockups are not native-display guarantees.
+
+## Five-poop care refinement (2026-10-24)
+
+Implemented on `ba4fe5b`; no release/version/identity changes. Existing
+meal-triggered single due event, two-count limit/one drawn icon and clear-all
+action are extended in place: five persisted slots, recurring four-hour lazy
+catch-up, one-poop cleanup and four-hour reward watermark. `v4` remains the
+atomic document; only `poopSlots`/`lastCleanReward` are additive fields. Legacy
+counts/pending timers survive; missing timers start on upgrade without backlog.
+
+**Enduro 4 / SDK 9.2 executed:**
+
+- **89/89 native tests PASS**, including five new waste tests for no-food/time
+  catch-up, 30-day/capacity/rollback boundaries, no hidden refill, one-at-a-time
+  cleaning and cleanliness, reward/reopen/daily-rollover safety, legacy saves,
+  occupied-slot persistence, DEV isolation, dirty-write suppression and geometry.
+  An existing sleep-energy fixture now holds its unrelated poop timer constant;
+  the initial 88/89 run exposed fixture coupling, not a changed sleep rule.
+- **96 production-renderer QA scenes / zero failures**: counts 0–5, Pip/Nimble,
+  all four themes and day/night. Poops clear the full beast bounds, each other,
+  circular edge and growth bar. Sampled instrumented heap 154,088 bytes of
+  781,976; not a production peak or battery measurement.
+- **Actual simulator buttons:** five visible icons; Clean gives 5→4→3, masks
+  31→30→28, cleanliness 25→40→55. Care growth/friendship stay at 30/3 after the
+  second cleanup. Full QA VM restart restores those three slots and reconciles
+  a controlled four-hour gap to four poops/mask 29 (remaining slots do not move).
+  Additional four-hour button advances produce five/mask 31, then remain five.
+- Signed Owner/public Enduro 4 builds PASS; public DEV exclusion PASS. Original
+  UUIDs/signing configuration unchanged. No new assets, bitmap cache, production
+  timer, background registration, GPS or per-poop objects. Rendering reuses one
+  cached icon mask; catch-up work is capped at five slot checks.
+
+Reproduction: `tests/poop/monkey.jungle`, `-Owner -Device enduro4`. This isolated
+QA identity uses `qa.poop24.*` Storage, never the real pet. It runs the layout
+audit then opens normal Pet/Actions; Pet DOWN advances the QA clock four hours,
+and each QA relaunch adds a controlled four-hour offline gap. Those clock controls
+are test-only; real system time/steps are untouched. Native persistence tests
+also verify same-time reopening without an extra arrival.
+Logs: `bin/poop-native.log`, `poop-{unit,qa,owner,public}-build.log`,
+`poop-qa-live.log`, `poop-qa-reopen.log`. No device matrix, physical-watch test,
+IQ export, installation or publication. Physical appearance/button comfort and
+ordinary-use battery remain unverified. Owner approved commit/push with scenery.
+
 ## Latest validation summary
 
-Source checkpoint: [`cd24933`](https://github.com/joshld/garmin-tekutekubeast/commit/cd24933)
+Latest combined milestone (2026-10-24): [scenery/daily AUTO](#scenery-prototype-and-daily-auto-2026-10-24)
+and [five-poop care](#five-poop-care-refinement-2026-10-24): **91/91 native**,
+**192 scenery scenes**, **96 poop scenes**, **48 asset checks**, signed Enduro 4
+Owner/public builds and actual simulator controls/persistence checks passed.
+Physical acceptance remains pending; no other-device runtime validation claimed.
+
+Previous source checkpoint: [`cd24933`](https://github.com/joshld/garmin-tekutekubeast/commit/cd24933)
 (2026-10-19). Enduro 4: **84/84 native tests**, signed Owner/public builds and
 public DEV exclusion passed. Actual simulator button tests verified Memory
 replay, saved battle state, Adventure Energy/rewards and the corrected stale

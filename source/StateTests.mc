@@ -899,6 +899,99 @@ function hatchTest(logger){
     var z=TestSupport.fixture();z.testNow+=23*3600;z.tick();Test.assertEqual(z.stage(),0);z.testNow+=3600;z.tick();Test.assertEqual(z.stage(),1);return true;
 }
 (:test)
+function dailyWorldRotationTest(logger){
+    var s=TestSupport.fixture();var w=new BeastWorld(s);var before=s.store.copy(s.data);
+    Test.assertEqual(w.prefs["dailyRotation"],0);Test.assertEqual(w.choose(2,20261024),1);
+    w.setDailyRotation();w.beginVisit(20261024);var first=w.choose(1,20261024);
+    Test.assert(first>=0 && first<6);Test.assert(w.environmentName().equals("AUTO DAILY"));
+    Test.assertEqual(w.choose(4,20261025),first); // No mid-visit rotation.
+    var reopen=new BeastWorld(s);reopen.beginVisit(20261024);Test.assertEqual(reopen.choose(3,20261024),first);
+    w.beginVisit(20261025);Test.assertEqual(w.choose(1,20261025),(first+1)%6);
+    w.setTheme(5);Test.assertEqual(w.choose(4,20261025),4);Test.assertEqual(w.prefs["dailyRotation"],0);
+    w.beginVisit(20261026);Test.assertEqual(w.choose(1,20261026),4);w.setTheme(6);Test.assertEqual(w.choose(1,20261026),5);
+    w.setTheme(4);Test.assertEqual(w.choose(1,20261026),3);w.setTheme(0);Test.assertEqual(w.choose(4,20261026),3);
+    Test.assert(s.store.same(before,s.data));return true;
+}
+(:test)
+function dailyWorldCalendarAndDevTest(logger){
+    var s=TestSupport.fixture();var w=new BeastWorld(s);w.setDailyRotation();
+    var dates=[20260130,20260131,20260201,20260202];var seen=0;
+    for(var i=0;i<dates.size();i++){
+        w.beginVisit(dates[i]);var theme=w.choose(0,dates[i]);Test.assert((seen&(1<<theme))==0);seen|=1<<theme;
+    }
+    var dawn=w.sample;var computations=w.computations;var original=s.store.copy(w.prefs);var d=s.enableDev();var dw=new BeastWorld(d);
+    dw.setTheme(6);dw.setDailyRotation();Test.assert(s.store.same(s.store.read("world.v1"),original));
+    Test.assertEqual(w.computations,computations);Test.assert(w.sample==dawn);
+    var b=Toybox.Application.getApp();var prior=b.activeView;var v=new TekuTekuBeastView();v.beast=s;v.world=w;
+    v.openMenu("Environment");Test.assertEqual(v.rows.size(),8);v.selection=7;v.selectAction();Test.assertEqual(w.prefs["dailyRotation"],1);
+    b.activeView=prior;return true;
+}
+(:test)
+function poopNaturalCatchupAndCapacityTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;var at=s.now();var xp=s.xp();
+    s.testNow=at+14399;s.tick();Test.assertEqual(s.number("poop"),0);
+    s.testNow++;s.tick();Test.assertEqual(s.number("poop"),1);Test.assertEqual(s.poopMask(),1);
+    s.testNow=at+30*86400;s.tick();Test.assertEqual(s.number("poop"),5);Test.assertEqual(s.poopMask(),31);
+    Test.assertEqual(s.number("cleanliness"),25);Test.assertEqual(s.number("poopDue"),s.now()+14400);
+    var due=s.number("poopDue");s.tick();Test.assertEqual(s.number("poopDue"),due);
+    Test.assert(s.clean());Test.assertEqual(s.number("poop"),4);Test.assertEqual(s.poopMask(),30);
+    s.tick();Test.assertEqual(s.number("poop"),4);s.testNow=due;s.tick();
+    Test.assertEqual(s.number("poop"),5);Test.assertEqual(s.poopMask(),31);Test.assertEqual(s.xp(),xp);return true;
+}
+(:test)
+function poopCleanOneRewardAndRollbackTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;s.testNow+=20*3600;s.tick();
+    var growth=s.number("careGrowth");var bond=s.friendship();var joy=s.number("happiness");
+    for(var i=4;i>=0;i--){Test.assert(s.clean());Test.assertEqual(s.number("poop"),i);Test.assertEqual(s.number("cleanliness"),100-15*i);}
+    Test.assert(!s.clean());Test.assertEqual(s.number("careGrowth"),growth+30);
+    Test.assertEqual(s.friendship(),bond+3);Test.assertEqual(s.number("happiness"),joy+10);
+    s.data["poop"]=1;s.testNow-=86400;Test.assert(s.clean());Test.assertEqual(s.number("careGrowth"),growth+30);
+    s.testNow+=86400;s.data["poop"]=1;s.data["day"]=0;s.tick();Test.assert(s.clean());
+    Test.assertEqual(s.friendship(),bond+3);Test.assertEqual(s.number("careGrowth"),growth+30);
+    s.testNow+=14400;s.tick();Test.assert(s.clean());Test.assertEqual(s.number("careGrowth"),growth+60);return true;
+}
+(:test)
+function poopLegacyMigrationAndSlotsTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;s.data["poop"]=2;s.data["cleanliness"]=70;
+    s.data["xp"]=12345l;s.data["poopDue"]=s.now()+7200;s.data.remove("poopSlots");s.data.remove("lastCleanReward");s.commit();
+    var r=new TekuTekuBeastState();r.store=s.store;r.skipWatch=true;r.testNow=s.now();r.start();
+    Test.assertEqual(r.xp(),12345l);Test.assertEqual(r.number("version"),4);Test.assertEqual(r.poopMask(),3);
+    Test.assertEqual(r.number("poopDue"),s.now()+7200);Test.assert(r.clean());Test.assertEqual(r.poopMask(),2);
+    var saved=r.store.copy(r.data);r.data=null;r.start();Test.assert(r.store.same(saved,r.data));
+    Test.assertEqual(r.poopMask(),2);Test.assertEqual(r.number("poop"),1);
+    r.testNow+=7200;r.tick();Test.assertEqual(r.poopMask(),3);Test.assertEqual(r.number("poop"),2);
+    r.commit();var before=r.store.writes;r.commit();Test.assertEqual(r.store.writes,before);return true;
+}
+(:test)
+function poopFoodSleepAndDevIsolationTest(logger){
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;var at=s.now();Test.assert(s.feedFood(true));
+    Test.assertEqual(s.number("poopDue"),at+10800);s.testNow+=10800;s.tick();Test.assertEqual(s.number("poop"),1);
+    s.data["fullness"]=50;Test.assert(s.feedFood(true));Test.assertEqual(s.number("poopDue"),at+25200);
+    s.rest();var mask=s.poopMask();var reward=s.number("careGrowth");Test.assert(!s.clean());
+    Test.assertEqual(s.poopMask(),mask);Test.assertEqual(s.number("careGrowth"),reward);
+    s.testNow+=3600;s.tick();s.commit();var saved=s.store.copy(s.store.read("v4"));
+    var d=s.enableDev();d.devSet("poop",5);Test.assertEqual(d.poopMask(),31);d.clean();
+    Test.assert(s.store.same(saved,s.store.read("v4")));s.data=null;s.start();Test.assertEqual(s.poopMask(),mask);return true;
+}
+(:test)
+function poopFloorGeometryTest(logger){
+    var v=new TekuTekuBeastView();v.beast=TestSupport.fixture();var w=280;var size=96;var scale=v.poopScale(w);
+    var top=v.poopTop(w);var bottom=top+6*scale;
+    Test.assert(top>(w*0.745).toNumber());Test.assert(bottom<w*0.80);
+    for(var slot=0;slot<5;slot++){
+        var x=v.poopX(w,slot);if(slot>0){Test.assert(x>v.poopX(w,slot-1)+7*scale);}
+        for(var edge=0;edge<4;edge++){
+            var dx=x+(edge%2)*7*scale-w/2;var dy=(edge<2?top:bottom)-w/2;
+            Test.assert(dx*dx+dy*dy<(w/2-9)*(w/2-9));
+        }
+        for(var part=0;part<8;part++){
+            v.positionCreature(w,w,size,w/2+v.roamX[part]*w,v.roamY[part]*w);
+            Test.assert(v.petBounds[1]+size<top);
+        }
+    }
+    return true;
+}
+(:test)
 function careAndRewardTest(logger){
     var s=TestSupport.fixture();Test.assert(s.feedFood(true));Test.assertEqual(s.number("meals"),1);Test.assertEqual(s.xp(),0l);
     s.testNow+=4*3600;s.tick();Test.assertEqual(s.number("poop"),1);Test.assert(s.clean());Test.assert(!s.clean());
@@ -1324,6 +1417,8 @@ function sleepUpcomingFallbackTest(logger){
     Test.assert(BeastSleep.inWindow(600,540,1020));
     s.data["sleepMode"]=1;s.data["bedMinute"]=1320;s.data["wakeMinute"]=420;
     s.testNow+=((1320-BeastSleep.minuteAt(s.now())+1440)%1440)*60;
+    // Isolate overnight energy projection from the independent waste timer.
+    s.data["poopDue"]=s.now()+86400;
     s.data["lastCare"]=s.now();s.data["energy"]=0;s.data["poop"]=0;s.data["fullness"]=80;s.data["friendship"]=25;
     s.testNow+=9*3600;var forecast=BeastSleep.previewMood(s.data,s.now());Test.assertEqual(s.number("energy"),0);
     Test.assert(BeastSleep.forecastEnergy(s.data,s.now())>=64);s.tick();Test.assert(s.mood().equals(forecast));return true;

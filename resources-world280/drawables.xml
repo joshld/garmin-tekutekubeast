@@ -15,4 +15,12 @@
     <bitmap id="GardenDay" filename="drawables/GardenDay.png" dithering="none" />
     <bitmap id="GardenDusk" filename="drawables/GardenDusk.png" dithering="none" />
     <bitmap id="GardenNight" filename="drawables/GardenNight.png" dithering="none" />
+    <bitmap id="AutumnDawn" filename="drawables/AutumnDawn.png" dithering="none" />
+    <bitmap id="AutumnDay" filename="drawables/AutumnDay.png" dithering="none" />
+    <bitmap id="AutumnDusk" filename="drawables/AutumnDusk.png" dithering="none" />
+    <bitmap id="AutumnNight" filename="drawables/AutumnNight.png" dithering="none" />
+    <bitmap id="CountrysideDawn" filename="drawables/CountrysideDawn.png" dithering="none" />
+    <bitmap id="CountrysideDay" filename="drawables/CountrysideDay.png" dithering="none" />
+    <bitmap id="CountrysideDusk" filename="drawables/CountrysideDusk.png" dithering="none" />
+    <bitmap id="CountrysideNight" filename="drawables/CountrysideNight.png" dithering="none" />
 </resources>

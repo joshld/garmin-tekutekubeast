@@ -12,7 +12,9 @@ class BeastScenery {
         [Rez.Drawables.ForestDawn,Rez.Drawables.ForestDay,Rez.Drawables.ForestDusk,Rez.Drawables.ForestNight],
         [Rez.Drawables.MeadowDawn,Rez.Drawables.MeadowDay,Rez.Drawables.MeadowDusk,Rez.Drawables.MeadowNight],
         [Rez.Drawables.LakesideDawn,Rez.Drawables.LakesideDay,Rez.Drawables.LakesideDusk,Rez.Drawables.LakesideNight],
-        [Rez.Drawables.GardenDawn,Rez.Drawables.GardenDay,Rez.Drawables.GardenDusk,Rez.Drawables.GardenNight]];
+        [Rez.Drawables.GardenDawn,Rez.Drawables.GardenDay,Rez.Drawables.GardenDusk,Rez.Drawables.GardenNight],
+        [Rez.Drawables.AutumnDawn,Rez.Drawables.AutumnDay,Rez.Drawables.AutumnDusk,Rez.Drawables.AutumnNight],
+        [Rez.Drawables.CountrysideDawn,Rez.Drawables.CountrysideDay,Rez.Drawables.CountrysideDusk,Rez.Drawables.CountrysideNight]];
     var skyColors=[0xFFAAAA,0xAAFFFF,0xAA55AA,0x000055];
     var horizonColors=[0xFFFFAA,0xAAFFFF,0xFFAAAA,0x5555AA];
     function initialize(){}

@@ -11,14 +11,18 @@ ROOT = Path(__file__).resolve().parents[1]
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--sizes', type=int, nargs='+', default=[240,260,280,390,416,454])
-sizes = parser.parse_args().sizes
+parser.add_argument('--themes', nargs='+', choices=('Forest','Meadow','Lakeside','Garden','Autumn','Countryside'))
+args = parser.parse_args()
+sizes = args.sizes
 phases = ('Dawn', 'Day', 'Dusk', 'Night')
-themes = ('Forest', 'Meadow', 'Lakeside', 'Garden')
+themes = ('Forest', 'Meadow', 'Lakeside', 'Garden', 'Autumn', 'Countryside')
+selected = args.themes or themes
 def mip(v):
     return max(0, min(255, round(v / 85) * 85))
 
-for theme in themes:
-    image = Image.open(ROOT / f'art/source/v051/{theme.lower()}.png').convert('RGBA')
+for theme in selected:
+    source = 'v051' if theme in themes[:4] else 'scenery-expansion'
+    image = Image.open(ROOT / f'art/source/{source}/{theme.lower()}.png').convert('RGBA')
     # Enlarge the WORLD's walkable clearing, never the creature. Move the
     # distant horizon up, leaving feet room to roam from ~53 to 75% height.
     split = round(image.height * .64)
@@ -26,7 +30,12 @@ for theme in themes:
     tile.alpha_composite(image.crop((0, 0, image.width, split)).resize((140, 70), Image.Resampling.NEAREST), (0, 0))
     tile.alpha_composite(image.crop((0, split, image.width, image.height)).resize((140, 70), Image.Resampling.NEAREST), (0, 70))
     alpha = tile.getchannel('A').point(lambda a: 255 if a >= 128 else 0)
-    rgb = tile.convert('RGB').quantize(colors=15, method=Image.Quantize.MEDIANCUT)
+    rgb = tile.convert('RGB')
+    if source != 'v051':
+        # Select among distinct supported colours, rather than allocating most
+        # palette entries to near-identical greens that later snap together.
+        rgb = rgb.point([mip(value) for value in range(256)] * 3)
+    rgb = rgb.quantize(colors=15, method=Image.Quantize.MEDIANCUT)
     palette = rgb.getpalette()
     for phase in phases:
         mapped = []
@@ -55,4 +64,4 @@ for size in sizes:
             ET.SubElement(tree.getroot(), 'bitmap', id=name, filename=f'drawables/{name}.png', dithering='none')
     ET.indent(tree, space='    ')
     tree.write(ROOT / f'resources-world{size}/drawables.xml', encoding='unicode')
-print(f'Prepared 4 landscapes x 4 palettes x {len(sizes)} native sizes; transparent skies.')
+print(f'Prepared {len(selected)} landscapes x 4 palettes x {len(sizes)} native sizes; transparent skies.')

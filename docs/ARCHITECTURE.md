@@ -35,6 +35,19 @@ Garmin's [bitmap tint API](https://developer.garmin.com/connect-iq/api-docs/Toyb
 is guarded by `has`; unsupported renderers keep the native sprite. No alpha
 framebuffer or GPU-only blending is required.
 
+Waste extends the existing canonical `v4` care fields, not a new save document:
+`poop` (0–5), `poopDue` and `lastPoop` retain their roles; optional `poopSlots`
+is a five-bit normalized floor-slot mask and `lastCleanReward` bounds rewards.
+State performs bounded elapsed-time catch-up/one-poop clean transactions; the
+view only projects slots to display coordinates using the existing icon mask.
+No per-poop objects, background registration or new bitmap cache is required.
+
+`BeastWorld` keeps optional `dailyRotation` in its existing foreground `world.v1`
+preferences. Calendar-derived cycling needs no saved random choice or daily write;
+`beginVisit` invalidates only the selected theme, never astronomy. Existing IDs
+0–4 are retained, Autumn/Countryside append as 5/6, and manual/family AUTO
+selection turns daily cycling off. Scenery still caches exactly one terrain layer.
+
 ## Rule contracts
 
 - Epochs are integer Unix seconds; calendar days remain local `YYYYMMDD` keys.

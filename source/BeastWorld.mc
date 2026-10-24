@@ -8,14 +8,16 @@ using Toybox.Weather;
 // Separate, small foreground preference/cache record: no pet migration, no
 // location payload in the strictly budgeted background or native Glance VM.
 class BeastWorld {
+    const THEME_COUNT=6;
     var prefs;var persisted=null;var store;var dev=false;var theme=-1;var checked=0l;
+    var visitDay=-1;
     var cacheKey=null;var days=null;var sample=[1,0.5,true];var minute=-1l;var activeDay=1;
     var source="FIXED 06-18";var preview=-1;var computations=0;
     var draftLat=0.0;var draftLon=0.0;
     function initialize(beast){
         store=beast.store;dev=beast.dev;var saved=store.read("world.v1");
         prefs=saved==null?{}:store.copy(saved);
-        var defaults={"environment"=>0,"locationMode"=>0,"lat"=>null,"lon"=>null,"at"=>0l,"manualLat"=>0.0,"manualLon"=>0.0,"manualSet"=>0};
+        var defaults={"environment"=>0,"dailyRotation"=>0,"locationMode"=>0,"lat"=>null,"lon"=>null,"at"=>0l,"manualLat"=>0.0,"manualLon"=>0.0,"manualSet"=>0};
         var keys=defaults.keys();for(var i=0;i<keys.size();i++){if(!prefs.hasKey(keys[i])){prefs[keys[i]]=defaults[keys[i]];}}
         persisted=store.copy(saved);
         draftLat=prefs["manualLat"];draftLon=prefs["manualLon"];
@@ -23,10 +25,23 @@ class BeastWorld {
     function save(){if(!dev && !store.same(persisted,prefs)){var document=store.copy(prefs);store.write("world.v1",document);persisted=document;}}
     function invalidate(){cacheKey=null;minute=-1l;}
     function choose(family,day){
-        // Locked until an explicit setting change or a new full-app session.
-        if(theme<0){theme=prefs["environment"]>0?prefs["environment"]-1:(family>0?family-1:day%4);}return theme;
+        // Locked while playing, including midnight. Apply a new daily scene
+        // only when the Pet view is shown again, not on a redraw or game turn.
+        if(theme<0){
+            if(prefs["environment"]>0){theme=prefs["environment"]-1;}
+            else if(prefs["dailyRotation"]==1){
+                var ordinal=BeastSky.midnight((day/10000).toNumber(),((day/100)%100).toNumber(),day%100)/86400;
+                theme=(ordinal%THEME_COUNT).toNumber();
+            }else{theme=family>0?family-1:day%4;}
+        }return theme;
     }
-    function setTheme(value){prefs["environment"]=value;theme=-1;save();}
+    function beginVisit(day){if(prefs["dailyRotation"]==1 && day!=visitDay){theme=-1;}visitDay=day;}
+    function setTheme(value){
+        if(value<0 || value>THEME_COUNT){return;}
+        prefs["environment"]=value;prefs["dailyRotation"]=0;theme=-1;save();
+    }
+    function setDailyRotation(){prefs["environment"]=0;prefs["dailyRotation"]=1;theme=-1;save();}
+    function environmentName(){return prefs["environment"]==0 && prefs["dailyRotation"]==1?"AUTO DAILY":["AUTO","FOREST","MEADOW","LAKESIDE","GARDEN","AUTUMN","COUNTRYSIDE"][prefs["environment"]];}
     function confirmManual(){
         // Editing is a foreground-only draft. Changing another setting or
         // waiting for a sky refresh must not apply/save unconfirmed coordinates.

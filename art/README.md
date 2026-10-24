@@ -30,6 +30,17 @@ landscape is cached. Sky/celestial placement is rendered separately; scenery
 does not run in Glance or background tasks. The illustrations are assets, not
 evidence of simulator or hardware operation.
 
+Autumn Woodland and Countryside prototype sources are in
+`source/scenery-expansion/{autumn,countryside}.png`, generated with the built-in
+image tool. Prompt direction: transparent sky; cozy amber woodland / open rural
+hills with distant hedges and farmhouse; a broad unobstructed grass clearing;
+140px-style stepped pixels; no beast, UI or baked sun/moon. The approved concept
+sheet is art direction, not a screenshot of the final reduced-colour game.
+The existing world compiler adds four palettes at six sizes; `--themes Autumn
+Countryside` leaves all historical terrain PNGs untouched. New inputs snap to
+supported RGB values before palette selection to avoid redundant near-colours.
+Only Enduro 4 runtime validation is claimed; other sizes are generated resources.
+
 ## Assets
 
 All 15 normal species have six poses: idle, walking, eating, curled sleep,

@@ -12,7 +12,7 @@ scope and [physical acceptance](WATCH_ACCEPTANCE.md) for hardware limitations.
 - Pet / Care / Details: UP and DOWN change pages; SELECT opens Actions.
 - Actions: Feed, Clean, Play, Pat, Rest, Collection and Settings. BACK returns.
 - Two free daily meals, earned snacks, fullness, joy, energy, cleanliness, poop
-  and friendship. Feeding schedules poop; Clean clears it directly.
+  and friendship. Up to five poops accumulate; each Clean removes exactly one.
 - Beast Bounce: move UP/DOWN between platforms and SELECT to hop into falling
   stars; fifteen targets, three increasing stages, combos and scores.
 - Follow My Lead: copy the beast's hop/smile/look, progressive 3/4/5 sequences,
@@ -72,6 +72,26 @@ then Watch Settings > System > Do Not Disturb; turn it back off yourself after
 playing if desired. See Garmin's [Enduro 4 System Settings](https://www8.garmin.com/manuals/webhelp/GUID-25EFCCBC-D0EB-4E1B-AE9F-B4B900891C20/EN-US/GUID-DB1A9D65-27AA-4762-84B4-2A9C52C75D12.html).
 Actual phone messages/calls, native alarms and other overlays still require
 owner hardware testing; simulator lifecycle tests cannot prove universal coverage.
+
+## Poop and cleaning
+
+- Natural waste arrives every four game hours, even without food or steps.
+  Feeding can bring the next arrival forward to three hours, but arrivals stay
+  at least four hours apart. Time away is reconciled on reopening/callbacks;
+  no extra timer, GPS, notification or overnight sound is needed.
+- Capacity is five. Full capacity still advances the waste clock, so cleaning
+  cannot release a hidden backlog or immediately refill the cleared slot.
+- Five fixed, separate grass slots persist as a compact occupancy mask. Cleaning
+  removes the leftmost occupied slot only; the remaining poops do not move.
+  Positions scale with the display and stay below the beast/above the growth bar.
+- Each arrival lowers cleanliness by 15; each cleanup restores 15 up to the
+  remaining-waste ceiling. Removing the last poop restores cleanliness to 100.
+  Clean remains blocked while asleep and never wakes the beast automatically.
+- Cleaning happiness/friendship/care rewards occur at most once per four game
+  hours, retain the existing daily care-growth cap and survive reopening/clock
+  rollback. Other poops can still be removed immediately without extra rewards.
+- Existing `v4` pets retain counts, pending food timers and all progress. Missing
+  natural timers start on upgrade rather than inventing pre-upgrade waste.
 
 ## Wild battles
 
@@ -302,8 +322,14 @@ window; clock rollback before waking or a time-zone change invalidates the wake
 override. Lighting and the astronomical sky remain independent: waking does not
 cancel AUTO bedtime dimming, change the sky or generate sound/vibration alerts.
 
-Settings > Outdoor world selects Forest, Meadow, Lakeside or Garden, or AUTO
-for a stable family-based choice. Sun / location uses retained watch/weather
+Settings > Outdoor world selects Forest, Meadow, Lakeside, Garden, Autumn
+Woodland or Countryside. Family / neutral AUTO preserves the existing choice.
+Optional **AUTO: change daily** cycles all six by local calendar date, stable
+across reopening on the same day. It changes only when the Pet view is shown
+again on another date, not during active roaming or a game. Manual selection
+disables daily rotation. Existing saved environment numbers retain their meaning;
+daily rotation defaults off. No new timers, location reads or pet-save fields.
+Sun / location uses retained watch/weather
 cache or confirmed approximate coordinates; Positioning permission never starts
 GPS. Native sunrise/sunset with offline calculation fallback is independent of
 bedtime. No location is transmitted. FIXED 06-18 is the labelled last resort;
