@@ -53,17 +53,17 @@ class BattleAudit extends BeastBattleView {
     function fighterLabel(dc,index){
         BeastBattleView.fighterLabel(dc,index);
         if(!audited && !compactGrid && battlePhase==2 && burst>0 && battle["events"][eventIndex()]["actor"]==index){
-            boxes.add([dc.getWidth()*(index==0?0.30:0.70)-16,y(dc,0.125)+dc.getFontHeight(moveFont),32,1,"Active fighter"]);
+            boxes.add([dc.getWidth()*(index==0?0.30:0.70)-16,y(dc,dc.getWidth()<240?0.14:0.125)+dc.getFontHeight(moveFont),32,1,"Active fighter"]);
         }
     }
     function hpBar(dc,x,top,width,index){
         BeastBattleView.hpBar(dc,x,top,width,index);
         if(!audited){
-            var text=displayHp(index)+"/"+battle["actors"][index]["maxHp"];var w=dc.getTextWidthInPixels(text,Graphics.FONT_XTINY);
-            boxes.add([compactGrid?x+width/2-w/2:x+width-w,compactGrid?top+7:top,w,dc.getFontHeight(Graphics.FONT_XTINY),"HP "+text]);
-            var barWidth=compactGrid?width:width-w-4;
+            var text=displayHp(index)+"/"+battle["actors"][index]["maxHp"];var font=hpFont(dc,top,index);var w=dc.getTextWidthInPixels(text,font);
+            if(dc.getWidth()>=240){boxes.add([hpInline(dc,top,index)?x+width-w:x+width/2-w/2,hpInline(dc,top,index)?top:top+7,w,dc.getFontHeight(font),"HP "+text]);}
+            var barWidth=!hpInline(dc,top,index) || dc.getWidth()<240?width:width-w-4;
             if(barWidth<3){failures.add("HP bar too narrow scene "+cursor);}
-            boxes.add([x,compactGrid?top:top+7,barWidth,6,"HP bar "+index]);
+            boxes.add([x,!hpInline(dc,top,index) || dc.getWidth()<240?top:top+7,barWidth,6,"HP bar "+index]);
         }
     }
     function battleSprite(dc,index){

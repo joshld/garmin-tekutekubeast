@@ -205,7 +205,7 @@ class BeastBattleView extends TekuTekuBeastView {
         return beast.max(0,beast.min(actor["maxHp"],hp));
     }
     function fighterLabel(dc,index){
-        var cx=dc.getWidth()*(index==0?0.30:0.70);var top=y(dc,compactGrid?0.11:0.125);
+        var cx=dc.getWidth()*(index==0?0.30:0.70);var top=y(dc,compactGrid?0.11:(dc.getWidth()<240?0.14:0.125));
         if(!compactGrid && battlePhase==2 && burst>0 && battle["events"][eventIndex()]["actor"]==index){
             dc.setColor(INK,Graphics.COLOR_TRANSPARENT);dc.drawLine(cx-16,top+dc.getFontHeight(moveFont),cx+16,top+dc.getFontHeight(moveFont));
         }
@@ -224,29 +224,40 @@ class BeastBattleView extends TekuTekuBeastView {
                 if(later){continue;}
             }
             if(target==0){youRows++;}else{wildRows++;}
-            battleText(dc,dc.getWidth()*(target==0?0.30:0.70),y(dc,compactGrid?0.59+row*0.06:0.64),dc.getWidth()*0.30,feedbackText(event));
+            battleText(dc,dc.getWidth()*(target==0?0.30:0.70),y(dc,compactGrid?0.59+row*0.06:0.64),dc.getWidth()*(dc.getWidth()<240?0.34:0.30),feedbackText(event));
         }
         var action=events[current];
         if(!compactGrid){
-            battleText(dc,dc.getWidth()/2,y(dc,0.06),dc.getWidth()*0.32,replaying?"REPLAY":(resultVisible()?"RESULT":"MOVE"));
+            if(dc.getWidth()>=240){battleText(dc,dc.getWidth()/2,y(dc,0.06),dc.getWidth()*0.32,replaying?"REPLAY":(resultVisible()?"RESULT":"MOVE"));}
             battleText(dc,dc.getWidth()/2,y(dc,0.74),dc.getWidth()*0.46,BeastBattleMoves.name(action["move"]));return;
         }
         battleText(dc,dc.getWidth()/2,y(dc,0.71),dc.getWidth()*0.58,
             (action["actor"]==0?"YOU":"WILD")+(resultVisible()?" RESULT":" MOVE"));
         battleText(dc,dc.getWidth()/2,y(dc,0.78),dc.getWidth()*0.54,BeastBattleMoves.name(action["move"]));
     }
+    function hpFont(dc,top,index){
+        if(compactGrid && battlePictures!=null && top+7+dc.getFontHeight(Graphics.FONT_XTINY)>y(dc,0.58)-battlePictures[index][0].getHeight()){return moveFont;}
+        return Graphics.FONT_XTINY;
+    }
+    function hpInline(dc,top,index){
+        return !compactGrid || (battlePictures!=null && top+7+dc.getFontHeight(hpFont(dc,top,index))>y(dc,0.58)-battlePictures[index][0].getHeight());
+    }
     function hpBar(dc,x,top,width,index){
         var actor=battle["actors"][index];var hp=displayHp(index);
-        var barWidth=width;var labelX=x+width/2;var labelTop=top+7;
-        if(!compactGrid){
-            var textWidth=dc.getTextWidthInPixels(hp+"/"+actor["maxHp"],Graphics.FONT_XTINY);
+        var barWidth=width;var labelX=x+width/2;var labelTop=top+7;var font=hpFont(dc,top,index);
+        if(dc.getWidth()<240){
+            dc.setColor(INK,Graphics.COLOR_TRANSPARENT);dc.drawRectangle(x,top,width,6);
+            dc.fillRectangle(x+1,top+1,((width-2)*hp.toFloat()/actor["maxHp"]).toNumber(),4);return;
+        }
+        if(hpInline(dc,top,index)){
+            var textWidth=dc.getTextWidthInPixels(hp+"/"+actor["maxHp"],font);
             barWidth=width-textWidth-4;labelX=x+width-textWidth/2;labelTop=top;
             top+=7;
         }
         dc.setColor(INK,Graphics.COLOR_TRANSPARENT);dc.drawRectangle(x,top,barWidth,6);
         var fill=((barWidth-2)*hp.toFloat()/actor["maxHp"]).toNumber();
         dc.fillRectangle(x+1,top+1,fill,4);
-        dc.drawText(labelX,labelTop,Graphics.FONT_XTINY,hp+"/"+actor["maxHp"],Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(labelX,labelTop,font,hp+"/"+actor["maxHp"],Graphics.TEXT_JUSTIFY_CENTER);
     }
     function battleSpriteBox(dc,index,bitmap,bump){
         var ground=y(dc,compactGrid?0.58:0.63);var top=ground-bitmap.getHeight();
@@ -287,23 +298,25 @@ class BeastBattleView extends TekuTekuBeastView {
             label(dc,y(dc,0.28),fight.battleQueueCount()+" WAITING",Graphics.FONT_XTINY);
             label(dc,y(dc,0.40),"BATTLE XP "+fight.battleXp(),Graphics.FONT_XTINY);
             label(dc,y(dc,0.57),battleNotice.length()>0?battleNotice:"SELECT: MEET A BEAST",Graphics.FONT_XTINY);
-            label(dc,y(dc,0.72),"UP/DOWN PICK MOVES",Graphics.FONT_XTINY);
+            label(dc,y(dc,0.72),"UP/DOWN: MOVES",Graphics.FONT_XTINY);
             label(dc,y(dc,0.83),"BACK: LATER",Graphics.FONT_XTINY);return;
         }
         loadBattleArt();var actors=battle["actors"];
         if(compactGrid && replaying && battlePhase==2){battleText(dc,dc.getWidth()/2,y(dc,0.04),dc.getWidth()*0.26,"REPLAY");}
         fighterLabel(dc,0);fighterLabel(dc,1);
-        hpBar(dc,dc.getWidth()*0.17,y(dc,compactGrid?0.18:0.215),dc.getWidth()*0.27,0);
-        hpBar(dc,dc.getWidth()*0.56,y(dc,compactGrid?0.18:0.215),dc.getWidth()*0.27,1);
+        var hpTop=compactGrid?y(dc,0.11)+dc.getFontHeight(moveFont)+4:y(dc,dc.getWidth()<240?0.235:0.215);
+        hpBar(dc,dc.getWidth()*0.17,hpTop,dc.getWidth()*0.27,0);
+        hpBar(dc,dc.getWidth()*0.56,hpTop,dc.getWidth()*0.27,1);
         battleSprite(dc,0);battleSprite(dc,1);
         if(battleSleeping || battleNotice.length()>0){
             label(dc,y(dc,compactGrid?0.62:0.65),battleSleeping?"Beast is asleep.":battleNotice,Graphics.FONT_XTINY);
             label(dc,y(dc,0.75),"BACK: PAUSE",Graphics.FONT_XTINY);return;
         }
         if(battlePhase==3){
-            label(dc,y(dc,compactGrid?0.61:0.65),battle["status"]==1?"VICTORY!":(battle["status"]==2?"A BRAVE TRY!":"A CLOSE MATCH!"),Graphics.FONT_XTINY);
-            label(dc,y(dc,compactGrid?0.72:0.75),battleResult,Graphics.FONT_XTINY);
-            label(dc,y(dc,compactGrid?0.81:0.83),"SELECT: EXIT",Graphics.FONT_XTINY);return;
+            var resultTop=compactGrid?y(dc,0.61):y(dc,0.63)+2;var lineHeight=dc.getFontHeight(Graphics.FONT_XTINY);
+            label(dc,resultTop,battle["status"]==1?"VICTORY!":(battle["status"]==2?"A BRAVE TRY!":"A CLOSE MATCH!"),Graphics.FONT_XTINY);
+            label(dc,compactGrid?y(dc,0.72):resultTop+lineHeight,battleResult,Graphics.FONT_XTINY);
+            label(dc,compactGrid?y(dc,0.81):resultTop+lineHeight*2,"SELECT: EXIT",Graphics.FONT_XTINY);return;
         }
         if(battlePhase==2){
             battleFeedback(dc);
@@ -313,7 +326,7 @@ class BeastBattleView extends TekuTekuBeastView {
         var rowHeight=dc.getHeight()*0.13;
         if(!compactGrid){
             battleText(dc,dc.getWidth()/2,y(dc,0.65),dc.getWidth()*0.60,names[moveChoice]);
-            label(dc,y(dc,0.83),(moveChoice+1)+" / 4",Graphics.FONT_XTINY);return;
+            label(dc,y(dc,dc.getWidth()<240?0.85:0.83),(moveChoice+1)+" / 4",Graphics.FONT_XTINY);return;
         }
         for(var i=0;i<4;i++){
             var cellWidth=dc.getWidth()*(i<2?0.40:0.32);

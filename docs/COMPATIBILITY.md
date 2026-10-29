@@ -50,8 +50,16 @@ now passes all 271 battle scenes on Fenix 6S Pro and all 271 on Enduro 4, includ
 HP bars and active-turn indicators. Native fonts use inline HP, lower sprites,
 a selected named move and one latest result per fighter; vector-font layouts
 remain unchanged. Physical readability/control acceptance is still pending.
-The previously exported public 0.6.0 IQ predates this fix and must be rebuilt
-before claiming it contains the correction. No full device matrix was rerun.
+The 0.6.1 source additionally fixes 218px crowding, large-AMOLED HP font/bar
+bounds and native-font result-row spacing. Actual SDK battle layouts pass all
+271 scenes on each representative: FR255S (218px), Fenix 6S Pro (240px),
+Enduro 4 (280px), FR265S (360px), original Venu (390px) and FR965 (454px).
+FR255S/Venu evidence is reused where later branch changes do not affect their
+rendering; the Venu help line is only shortened. At 218px HP bars replace the
+numeric HP row and duplicate phase header; selected move names remain complete.
+No full device matrix was rerun. The historical 0.6.0 IQ predates these fixes;
+0.6.1 requires its own signed export. Physical testing beyond the owner's
+observed Enduro 4 behavior remains unverified.
 
 
 Primary target: standard Fenix 6S Pro (`fenix6spro`). Garmin uses that same SDK

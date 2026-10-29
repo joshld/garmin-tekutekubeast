@@ -4,7 +4,7 @@ A native, offline Garmin virtual-beast game. Grow through time, care and play;
 real watch activity adds growth and adventure rewards. No exercise, phone,
 account or internet connection is required for normal gameplay.
 
-**0.6.0 beta development:** ten outdoor environments, daily scenery rotation,
+**0.6.1 beta candidate:** ten outdoor environments, daily scenery rotation,
 five-poop care, offline battles and interaction improvements. Existing compatibility
 evidence covers 47 SDK profiles, including standard Fenix 6S Pro. The current
 private acceptance package targets Enduro 4 only; Store releases remain unchanged.

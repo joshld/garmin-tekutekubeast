@@ -1,5 +1,40 @@
 # Current source validation checkpoint
 
+## Public 0.6.1 representative validation (2026-10-30)
+
+Owner authorized representative checks/fixes followed by public deployment,
+and reports the app looks good on Enduro 4. This is not blanket acceptance of
+all watch cases. Original app identities/key and saved-state contracts retained.
+0.6.1 distinguishes the compatibility patch from historical 0.6.0 packages.
+
+Actual SDK 9.2 battle rendering: **271 scenes each / zero failures**:
+FR255S 218px, Fenix 6S Pro 240px, Enduro 4 280px, FR265S 360px,
+original Venu 390px and FR965 454px (**1,626 representative scenes**).
+Final logs: `bin/ship-final-{fr265s,fr965,fenix6spro,enduro4}-{build,layout}.log`;
+`bin/ship-{fr255s,venu}-{build,layout}.log` reused for unaffected rendering
+branches (Venu's already-fitting help line is shortened). Not a full matrix.
+Sampled QA heap/total: FR255S 162,608/519,968; Fenix 227,568/1,306,136;
+Enduro 163,104/781,976; FR265S and FR965 163,008/781,976;
+Venu 290,376/1,043,992 bytes. Not production peak/battery measurements.
+
+Demonstrated fixes: 218px uses full HP bars without numeric/duplicate-phase
+rows, inset ownership labels, wider feedback and a safe move-counter position.
+Native result rows use actual font heights. Vector HP rows use label metrics,
+existing move-font fallback and inline HP where needed. No new artwork, image
+transforms, resource caches, buffers or timers. No battle-rule, move, reward,
+input-mapping, save or step-ledger changes.
+
+**5/5 public native Enduro 4 tests PASS**: DEV excluded, battle claim once,
+legacy/v4 additive upgrade and genuine catch-up, care/game recovery.
+Logs: `bin/public061-release-tests{-build,}.log`. Structural preflight and
+whitespace checks pass; existing unchanged scenery/Glance/background evidence
+retained, not rerun. Full public IQ export is the next packaging step.
+
+Browser control failed before listing access with "failed to write kernel
+assets ... (os error 3)"; one runtime reset/retry also failed. No manual GUI
+inspection or Garmin upload/publication is claimed. Physical checks on other
+models remain disclosed beta coverage gaps, not simulated acceptance.
+
 ## Fenix 6S Pro battle layout correction (2026-10-30)
 
 The native-font fallback used 19px text on a 240px screen: ownership labels
