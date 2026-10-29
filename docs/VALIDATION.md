@@ -1,5 +1,20 @@
 # Current source validation checkpoint
 
+## 0.6.0 beta version and private Enduro 4 package (2026-10-30)
+
+Updated the in-app version, build identity version, export filename guards and
+current build guidance to 0.6.0 beta. UUIDs, signing key, saves and gameplay are
+unchanged. Signed SDK 9.2 export: **1/1 Enduro 4 hardware part / BUILD SUCCESSFUL**.
+Archive extraction, original Beta UUID, pinned public-key fingerprint,
+RSA-SHA256 manifest signature, DEV/scenery symbols and embedded `0.6.0 beta`
+verified. Workspace artifact: `outputs/dev-enduro4-0.6.0-20261030/TekuTekuBeast-Dev-0.6.0.iq`
+(290,110 bytes); SHA256 `8E3CE7E03B94507F210F86DBFE66B1EFFC92411672B2282951BC5B612E09AA5F`.
+Structural preflight and 31 changed-guide local file links pass; build scripts
+parse successfully. Reused unchanged gameplay's 92 native tests and 332 simulator
+scenes below; these were not rerun for the version-only update. Existing 0.5.2
+artifacts remain historical. No full-device export, installation, public package,
+physical acceptance or Garmin upload performed.
+
 ## Ten environments and private Enduro 4 IQ (2026-10-30)
 
 Added Bamboo Grove, Coastal Beach, Japanese Garden and Winter Woodland to the

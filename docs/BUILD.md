@@ -1,6 +1,6 @@
 # Build, test and release packaging
 
-Current workflow for the fixed v0.5.2 identities. Run from the repository root.
+Current workflow for v0.6.0 beta using the existing fixed application identities. Run from the repository root.
 [Validation](VALIDATION.md) records executed checks; commands below are
 instructions, not claims of new runs.
 
@@ -154,23 +154,29 @@ build-time checks/preparation; never generate artwork on the watch.
 
 ## Public versus private Store packages
 
-Current guards pin version/filenames to 0.5.2. These commands replace outputs:
-preserve original artifact hashes/evidence before rebuilding. Issue #19 did not
-re-export or replace the signed v0.5.2 IQs.
+Current guards pin version/filenames to 0.6.0. Preserve original signed 0.5.2
+artifacts and their historical hashes/evidence. Full exports require explicit approval.
 
 ```powershell
 # Public .iq: all advertised hardware parts; DEV excluded
-& scripts/build.ps1 -Export -Release -Output bin/TekuTekuBeast-Public-0.5.2.iq
+& scripts/build.ps1 -Export -Release -Output bin/TekuTekuBeast-Public-0.6.0.iq
 # Owner-requested PRIVATE Beta .iq: original UUID; DEV included
 & scripts/build.ps1 -DeveloperBetaExport
 ```
 
 `-Export -Owner` is rejected. The explicit private exception rejects QA input
-and the public filename; it produces `bin/TekuTekuBeast-Dev-0.5.2.iq`.
+and the public filename; it produces `bin/TekuTekuBeast-Dev-0.6.0.iq`.
 Never attach that binary to a published public GitHub release or public Garmin
 listing. Any private draft download must remain restricted to maintainers.
 
-Export every advertised hardware part, verify UUID/version/key/SDK signatures,
+An explicitly requested Enduro 4-only private IQ uses an isolated temporary
+manifest containing only `enduro4`, the original Developer Beta UUID/permissions,
+and the existing source/resources/signing key. Export it with the SDK compiler
+(`-e -r`), without changing the root manifest or including QA sources. Verify
+its one hardware part, in-app version, original key and manifest signature.
+This focused test package does not establish full release coverage.
+
+For a full release, export every advertised hardware part, verify UUID/version/key/SDK signatures,
 coverage, public symbol exclusion and retained personal DEV, then run targeted
 risk-based regressions. Exporting all parts is not a simulator matrix.
 
@@ -186,8 +192,8 @@ Never relabel these old checks as fresh source validation.
 
 Public IQ belongs to the separate public listing; private Developer Beta IQ
 updates the existing Beta listing. The historical ambiguous
-`TekuTekuBeast-0.5.2.iq` is not for a new public app. Enter `0.5.2` in the Store
-version field; the in-app string is `0.5.2 beta`.
+`TekuTekuBeast-0.5.2.iq` is not for a new public app. The current in-app string is `0.6.0 beta`; use `0.6.0` when an approved
+0.6.0 package is uploaded. Existing Store releases remain unchanged.
 
 The owner handles uploads through the
 [developer dashboard](https://apps-developer.garmin.com/developer/dashboard).

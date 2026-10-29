@@ -52,8 +52,8 @@
 
 ## 7. Application and player-data safety
 - **Never change either application UUID or the signing identity** without explicit approval. The existing Developer Beta is `54A4F9D3B6584CA4B01C232D20438E5B` (root manifest, real existing pet); the owner-approved separate public application is `53C660EBC4454BCF9292E5591EEC18DA` (generated public manifest). Fixed identities are in `config/build-identities.json`.
-- Public exports must use `TekuTekuBeast-Public-0.5.2.iq`, compile out DEV, and retain the validated profile set. `-Owner` uses the original Developer Beta UUID and retains DEV. Saves do not transfer automatically between these applications; never reset/uninstall or copy data between them without approval.
-- An owner-requested private `.iq` uses the explicit `-DeveloperBetaExport` switch and `TekuTekuBeast-Dev-0.5.2.iq`, retaining the Developer Beta UUID/key and DEV tools. Never attach this developer binary to a public GitHub release or use it on the public Garmin listing.
+- Public exports must use `TekuTekuBeast-Public-0.6.0.iq`, compile out DEV, and retain the validated profile set. `-Owner` uses the original Developer Beta UUID and retains DEV. Saves do not transfer automatically between these applications; never reset/uninstall or copy data between them without approval.
+- An owner-requested private `.iq` uses the explicit `-DeveloperBetaExport` switch and `TekuTekuBeast-Dev-0.6.0.iq`, retaining the Developer Beta UUID/key and DEV tools. Never attach this developer binary to a public GitHub release or use it on the public Garmin listing.
 - Preserve real saves, migration compatibility, genuine step-XP and watermarks, evolution, inventory, rewards, collections and native Glance.
 - Keep Developer Mode test changes isolated from the real pet; public-release DEV exclusion is a separate required acceptance item (see issue #18).
 - Never uninstall/reset the production app or clear Garmin Storage to simplify testing.

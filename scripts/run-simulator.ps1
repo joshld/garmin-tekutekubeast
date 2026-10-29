@@ -1,4 +1,4 @@
-param([string]$Device='enduro4',[string]$Program='bin/v052-public.prg',[switch]$Tests)
+param([string]$Device='enduro4',[string]$Program='bin/v060-public.prg',[switch]$Tests)
 $project=Split-Path $PSScriptRoot -Parent
 $sdk=(Get-Content "$env:APPDATA\Garmin\ConnectIQ\current-sdk.cfg" -Raw).Trim()
 $java='C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot\bin\java.exe'
