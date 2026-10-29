@@ -45,8 +45,9 @@ No per-poop objects, background registration or new bitmap cache is required.
 `BeastWorld` keeps optional `dailyRotation` in its existing foreground `world.v1`
 preferences. Calendar-derived cycling needs no saved random choice or daily write;
 `beginVisit` invalidates only the selected theme, never astronomy. Existing IDs
-0–4 are retained, Autumn/Countryside append as 5/6, and manual/family AUTO
-selection turns daily cycling off. Scenery still caches exactly one terrain layer.
+0–4 are retained, Autumn/Countryside append as 5/6 and Bamboo/Coast/Japanese/Winter
+as 7–10. Manual/family AUTO selection turns daily cycling off. Scenery still
+caches exactly one terrain layer; daily selection uses the current theme count.
 
 ## Rule contracts
 

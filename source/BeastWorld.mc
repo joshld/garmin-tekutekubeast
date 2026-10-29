@@ -8,7 +8,7 @@ using Toybox.Weather;
 // Separate, small foreground preference/cache record: no pet migration, no
 // location payload in the strictly budgeted background or native Glance VM.
 class BeastWorld {
-    const THEME_COUNT=6;
+    const THEME_COUNT=10;
     var prefs;var persisted=null;var store;var dev=false;var theme=-1;var checked=0l;
     var visitDay=-1;
     var cacheKey=null;var days=null;var sample=[1,0.5,true];var minute=-1l;var activeDay=1;
@@ -41,7 +41,7 @@ class BeastWorld {
         prefs["environment"]=value;prefs["dailyRotation"]=0;theme=-1;save();
     }
     function setDailyRotation(){prefs["environment"]=0;prefs["dailyRotation"]=1;theme=-1;save();}
-    function environmentName(){return prefs["environment"]==0 && prefs["dailyRotation"]==1?"AUTO DAILY":["AUTO","FOREST","MEADOW","LAKESIDE","GARDEN","AUTUMN","COUNTRYSIDE"][prefs["environment"]];}
+    function environmentName(){return prefs["environment"]==0 && prefs["dailyRotation"]==1?"AUTO DAILY":["AUTO","FOREST","MEADOW","LAKESIDE","GARDEN","AUTUMN","COUNTRYSIDE","BAMBOO","COAST","JAPANESE GARDEN","WINTER"][prefs["environment"]];}
     function confirmManual(){
         // Editing is a foreground-only draft. Changing another setting or
         // waiting for a sky refresh must not apply/save unconfirmed coordinates.

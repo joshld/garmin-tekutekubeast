@@ -323,8 +323,9 @@ override. Lighting and the astronomical sky remain independent: waking does not
 cancel AUTO bedtime dimming, change the sky or generate sound/vibration alerts.
 
 Settings > Outdoor world selects Forest, Meadow, Lakeside, Garden, Autumn
-Woodland or Countryside. Family / neutral AUTO preserves the existing choice.
-Optional **AUTO: change daily** cycles all six by local calendar date, stable
+Woodland, Countryside, Bamboo Grove, Coastal Beach, Japanese Garden or Winter
+Woodland. Family / neutral AUTO preserves the existing choice.
+Optional **AUTO: change daily** cycles all ten by local calendar date, stable
 across reopening on the same day. It changes only when the Pet view is shown
 again on another date, not during active roaming or a game. Manual selection
 disables daily rotation. Existing saved environment numbers retain their meaning;

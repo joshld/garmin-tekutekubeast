@@ -32,7 +32,7 @@ check into a pass. Physical checks remain open unless explicitly confirmed.
 - **Care and UI:** feed on a zero-step day, wait for poop, clean, pet/rest and
   reopen. Check original-sized creatures, broad horizontal/vertical roaming,
   circular boundaries, attention-only icons and direct-sunlight contrast.
-- **Scenery and sleep:** inspect six environments and real dawn/day/dusk/night;
+- **Scenery and sleep:** inspect ten environments and real dawn/day/dusk/night;
   check location source/age, saved/manual/offline fallback and watch time-zone
   changes. Sunset must not force bedtime. Verify scheduled sleep/wake, morning
   reopening and virtual lights without changing the hardware backlight.

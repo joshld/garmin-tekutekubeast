@@ -5,7 +5,7 @@ from PIL import Image
 root = Path(__file__).resolve().parents[2]
 checked = 0
 for size in (240, 260, 280, 390, 416, 454):
-    for theme in ('Autumn', 'Countryside'):
+    for theme in ('Autumn', 'Countryside', 'Bamboo', 'Coast', 'Japanese', 'Winter'):
         for phase in ('Dawn', 'Day', 'Dusk', 'Night'):
             path = root / f'resources-world{size}/drawables/{theme}{phase}.png'
             image = Image.open(path).convert('RGBA')

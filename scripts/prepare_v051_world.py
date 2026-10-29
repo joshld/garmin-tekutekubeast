@@ -11,11 +11,11 @@ ROOT = Path(__file__).resolve().parents[1]
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--sizes', type=int, nargs='+', default=[240,260,280,390,416,454])
-parser.add_argument('--themes', nargs='+', choices=('Forest','Meadow','Lakeside','Garden','Autumn','Countryside'))
+parser.add_argument('--themes', nargs='+', choices=('Forest','Meadow','Lakeside','Garden','Autumn','Countryside','Bamboo','Coast','Japanese','Winter'))
 args = parser.parse_args()
 sizes = args.sizes
 phases = ('Dawn', 'Day', 'Dusk', 'Night')
-themes = ('Forest', 'Meadow', 'Lakeside', 'Garden', 'Autumn', 'Countryside')
+themes = ('Forest', 'Meadow', 'Lakeside', 'Garden', 'Autumn', 'Countryside', 'Bamboo', 'Coast', 'Japanese', 'Winter')
 selected = args.themes or themes
 def mip(v):
     return max(0, min(255, round(v / 85) * 85))

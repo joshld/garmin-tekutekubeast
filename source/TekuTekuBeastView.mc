@@ -127,7 +127,7 @@ class TekuTekuBeastView extends WatchUi.View {
     function updateWorldRows(){
         ensureWorld();
         if(menu.equals("Outdoor world")){rows=["Environment: "+world.environmentName(),"Sun / location"];if(beast.dev){rows.add("Sky preview");}}
-        else if(menu.equals("Environment")){rows=["Family / neutral AUTO","Forest","Meadow","Lakeside","Garden","Autumn Woodland","Countryside","AUTO: change daily"];}
+        else if(menu.equals("Environment")){rows=["Family / neutral AUTO","Forest","Meadow","Lakeside","Garden","Autumn Woodland","Countryside","Bamboo Grove","Coastal Beach","Japanese Garden","Winter Woodland","AUTO: change daily"];}
         else if(menu.equals("Sun / location")){world.update(beast.realNow(),!beast.skipWatch);rows=["Location: "+["AUTO","SAVED","MANUAL","FIXED"][world.prefs["locationMode"]],world.source,"Rise "+world.eventText(0)+" Set "+world.eventText(1),"Read watch cache","Approx latitude","Approx longitude","No GPS activation","Moon: decorative arc",world.engine(),world.fixAge(beast.realNow())];}
         else if(menu.equals("Approx latitude") || menu.equals("Approx longitude")){var coord=menu.equals("Approx latitude")?world.draftLat:world.draftLon;rows=[coord.toFloat().format("%.1f")+" degrees","+1 degree","-1 degree","+0.1 degree","-0.1 degree","+10 degrees","-10 degrees","Use this location"];}
         else if(menu.equals("Sky preview")){rows=["Real local sky","Dawn","Day","Dusk","Night"];}
@@ -252,7 +252,7 @@ class TekuTekuBeastView extends WatchUi.View {
     }
     function worldAction(context,name,n){
         if(context.equals("Outdoor world")){openMenu(n==0?"Environment":(n==1?"Sun / location":"Sky preview"));return true;}
-        if(context.equals("Environment")){if(n==7){world.setDailyRotation();}else{world.setTheme(n);}menu=null;toast("WORLD SET","look");return true;}
+        if(context.equals("Environment")){if(n==BeastWorld.THEME_COUNT+1){world.setDailyRotation();}else{world.setTheme(n);}menu=null;toast("WORLD SET","look");return true;}
         if(context.equals("Sky preview")){world.preview=n-1;world.invalidate();menu=null;toast(n==0?"REAL SKY":"SKY PREVIEW","look");return true;}
         if(context.equals("Sun / location")){
             if(n==0){world.prefs["locationMode"]=(world.prefs["locationMode"]+1)%4;world.invalidate();world.save();}

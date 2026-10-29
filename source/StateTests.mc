@@ -903,10 +903,10 @@ function dailyWorldRotationTest(logger){
     var s=TestSupport.fixture();var w=new BeastWorld(s);var before=s.store.copy(s.data);
     Test.assertEqual(w.prefs["dailyRotation"],0);Test.assertEqual(w.choose(2,20261024),1);
     w.setDailyRotation();w.beginVisit(20261024);var first=w.choose(1,20261024);
-    Test.assert(first>=0 && first<6);Test.assert(w.environmentName().equals("AUTO DAILY"));
+    Test.assert(first>=0 && first<BeastWorld.THEME_COUNT);Test.assert(w.environmentName().equals("AUTO DAILY"));
     Test.assertEqual(w.choose(4,20261025),first); // No mid-visit rotation.
     var reopen=new BeastWorld(s);reopen.beginVisit(20261024);Test.assertEqual(reopen.choose(3,20261024),first);
-    w.beginVisit(20261025);Test.assertEqual(w.choose(1,20261025),(first+1)%6);
+    w.beginVisit(20261025);Test.assertEqual(w.choose(1,20261025),(first+1)%BeastWorld.THEME_COUNT);
     w.setTheme(5);Test.assertEqual(w.choose(4,20261025),4);Test.assertEqual(w.prefs["dailyRotation"],0);
     w.beginVisit(20261026);Test.assertEqual(w.choose(1,20261026),4);w.setTheme(6);Test.assertEqual(w.choose(1,20261026),5);
     w.setTheme(4);Test.assertEqual(w.choose(1,20261026),3);w.setTheme(0);Test.assertEqual(w.choose(4,20261026),3);
@@ -923,8 +923,23 @@ function dailyWorldCalendarAndDevTest(logger){
     dw.setTheme(6);dw.setDailyRotation();Test.assert(s.store.same(s.store.read("world.v1"),original));
     Test.assertEqual(w.computations,computations);Test.assert(w.sample==dawn);
     var b=Toybox.Application.getApp();var prior=b.activeView;var v=new TekuTekuBeastView();v.beast=s;v.world=w;
-    v.openMenu("Environment");Test.assertEqual(v.rows.size(),8);v.selection=7;v.selectAction();Test.assertEqual(w.prefs["dailyRotation"],1);
+    v.openMenu("Environment");Test.assertEqual(v.rows.size(),BeastWorld.THEME_COUNT+2);v.selection=BeastWorld.THEME_COUNT+1;v.selectAction();Test.assertEqual(w.prefs["dailyRotation"],1);
     b.activeView=prior;return true;
+}
+(:test)
+function expandedWorldSelectionsTest(logger){
+    var s=TestSupport.fixture();var w=new BeastWorld(s);
+    var names=["BAMBOO","COAST","JAPANESE GARDEN","WINTER"];
+    for(var id=7;id<=10;id++){
+        w.setTheme(id);Test.assertEqual(w.choose(1,20261030),id-1);
+        Test.assert(w.environmentName().equals(names[id-7]));
+        var reopened=new BeastWorld(s);Test.assertEqual(reopened.choose(4,20261031),id-1);
+    }
+    w.setDailyRotation();var seen=0;var first=w.choose(1,20261101);
+    for(var day=1;day<=10;day++){w.beginVisit(20261100+day);seen|=1<<w.choose(1,20261100+day);}
+    Test.assertEqual(seen,1023);w.beginVisit(20261111);Test.assertEqual(w.choose(1,20261111),first);
+    w.setTheme(6);w.setTheme(11);Test.assertEqual(w.prefs["environment"],6);
+    w.setTheme(-1);Test.assertEqual(w.prefs["environment"],6);return true;
 }
 (:test)
 function poopNaturalCatchupAndCapacityTest(logger){

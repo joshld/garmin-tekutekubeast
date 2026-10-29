@@ -1,5 +1,48 @@
 # Current source validation checkpoint
 
+## Ten environments and private Enduro 4 IQ (2026-10-30)
+
+Added Bamboo Grove, Coastal Beach, Japanese Garden and Winter Woodland to the
+existing six environments. New IDs 7–10 append without renumbering saved manual
+choices; family AUTO remains unchanged and daily AUTO now cycles all ten.
+No pet/save-schema, gameplay/reward, GPS, sky/sleep, background/Glance or timer
+changes. One cached terrain layer retained. Four built-in-generated transparent
+sources compile into 96 new palette/size resources; previous PNGs are unchanged.
+
+Enduro 4 / SDK 9.2 executed:
+- **92/92 native tests PASS**, including all new manual selections/reopen,
+  ten-day rotation coverage, old IDs, invalid-selection guards and existing
+  care/poop/activity/battle/sleep/DEV regressions.
+- **332 actual SDK simulator scenes / zero failures**: ten themes × four sky
+  phases × ON/OFF × Pip/Nimble × zero/five poops (320 scenes), plus all 12
+  Environment menu selections with untruncated selected labels. Renderer checks
+  retain the same terrain handle on cached redraws and keep waste clear of the
+  beast/bar. Instrumented sample 155,816 / 781,976 bytes, not production peak
+  or physical battery usage. Set `autoExit=false` for interactive QA afterward.
+- Structural preflight and **144 read-only expansion-asset checks PASS**.
+  Other native resource sizes are generated/checked, not other-device runtime
+  certification. Sixteen added Enduro PNGs total 84,964 compressed bytes.
+- Signed private production IQ: one Enduro 4 hardware part (`006-B5169-00`),
+  original Beta UUID/pinned public-key fingerprint, RSA-SHA256 manifest signature
+  verified, archive extraction integrity, version 0.5.2 beta and DEV retained.
+  Debug symbols include all four new scenes. No production manifest/key changes.
+
+Manual UI automation was unavailable: its helper failed to write kernel assets
+even after one reset/retry. SDK-native tests and production rendering executed
+successfully in the actual simulator; no manual visual walkthrough or physical
+watch acceptance is claimed for this build. Initial disconnected-simulator run
+was retried after starting the installed SDK simulator, not counted as a pass.
+Logs: `bin/ten-worlds-{unit-build,native,qa-build,layout}.log`.
+
+Requested acceptance artifact (not a public/all-device release):
+`C:\Users\jldon\Documents\Codex\2026-10-15\referenced-chatgpt-conversation-this-is-an\outputs\dev-enduro4-ten-worlds-20261030\TekuTekuBeast-Dev-0.5.2.iq`
+(290,077 bytes), SHA256
+`69BEE3A17D1EB5EA428CC700D650B54245FA869E1B51BFA35B089A2A45FD471E`.
+Package uses an isolated temporary Enduro-only export manifest, not a tracked
+application-ID/version change. Update the existing private Developer Beta only;
+do not uninstall, use the public listing or infer old IQs contain these changes.
+No multi-device export/matrix, installation, Garmin upload or publication.
+
 ## Scenery prototype and daily AUTO (2026-10-24)
 
 First approved scenery milestone: Autumn Woodland and Countryside, alongside
@@ -84,6 +127,9 @@ IQ export, installation or publication. Physical appearance/button comfort and
 ordinary-use battery remain unverified. Owner approved commit/push with scenery.
 
 ## Latest validation summary
+
+Latest source/package milestone: [ten environments and private IQ](#ten-environments-and-private-enduro-4-iq-2026-10-30),
+**92 native / 332 simulator scenes / 144 asset checks**, Enduro 4 only.
 
 Hygiene review (2026-10-29): structural preflight passes with world-catalog IDs
 derived from the renderer's definitions; four malformed-catalog negative checks

@@ -41,6 +41,15 @@ Countryside` leaves all historical terrain PNGs untouched. New inputs snap to
 supported RGB values before palette selection to avoid redundant near-colours.
 Only Enduro 4 runtime validation is claimed; other sizes are generated resources.
 
+The remaining approved concepts use the same pipeline and source folder:
+`bamboo.png`, `coast.png`, `japanese.png` and `winter.png`. Built-in generation
+prompts retain the shared transparent-sky/open-clearing/no-character constraints:
+segmented bamboo at the edges; dry sand with sea behind the roaming area;
+pruned trees/stone lantern with a distant pond/bridge; and snow-capped woodland
+with a broad snowy clearing. No weather particles, new timers or extra cached
+landscape layers are introduced. All ten scenes share the existing celestial
+sky and lighting renderer. Original source images and older native PNGs remain.
+
 ## Assets
 
 All 15 normal species have six poses: idle, walking, eating, curled sleep,

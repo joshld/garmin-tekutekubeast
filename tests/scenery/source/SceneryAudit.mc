@@ -11,11 +11,11 @@ class MatrixApp extends TekuTekuBeastApp {
 // After the audit: choose a real Environment row; BACK on Pet reopens that
 // menu. On Pet, UP cycles sky previews, DOWN toggles lighting. No real GPS.
 class SceneryAudit extends TekuTekuBeastView {
-    var auditing=true;var cursor=0;var failures=0;var peak=0;
+    var auditing=true;var cursor=0;var failures=0;var peak=0;var autoExit=true;
     function initialize(){TekuTekuBeastView.initialize();beast=new ArtPreviewState();ensureWorld();scenery.audit=true;}
     function onShow(){refresher=new Toybox.Timer.Timer();refresher.start(method(:refresh),100,true);}
     function refresh() as Void {if(auditing){WatchUi.requestUpdate();}else{TekuTekuBeastView.refresh();}}
-    function back(){if(menu==null){openMenu("Environment");selection=5;WatchUi.requestUpdate();return true;}return TekuTekuBeastView.back();}
+    function back(){if(menu==null){openMenu("Environment");selection=7;WatchUi.requestUpdate();return true;}return TekuTekuBeastView.back();}
     function switchPage(delta){
         if(menu==null){
             if(delta<0){world.preview=(world.preview+1)%4;world.invalidate();}
@@ -28,9 +28,19 @@ class SceneryAudit extends TekuTekuBeastView {
         TekuTekuBeastView.selectAction();
         System.println("WORLD_MENU: selected="+world.environmentName()+" theme="+world.choose(beast.family(),beast.today())+" phase="+world.preview);
     }
+    function label(dc,top,value,font){
+        var box=TekuTekuBeastView.label(dc,top,value,font);
+        if(auditing && menu!=null && menu.equals("Environment") && value.equals(rows[selection]) && !box[4].equals(value)){failures++;}
+        return box;
+    }
     function onUpdate(dc){
         if(!auditing){TekuTekuBeastView.onUpdate(dc);return;}
         var model=beast as ArtPreviewState;
+        var landscapes=BeastWorld.THEME_COUNT*32;var total=landscapes+BeastWorld.THEME_COUNT+2;
+        if(cursor>=landscapes){
+            openMenu("Environment");selection=cursor-landscapes;TekuTekuBeastView.onUpdate(dc);
+            cursor++;if(cursor==total){finishAudit();}return;
+        }
         var theme=(cursor/32).toNumber();var phase=((cursor%32)/8).toNumber();
         model.previewStage=cursor%2==0?1:2;model.data["motion"]=2;model.data["sleepMode"]=2;
         model.data["energy"]=80;model.data["fullness"]=80;model.data["happiness"]=80;
@@ -46,11 +56,13 @@ class SceneryAudit extends TekuTekuBeastView {
         }
         var used=System.getSystemStats().usedMemory;if(used>peak){peak=used;}
         cursor++;
-        if(cursor==192){
-            System.println("WORLD_LAYOUT: scenes="+cursor+" failures="+failures+" sampledHeap="+peak+" total="+System.getSystemStats().totalMemory);
-            auditing=false;refresher.stop();model.previewStage=2;model.data["poop"]=5;model.repairPoop();model.setLighting(1);
-            world.preview=1;world.invalidate();world.setTheme(5);loadSprite();openMenu("Environment");selection=5;
-            refresher=new Toybox.Timer.Timer();timerPeriod=1000;refresher.start(method(:refresh),1000,true);WatchUi.requestUpdate();
-        }
+    }
+    function finishAudit(){
+        System.println("WORLD_LAYOUT: scenes="+cursor+" failures="+failures+" sampledHeap="+peak+" total="+System.getSystemStats().totalMemory);
+        if(autoExit){System.exit();return;}
+        auditing=false;refresher.stop();var model=beast as ArtPreviewState;
+        model.previewStage=2;model.data["poop"]=5;model.repairPoop();model.setLighting(1);
+        world.preview=1;world.invalidate();world.setTheme(7);loadSprite();openMenu("Environment");selection=7;
+        refresher=new Toybox.Timer.Timer();timerPeriod=1000;refresher.start(method(:refresh),1000,true);WatchUi.requestUpdate();
     }
 }
