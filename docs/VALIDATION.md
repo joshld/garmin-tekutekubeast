@@ -1,5 +1,37 @@
 # Current source validation checkpoint
 
+## Fenix 6S Pro battle layout correction (2026-10-30)
+
+The native-font fallback used 19px text on a 240px screen: ownership labels
+exceeded the circular safe area, HP text overlapped the 80px sprite frames,
+and stacked feedback collided with action headings. Corrected fallback only:
+inline HP bars/numbers, lower unchanged-size sprites, inward ownership labels,
+a bounded active-turn underline, MOVE/RESULT (or REPLAY) header and complete
+named moves. Each timed result still appears beneath its affected fighter;
+only the latest per fighter remains on compact native-font displays. Vector-font
+Enduro 4 grid/presentation, battle rules, 72 move definitions, controls, timing,
+saves, app identities, signing key and all existing IQ packages are unchanged.
+
+Actual SDK 9.2 simulator renderer checks:
+- **Fenix 6S Pro: 271 scenes / zero failures** (previously 1,218 warnings).
+  Sampled QA heap 226,848 / 1,306,136 bytes. Earlier warning-array allocations
+  make baseline heap incomparable; this is not a production peak improvement.
+- **Enduro 4: 271 scenes / zero failures**, sampled QA heap 162,536 / 781,976.
+- Audit covers all 72 names, forms, identical fighters, guard/buff/damage,
+  signature feedback, replay, terminal/results, pause and readiness states.
+  New checks include actual HP bar bounds/minimum width and active-turn marker.
+- Logs: `bin/battle-{fenix,enduro}-fit-{build,layout}.log`.
+  Signed public release-mode device programs: `bin/TekuTekuBeast-Public-0.6.0-{fenix6spro,enduro4}-battlefit.prg`;
+  build logs `bin/battle-fit-{fenix,enduro}-public-build.log`.
+- Structural preflight and diff checks pass; unchanged rules/save/claim native
+  evidence from the public candidate below is reused, not rerun.
+
+No new assets, runtime image transforms, buffers, caches or timers. Computer-use
+helper failed to initialize; no manual visual inspection, button interaction or
+physical acceptance is claimed. Owner checks remain in #20/#24. No full matrix,
+new IQ export, installation or Garmin upload/publication performed. Existing
+public 0.6.0 IQ must be regenerated to include this source correction.
+
 ## Public 0.6.0 candidate packaging (2026-10-30)
 
 Signed SDK 9.2 public export **72/72 hardware parts / BUILD SUCCESSFUL**,

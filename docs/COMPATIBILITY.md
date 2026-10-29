@@ -44,10 +44,14 @@ legacy source changes only resource references. All PNG pixels, Glance, saves,
 step catch-up and public/private identities are retained; no runtime image
 transforms or new timers. Always prepare through the build wrapper.
 
-Focused Fenix 6S Pro scenery validation passed 332 simulator scenes. A separate
-271-scene battle layout audit found text/sprite overlap and edge-clearance
-failures on that smaller display; battle UI acceptance remains outstanding.
-This limitation is not a failed scenery build or a full compatibility rerun.
+Focused Fenix 6S Pro scenery validation passed 332 simulator scenes. The initial
+battle audit found 1,218 overlap/edge warnings. The corrected native-font layout
+now passes all 271 battle scenes on Fenix 6S Pro and all 271 on Enduro 4, including
+HP bars and active-turn indicators. Native fonts use inline HP, lower sprites,
+a selected named move and one latest result per fighter; vector-font layouts
+remain unchanged. Physical readability/control acceptance is still pending.
+The previously exported public 0.6.0 IQ predates this fix and must be rebuilt
+before claiming it contains the correction. No full device matrix was rerun.
 
 
 Primary target: standard Fenix 6S Pro (`fenix6spro`). Garmin uses that same SDK

@@ -2,3 +2,6 @@ project.manifest = ../matrix/manifest.xml
 base.sourcePath = ../../source;../art-preview/source;source
 base.resourcePath = ../../resources;../art-preview/resources;../../resources-world280
 enduro4.resourcePath = ../../resources-pet144;../art-preview/resources;../../resources-world280
+base.barrelPath = ../../bin/scenery-barrel/SceneryPack.barrel
+fenix6spro.sourcePath = ../../bin/legacy-source;../art-preview/source;source
+fenix6spro.resourcePath = ../../resources-legacy;../../bin/legacy-world240;../art-preview/resources;../../resources-deferred
