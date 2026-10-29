@@ -58,7 +58,8 @@ FR255S/Venu evidence is reused where later branch changes do not affect their
 rendering; the Venu help line is only shortened. At 218px HP bars replace the
 numeric HP row and duplicate phase header; selected move names remain complete.
 No full device matrix was rerun. The historical 0.6.0 IQ predates these fixes;
-0.6.1 requires its own signed export. Physical testing beyond the owner's
+the signed 0.6.1 export covers all 47 profiles/72 parts (see validation).
+Physical testing beyond the owner's
 observed Enduro 4 behavior remains unverified.
 
 

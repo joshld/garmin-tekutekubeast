@@ -1,5 +1,28 @@
 # Current source validation checkpoint
 
+## Signed public 0.6.1 package (2026-10-30)
+
+Source milestone `95c428043d62fa5378247b16904d8323cab83c30` exported with SDK 9.2:
+**72/72 hardware parts / BUILD SUCCESSFUL**, existing 47 advertised SDK profiles.
+Public UUID `53C660EBC4454BCF9292E5591EEC18DA`, original pinned signing key,
+RSA-SHA256 manifest signature, complete archive extraction, exact part coverage,
+embedded `0.6.1 beta` and absence of DEV/QA controls in every program's symbol
+table verified. SDK per-part signatures present; raw PRG signatures were not
+independently checked. Both identities and prior artifacts remain unchanged.
+
+Artifact: `D:\working\garmin-tekutekubeast\bin\TekuTekuBeast-Public-0.6.1.iq`,
+22,128,331 bytes; SHA256 `B229DDB6D834E21954757D254803E81BF291AF2586DE29ADD2D5A378EFE8C78A`.
+Workspace download/evidence: `outputs/public-0.6.1-20261030/` contains the matching
+IQ, `BUILD_INFO.txt`, `WHATS_NEW.txt`, verifier and extracted metadata/programs.
+Build log: `bin/public-061-export.log`. Representative 1,626 layout scenes and
+five public native tests below passed; no full simulator matrix or additional
+physical testing is implied.
+
+**Not uploaded/published.** Owner authorized deployment, but browser control
+fails to initialize even after reset (kernel-assets OS error 3). Public listing
+opened for manual handoff; upload this package to that existing public app,
+version `0.6.1`, without uninstalling or touching the separate Developer Beta.
+
 ## Public 0.6.1 representative validation (2026-10-30)
 
 Owner authorized representative checks/fixes followed by public deployment,
