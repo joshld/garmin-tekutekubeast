@@ -1,4 +1,4 @@
-# TekuTekuBeast for Mum's standard Fenix 6S Pro
+# TekuTekuBeast for the standard Fenix 6S Pro
 
 Compatibility beta candidate: **0.5.2**. Not yet published to Garmin.
 Use the `fenix6spro` program, not `fenix6s` (non-Pro), not an Enduro program.
@@ -10,7 +10,7 @@ Garmin's 6S Pro profile also covers Sapphire/Pro Solar variants; the standard
 Check Settings > System > About first. The installed SDK's standard 6S Pro
 part targets firmware 27.00 or newer; update through Garmin if the watch is older.
 
-These steps assume TekuTekuBeast is **not already installed** on Mum's watch.
+These steps assume TekuTekuBeast is **not already installed** on the Fenix 6S Pro.
 If it is installed through the Store, do not uninstall or create a second copy:
 use an update of that existing installation once the owner approves publication.
 

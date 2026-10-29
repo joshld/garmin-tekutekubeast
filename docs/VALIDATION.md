@@ -43,7 +43,7 @@ acceptance remains open; art mockups are not native-display guarantees.
 
 ## Five-poop care refinement (2026-10-24)
 
-Implemented on `ba4fe5b`; no release/version/identity changes. Existing
+Implemented in `2383141`; no release/version/identity changes. Existing
 meal-triggered single due event, two-count limit/one drawn icon and clear-all
 action are extended in place: five persisted slots, recurring four-hour lazy
 catch-up, one-poop cleanup and four-hour reward watermark. `v4` remains the
@@ -84,6 +84,11 @@ IQ export, installation or publication. Physical appearance/button comfort and
 ordinary-use battery remain unverified. Owner approved commit/push with scenery.
 
 ## Latest validation summary
+
+Hygiene review (2026-10-29): structural preflight passes with world-catalog IDs
+derived from the renderer's definitions; four malformed-catalog negative checks
+and 95 local documentation links/anchors pass. No SDK
+builds or simulator tests repeated for this tooling/documentation-only cleanup.
 
 Latest combined milestone (2026-10-24): [scenery/daily AUTO](#scenery-prototype-and-daily-auto-2026-10-24)
 and [five-poop care](#five-poop-care-refinement-2026-10-24): **91/91 native**,

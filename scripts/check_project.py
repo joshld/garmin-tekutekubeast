@@ -3,6 +3,7 @@
 from pathlib import Path
 import sys
 import struct
+import re
 import xml.etree.ElementTree as ET
 from prepare_battle_data import render as render_battle_data
 
@@ -127,12 +128,21 @@ for directory, size in (("resources",96),("resources-pet144",96),("resources-nat
             if resource_id.endswith("Small"):
                 check(bitmap.get("scope") == "glance", "Sleeping Glance sprite lacks glance scope")
 
+# The runtime's scenery definitions are authoritative; do not freeze the
+# catalog count at a historical number of environments or palettes.
+scenery = (SRC / "BeastScenery.mc").read_text(encoding="utf-8")
+landscapes = re.findall(r"Rez\.Drawables\.(\w+)", scenery)
+expected_landscapes = set(landscapes)
+check(bool(landscapes) and len(landscapes) == len(expected_landscapes),
+      "Scenery definitions must contain unique landscape resource IDs")
 for size in (240,260,280,390,416,454):
     catalog = ROOT / f"resources-world{size}/drawables.xml"
     check(catalog.is_file(), f"Missing {size}px world catalog")
     if catalog.is_file():
         entries = list(ET.parse(catalog).getroot().iter("bitmap"))
-        check(len(entries) == 16, "Expected four themes x four palettes")
+        ids = [bitmap.get("id") for bitmap in entries]
+        check(len(ids) == len(expected_landscapes) and set(ids) == expected_landscapes,
+              f"{size}px world catalog must match the {len(expected_landscapes)} scenery definitions (no missing, duplicate or unexpected IDs)")
         for bitmap in entries:
             image = catalog.parent / bitmap.get("filename", "")
             check(image.is_file(), "Missing landscape: " + str(image))
