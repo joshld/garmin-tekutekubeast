@@ -20,7 +20,7 @@ physical testing is implied.
 
 **Not uploaded/published.** Owner authorized deployment, but browser control
 fails to initialize even after reset (kernel-assets OS error 3). Public listing
-opened for manual handoff; upload this package to that existing public app,
+queued in Codex for manual handoff; upload this package to that existing public app,
 version `0.6.1`, without uninstalling or touching the separate Developer Beta.
 
 ## Public 0.6.1 representative validation (2026-10-30)
