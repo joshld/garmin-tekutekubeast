@@ -3,5 +3,6 @@
     <iq:products><iq:product id="enduro4"/><iq:product id="fenix6spro"/></iq:products>
     <iq:permissions><iq:uses-permission id="Background"/><iq:uses-permission id="UserProfile"/><iq:uses-permission id="Positioning"/></iq:permissions>
     <iq:languages><iq:language>eng</iq:language></iq:languages>
+    <iq:barrels><iq:depends name="SceneryPack" version="1.0.0" /></iq:barrels>
   </iq:application>
 </iq:manifest>

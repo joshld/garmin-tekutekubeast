@@ -17,6 +17,9 @@ for path in (ROOT/'source').glob('*.mc'):
         text = text.replace('(:background)', '// Foreground-only scope on constrained profiles.', 1)
     if path.name == 'TekuTekuBeastService.mc':
         text = (ROOT/'source/DeferredService.mc.template').read_text()
+    if path.name == 'BeastScenery.mc':
+        for theme in ('Bamboo','Coast','Japanese','Winter'):
+            text = text.replace('Rez.Drawables.'+theme, 'SceneryPack.Rez.Drawables.'+theme)
     target=OUT/path.name
     if not target.exists() or target.read_text()!=text:
         target.write_text(text)

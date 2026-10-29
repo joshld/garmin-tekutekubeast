@@ -13,8 +13,9 @@ Monkey C extension provide installation/verification. Keep the existing
 `developer_key` private, backed up locally and out of Git; never replace it
 to update an existing app.
 
-Use `scripts/build.ps1`: it prepares constrained-profile catalogs/scopes and
-fail-closed public exclusions. Direct `monkey.jungle` compilation, including
+Use `scripts/build.ps1`: it prepares constrained-profile catalogs/scopes, the
+resource-only scenery barrel and fail-closed public exclusions. The barrel is
+created on first build and refreshed for legacy-device builds/full exports. Direct `monkey.jungle` compilation, including
 `scripts/build.sh` on Linux/macOS, is owner input, **not public Store input**.
 Windows SDK builds are validated; equivalent non-Windows public packaging is
 not claimed.
@@ -22,6 +23,9 @@ not claimed.
 For owner-only Linux/macOS development with `monkeyc` on PATH:
 
 ```bash
+python scripts/prepare_legacy_resources.py
+python scripts/prepare_legacy_sources.py
+barrelbuild -f bin/scenery-barrel/monkey.jungle -o bin/scenery-barrel/SceneryPack.barrel -l 0
 CIQ_DEVELOPER_KEY="/path/to/existing/developer_key.der" ./scripts/build.sh
 # Start connectiq, then run the result:
 monkeydo build/TekuTekuBeast.prg enduro4

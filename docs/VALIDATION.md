@@ -1,5 +1,44 @@
 # Current source validation checkpoint
 
+## Public 0.6.0 candidate packaging (2026-10-30)
+
+Signed SDK 9.2 public export **72/72 hardware parts / BUILD SUCCESSFUL**,
+covering the existing 47 SDK profiles including Enduro 4 and Fenix 6S Pro.
+Public UUID `53C660EBC4454BCF9292E5591EEC18DA`, original pinned signing key,
+RSA-SHA256 manifest signature, archive extraction, exact hardware-part coverage,
+embedded `0.6.0 beta` and absence of owner/QA controls in all 72 symbol tables
+verified. Per-part signature fields are present; raw PRG signatures were not
+independently verified (manifest signatures use a different signing payload).
+`D:\working\garmin-tekutekubeast\bin\TekuTekuBeast-Public-0.6.0.iq`,
+22,093,303 bytes; SHA256 `20C96A9CB7BF4D8950113BC98AFA975CD060C018CD14B3E410A7CE765D54ED70`.
+Workspace download copy: `outputs/public-0.6.0-20261030/`.
+
+Required packaging corrections: generate all ten themes at 218/360px too;
+move the four newest themes into a resource-only barrel on CIQ 3.x to avoid
+270 drawable names exceeding its 254-name limit. No original artwork, gameplay,
+saves, app IDs, signing key, timers or Glance behavior changed. Build/test
+resource paths and preparation tools aligned; original release records retained.
+
+Executed/reused evidence:
+- **5/5 public native Enduro 4 SDK simulator tests PASS**: DEV absent, additive
+  v4 migration/catch-up, game recovery/care and one-time battle claims.
+  Logs: `bin/public060-release-tests-build.log`, `bin/public060-release-tests.log`.
+- Fenix 6S Pro production build passes. **332/332 scenery/menu simulator scenes
+  pass**, sampled QA heap 301,560 / 1,306,136 bytes (not production peak).
+  Workspace logs: `outputs/public060-qa/{build,simulator}.log`.
+- **271-scene Fenix battle audit FAILS** with 1,218 bounding-box overlap/edge
+  warnings; sampled heap 290,584 / 1,306,136 bytes. These include sprite-frame
+  bounds and require visual review; not 1,218 confirmed visible defects.
+  Logs: `outputs/public060-qa/battle/{build,simulator}.log`. Smaller-display
+  battle layout remains an acceptance limitation; no battle rules/UI changed.
+- Structural preflight, 192 scenery asset checks, legacy namespace/pixel-identity
+  checks, guide-file links and diff whitespace checks pass. Earlier unchanged
+  Enduro 4 gameplay/scenery evidence reused; no full simulator matrix rerun.
+
+Candidate package only. Physical acceptance, the Fenix battle-layout findings
+and remaining issue #24 release gates are not satisfied by a signed export.
+No installation, Garmin upload/publication or replacement of old IQs performed.
+
 ## 0.6.0 beta version and private Enduro 4 package (2026-10-30)
 
 Updated the in-app version, build identity version, export filename guards and

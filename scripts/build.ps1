@@ -26,12 +26,14 @@ if($Tests){
     & $python "$PSScriptRoot/prepare_rule_vectors.py"
     if($LASTEXITCODE -ne 0){throw 'Cannot prepare deterministic rule fixtures'}
 }
-if($Export -or (Select-String -LiteralPath "$project/monkey.jungle" -SimpleMatch "$Device.sourcePath = bin/legacy-source" -Quiet)){
+if($Export -or !(Test-Path "$project/bin/scenery-barrel/SceneryPack.barrel") -or (Select-String -LiteralPath "$project/monkey.jungle" -SimpleMatch "$Device.sourcePath = bin/legacy-source" -Quiet)){
     $python="$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
     if(!(Test-Path $python)){$python=(Get-Command python -ErrorAction Stop).Source}
     & $python "$PSScriptRoot/prepare_legacy_resources.py"
     & $python "$PSScriptRoot/prepare_legacy_sources.py"
     if($LASTEXITCODE -ne 0){throw 'Cannot prepare constrained-device scope variant'}
+    & $java '-Dfile.encoding=UTF-8' '-cp' "$sdk/bin/monkeybrains.jar" com.garmin.monkeybrains.MonkeyBarrelEntry -f "$project/bin/scenery-barrel/monkey.jungle" -o "$project/bin/scenery-barrel/SceneryPack.barrel" -l 0
+    if($LASTEXITCODE -ne 0){throw 'Cannot prepare legacy scenery resource namespace'}
 }
 if(!$Owner){
     $python="$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"

@@ -135,7 +135,7 @@ landscapes = re.findall(r"Rez\.Drawables\.(\w+)", scenery)
 expected_landscapes = set(landscapes)
 check(bool(landscapes) and len(landscapes) == len(expected_landscapes),
       "Scenery definitions must contain unique landscape resource IDs")
-for size in (240,260,280,390,416,454):
+for size in (218,240,260,280,360,390,416,454):
     catalog = ROOT / f"resources-world{size}/drawables.xml"
     check(catalog.is_file(), f"Missing {size}px world catalog")
     if catalog.is_file():

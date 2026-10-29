@@ -34,6 +34,22 @@ gameplay, resources and compatibility evidence below remain unchanged.
 
 ## Scope and architecture
 
+### 0.6.0 scenery packaging
+
+All eight native scenery sizes (218–454px) include ten environments/four
+palettes. On CIQ 3.x, the four newest environments use a resource-only
+`SceneryPack` barrel namespace: 230 core + 24 scenery names in the application,
+16 scenery names in the barrel, within the 254-name per-module limit. Generated
+legacy source changes only resource references. All PNG pixels, Glance, saves,
+step catch-up and public/private identities are retained; no runtime image
+transforms or new timers. Always prepare through the build wrapper.
+
+Focused Fenix 6S Pro scenery validation passed 332 simulator scenes. A separate
+271-scene battle layout audit found text/sprite overlap and edge-clearance
+failures on that smaller display; battle UI acceptance remains outstanding.
+This limitation is not a failed scenery build or a full compatibility rerun.
+
+
 Primary target: standard Fenix 6S Pro (`fenix6spro`). Garmin uses that same SDK
 profile for 6S Sapphire / Pro Solar / Dual Power; it is not a Solar-only build.
 Additional candidates are grouped in `scripts/compatibility_candidates.json` by

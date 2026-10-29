@@ -111,7 +111,7 @@ def main():
     for line in jungle.read_text().splitlines():
         if '=' in line and not line.lstrip().startswith('#'):
             key, value = line.split('=', 1)
-            if key.strip().endswith(('sourcePath', 'resourcePath', 'manifest')):
+            if key.strip().endswith(('sourcePath', 'resourcePath', 'barrelPath', 'manifest')):
                 paths = []
                 for relative in value.strip().split(';'):
                     resolved = (jungle.parent/relative).resolve()
