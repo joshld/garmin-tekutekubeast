@@ -654,7 +654,7 @@ function activityGoldenVectorsTest(logger){
         var day=s.number("day");var writes=s.store.writes;var ruleData=s.store.copy(s.data);
         for(var j=0;j<row["samples"].size();j++){
             var sample=row["samples"][j];var steps=sample["steps"];var minutes=sample["minutes"];var pushes=sample["pushes"];
-            if(steps!=null){s.observe(day,steps);BeastActivityRules.observe(ruleData,day,steps);}
+            if(steps!=null){s.observe(day,steps);BeastActivityRules.observe(ruleData,day,steps);BeastCareRules.activity(ruleData,day,BeastActivityRules.credited(ruleData,day));}
             s.activityRewards(day,steps,minutes,pushes);BeastActivityRules.rewards(ruleData,day,steps,minutes,pushes);
             for(var k=0;k<fields.size();k++){Test.assert(s.data[fields[k]]==sample["expected"][k]);}
             Test.assert(TestSupport.same(ruleData,s.data));Test.assertEqual(s.store.writes,writes);
@@ -944,10 +944,10 @@ function expandedWorldSelectionsTest(logger){
 (:test)
 function poopNaturalCatchupAndCapacityTest(logger){
     var s=TestSupport.fixture();s.data["sleepMode"]=2;var at=s.now();var xp=s.xp();
-    s.testNow=at+14399;s.tick();Test.assertEqual(s.number("poop"),0);
+    s.testNow=at+57599;s.tick();Test.assertEqual(s.number("poop"),0);
     s.testNow++;s.tick();Test.assertEqual(s.number("poop"),1);Test.assertEqual(s.poopMask(),1);
     s.testNow=at+30*86400;s.tick();Test.assertEqual(s.number("poop"),5);Test.assertEqual(s.poopMask(),31);
-    Test.assertEqual(s.number("cleanliness"),25);Test.assertEqual(s.number("poopDue"),s.now()+14400);
+    Test.assertEqual(s.number("cleanliness"),25);Test.assertEqual(s.number("poopDue"),s.now()+57600);
     var due=s.number("poopDue");s.tick();Test.assertEqual(s.number("poopDue"),due);
     Test.assert(s.clean());Test.assertEqual(s.number("poop"),4);Test.assertEqual(s.poopMask(),30);
     s.tick();Test.assertEqual(s.number("poop"),4);s.testNow=due;s.tick();
@@ -955,15 +955,15 @@ function poopNaturalCatchupAndCapacityTest(logger){
 }
 (:test)
 function poopCleanOneRewardAndRollbackTest(logger){
-    var s=TestSupport.fixture();s.data["sleepMode"]=2;s.testNow+=20*3600;s.tick();
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;s.testNow+=4*86400;s.tick();
     var growth=s.number("careGrowth");var bond=s.friendship();var joy=s.number("happiness");
     for(var i=4;i>=0;i--){Test.assert(s.clean());Test.assertEqual(s.number("poop"),i);Test.assertEqual(s.number("cleanliness"),100-15*i);}
     Test.assert(!s.clean());Test.assertEqual(s.number("careGrowth"),growth+30);
-    Test.assertEqual(s.friendship(),bond+3);Test.assertEqual(s.number("happiness"),joy+10);
+    Test.assertEqual(s.friendship(),bond+3);Test.assertEqual(s.number("happiness"),joy+3);
     s.data["poop"]=1;s.testNow-=86400;Test.assert(s.clean());Test.assertEqual(s.number("careGrowth"),growth+30);
     s.testNow+=86400;s.data["poop"]=1;s.data["day"]=0;s.tick();Test.assert(s.clean());
     Test.assertEqual(s.friendship(),bond+3);Test.assertEqual(s.number("careGrowth"),growth+30);
-    s.testNow+=14400;s.tick();Test.assert(s.clean());Test.assertEqual(s.number("careGrowth"),growth+60);return true;
+    s.testNow+=14400;s.tick();s.data["poop"]=1;Test.assert(s.clean());Test.assertEqual(s.number("careGrowth"),growth+60);return true;
 }
 (:test)
 function poopLegacyMigrationAndSlotsTest(logger){
@@ -979,9 +979,9 @@ function poopLegacyMigrationAndSlotsTest(logger){
 }
 (:test)
 function poopFoodSleepAndDevIsolationTest(logger){
-    var s=TestSupport.fixture();s.data["sleepMode"]=2;var at=s.now();Test.assert(s.feedFood(true));
-    Test.assertEqual(s.number("poopDue"),at+10800);s.testNow+=10800;s.tick();Test.assertEqual(s.number("poop"),1);
-    s.data["fullness"]=50;Test.assert(s.feedFood(true));Test.assertEqual(s.number("poopDue"),at+25200);
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;var at=s.now();s.data["fullness"]=50;s.data["snacks"]=1;Test.assert(s.feedFood(true));Test.assert(s.feedFood(false));
+    Test.assertEqual(s.data["digestion"][0],at+10800);s.testNow+=10800;s.tick();Test.assertEqual(s.number("poop"),1);
+    s.data["fullness"]=50;Test.assert(s.feedFood(true));Test.assertEqual(s.data["digestion"][0],at+21600);
     s.rest();var mask=s.poopMask();var reward=s.number("careGrowth");Test.assert(!s.clean());
     Test.assertEqual(s.poopMask(),mask);Test.assertEqual(s.number("careGrowth"),reward);
     s.testNow+=3600;s.tick();s.commit();var saved=s.store.copy(s.store.read("v4"));
@@ -1008,8 +1008,8 @@ function poopFloorGeometryTest(logger){
 }
 (:test)
 function careAndRewardTest(logger){
-    var s=TestSupport.fixture();Test.assert(s.feedFood(true));Test.assertEqual(s.number("meals"),1);Test.assertEqual(s.xp(),0l);
-    s.testNow+=4*3600;s.tick();Test.assertEqual(s.number("poop"),1);Test.assert(s.clean());Test.assert(!s.clean());
+    var s=TestSupport.fixture();s.data["sleepMode"]=2;Test.assert(s.feedFood(true));Test.assertEqual(s.number("meals"),1);Test.assertEqual(s.xp(),0l);
+    s.testNow+=16*3600;s.tick();Test.assertEqual(s.number("poop"),1);Test.assert(s.clean());Test.assert(!s.clean());
     s.testNow+=86400;s.tick();Test.assertEqual(s.number("meals"),2);s.feedFood(true);var meals=s.number("meals");
     s.testNow-=86400;s.tick();Test.assertEqual(s.number("meals"),meals);
     for(var i=0;i<8;i++){s.gameReward(true,i%2);}Test.assertEqual(s.number("games"),3);Test.assertEqual(s.xp(),0l);return true;

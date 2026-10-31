@@ -12,9 +12,11 @@ OUT = ROOT/'bin/legacy-source'
 OUT.mkdir(parents=True, exist_ok=True)
 for path in (ROOT/'source').glob('*.mc'):
     text = path.read_text()
-    if path.name in ('TekuTekuBeastState.mc', 'BeastStore.mc', 'BeastProgression.mc', 'BeastActivityRules.mc', 'GarminActivity.mc', 'BeastGameRules.mc', 'BeastAffinity.mc'):
+    if path.name in ('BeastStateCore.mc', 'BeastStore.mc', 'BeastProgression.mc', 'BeastActivityRules.mc', 'GarminActivity.mc', 'BeastAffinity.mc'):
         assert text.count('(:background)') == 1
         text = text.replace('(:background)', '// Foreground-only scope on constrained profiles.', 1)
+    if path.name == 'BeastCareRules.mc':
+        text=text.replace('(:background,:glance)', '(:glance)', 1)
     if path.name == 'TekuTekuBeastService.mc':
         text = (ROOT/'source/DeferredService.mc.template').read_text()
     if path.name == 'BeastScenery.mc':

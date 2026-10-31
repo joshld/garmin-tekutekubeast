@@ -1,142 +1,13 @@
-using Toybox.Time;
-using Toybox.Time.Gregorian;
-using Toybox.Lang;
-using Toybox.UserProfile;
-
-(:background)
-class TekuTekuBeastState {
-    var store; var data=null; var dev=false;
-    var battleData=null; // Foreground-only cache; never part of the pet document.
+// Foreground care, games and owner tools. Canonical data/API remain inherited.
+class TekuTekuBeastState extends BeastStateCore {
+    var battleData=null;
     var virtualNow=0l; var anchor=0l; var speed=1;
-    var testNow=null; var skipWatch=false;
-    function initialize(){store=new BeastStore();}
-    function max(a,b){return a>b?a:b;}
-    function min(a,b){return a<b?a:b;}
-    function clamp(x){return min(100,max(0,x));}
-    function realNow(){return testNow==null?Time.now().value().toLong():testNow;}
+    function initialize(){BeastStateCore.initialize();}
     function now(){return dev?virtualNow+max(0l,realNow()-anchor)*speed:realNow();}
-    function dateKey(moment){var d=Gregorian.info(moment,Time.FORMAT_SHORT);return d.year*10000+d.month*100+d.day;}
-    function today(){return dateKey(new Time.Moment(now().toNumber()));}
-    function legacy(key){var v=store.read(key);return v==null?0:v;}
-    function number(key){return data.hasKey(key)?data[key]:0;}
-    function start(){
-        if(data!=null){return;}
-        data=store.copy(store.read("v4"));if(data!=null){
-            if(!data.hasKey("equipped")){data["equipped"]=-1;}
-            if(!data.hasKey("activityBonus")){data["activityBonus"]=0l;}
-            if(!data.hasKey("activityUnitGrowth")){data["activityUnitGrowth"]=1000;}
-            if(!data.hasKey("discoveryMask")){data["discoveryMask"]=0;for(var i=0;i<8;i++){if(data["items"][i]>0){data["discoveryMask"]|=1<<i;}}}
-            migrateV5();
-            return;
-        }
-        var exists=store.read("birth")!=null;
-        var epoch=store.read("birthEpoch");
-        if(epoch==null){
-            epoch=now();
-            if(exists){
-                // Very early saves have a local birth date but no epoch. Recover
-                // calendar age instead of making an older beast newborn again.
-                try{var days=(calendarMoment(today())-calendarMoment(legacy("birth")))/86400;epoch-=max(0l,days)*86400;}
-                catch(e instanceof Lang.Exception){}
-            }
-        }
-        data={"version"=>4,"birth"=>exists?legacy("birth"):today(),"birthEpoch"=>epoch.toLong(),
-            "birthBaseline"=>exists?legacy("birthBaseline"):(skipWatch?0:getTodaySteps()),
-            "xp"=>exists?legacy("xp").toLong():0l,"snacks"=>exists?legacy("snacks"):0,
-            "snackRemainder"=>exists?legacy("snackRemainder"):0,"friendship"=>exists?legacy("friendship"):0,
-            "patDay"=>exists?legacy("patDay"):0,"pats"=>exists?legacy("pats"):0,"family"=>exists?legacy("family"):0,
-            "baseGrowth"=>0l,"careGrowth"=>0l,"activityBonus"=>0l,"activityUnitGrowth"=>1000,"discoveryMask"=>0,"growthRemainder"=>0l,"petXpBaseline"=>0l,
-            "lastGrowth"=>now(),"lastCare"=>now(),"stageFloor"=>0,"evolutionPending"=>0,
-            "fullness"=>75,"happiness"=>65,"energy"=>80,"cleanliness"=>100,
-            "poop"=>0,"poopDue"=>0l,"lastPoop"=>0l,"sleepUntil"=>0l,
-            "day"=>today(),"meals"=>2,"games"=>0,"careToday"=>0,"rested"=>0,
-            "activityMilestone"=>0,"adventure"=>0,"encounters"=>0,"target"=>2000,
-            "minutesBase"=>-1,"pushBase"=>-1,"sound"=>0,"haptics"=>1,"motion"=>2,
-            "passiveRate"=>12000,"careCap"=>300,"hatchHours"=>24,"hatchMinimum"=>8,"legendDays"=>21,
-            "forcedStage"=>-1,"forcedFamily"=>0,"personality"=>[0,0,0,0],
-            "collection"=>0,"rareCollection"=>0,"charms"=>0,"rare"=>0,"petSerial"=>0,
-            "items"=>[0,0,0,0,0,0,0,0],"equipped"=>-1,"days"=>[],"counts"=>[]};
-        for(var i=0;i<32;i++){data["days"].add(exists?legacy("day"+i):0);data["counts"].add(exists?legacy("count"+i):0);}
-        // Capture existing stages before changing the hatch rule. No retroactive
-        // passive XP, no reset of legacy keys, and a retained migration snapshot.
-        if(exists){data["stageFloor"]=oldStage(xp(),ageDays());if(number("family")>0){data["stageFloor"]=max(3,number("stageFloor"));}}
-        migrateV5();store.write("v4.migration",store.copy(data));commit();
+    function scheduleFoodPoop(meal){BeastCareRules.feed(data,now(),meal);}
+    function setCareDifficulty(mode){
+        start();if(mode<0 || mode>2){return;}tick();BeastCareRules.advance(data,now(),true);data["careDifficulty"]=mode;commit();
     }
-    function migrateV5(){
-        // Additive migration: canonical key/version and all existing values stay
-        // intact. A single atomic document also owns resumable game transactions.
-        var defaults={"sleepMode"=>0,"bedMinute"=>1320,"wakeMinute"=>420,"watchBed"=>1320,"watchWake"=>420,
-            "nextBed"=>0l,"nextWake"=>0l,"scheduleAt"=>0l,"sleepSource"=>"FALLBACK","autoLights"=>1,"lights"=>0,"lightsUntil"=>0l,"vibeStyle"=>0,
-            "gameSerial"=>0,"gameDone"=>0,"session"=>null,"sessions"=>[null,null,null],"gameClaims"=>[0,0,0],"easy"=>0,"v5"=>1,"profileZone"=>null,
-            "awakeAt"=>0l,"awakeUntil"=>0l,"awakeZone"=>null,"grumpAt"=>0l,"grumpLevel"=>0,
-            "poopSlots"=>0,"lastCleanReward"=>0l};
-        var keys=defaults.keys();for(var i=0;i<keys.size();i++){if(!data.hasKey(keys[i])){data[keys[i]]=defaults[keys[i]];}}
-        // Freeze an already-adult legacy branch before introducing new tendencies.
-        if(!data.hasKey("affinity")){
-            if(number("family")==0 && stage()>=3){data["family"]=BeastProgression.chooseFamily(data);}
-            data["affinity"]=[0,0,0,0];data["affinityToday"]=[0,0,0,0];data["affinityDay"]=number("day");
-            data["temperament"]=BeastAffinity.temperament(number("birthEpoch"),number("petSerial"));
-        }
-        repairPoop();
-        // Old saves without a pending meal start a new interval, not retroactive
-        // waste for time before this feature existed. Keep an already-due meal.
-        if(number("poopDue")==0){data["poopDue"]=max(now(),number("lastPoop"))+14400;}
-    }
-    function poopMask(){
-        var mask=number("poopSlots")&31;var count=0;
-        for(var i=0;i<5;i++){if((mask&(1<<i))!=0){count++;}}
-        var wanted=min(5,max(0,number("poop")));
-        return count==wanted?mask:(1<<wanted)-1;
-    }
-    function repairPoop(){data["poop"]=min(5,max(0,number("poop")));data["poopSlots"]=poopMask();}
-    function advancePoop(t){
-        repairPoop();var due=number("poopDue");
-        if(due==0){data["poopDue"]=max(t,number("lastPoop"))+14400;return;}
-        due=max(due,number("lastPoop")+14400);if(t<due){return;}
-        var events=((t-due)/14400).toLong()+1;
-        var added=min(5-number("poop"),events).toNumber();var mask=number("poopSlots");
-        for(var i=0;i<5 && added>0;i++){
-            if((mask&(1<<i))==0){mask|=1<<i;data["poop"]++;added--;data["cleanliness"]=max(0,number("cleanliness")-15);}
-        }
-        data["poopSlots"]=mask;
-        // Advance the watermark even at capacity: no hidden backlog refills a
-        // freshly cleaned slot. Catch-up is bounded to five slots, not hours.
-        data["lastPoop"]=due+(events-1)*14400;data["poopDue"]=number("lastPoop")+14400;
-    }
-    function scheduleFoodPoop(){
-        var due=max(now()+10800,number("lastPoop")+14400);
-        if(number("poopDue")==0 || due<number("poopDue")){data["poopDue"]=due;}
-    }
-    function refreshSleep(){
-        if(dev || skipWatch || number("sleepMode")!=0){return;}
-        data["nextBed"]=0l;data["nextWake"]=0l;data["scheduleAt"]=now();data["sleepSource"]="FALLBACK";
-        data["profileZone"]=BeastSleep.zoneAt(now());
-        data["watchBed"]=number("bedMinute");data["watchWake"]=number("wakeMinute");
-        try{
-            var p=UserProfile.getProfile();
-            if(p!=null){
-                if(p.sleepTime!=null && p.wakeTime!=null){
-                    var bed=p.sleepTime.value()/60;var wake=p.wakeTime.value()/60;
-                    if(BeastSleep.validSchedule(bed,wake)){data["watchBed"]=bed;data["watchWake"]=wake;data["sleepSource"]="WATCH TYPICAL";}
-                }
-                if((p has :upcomingSleepTime) && (p has :upcomingWakeTime) && p.upcomingSleepTime!=null && p.upcomingWakeTime!=null){
-                    var b=p.upcomingSleepTime.value().toLong();var w=p.upcomingWakeTime.value().toLong();
-                    if(b!=w && b>now() && w>now() && b-now()<=172800 && w-now()<=172800){
-                        data["nextBed"]=b;data["nextWake"]=w;data["sleepSource"]="WATCH UPCOMING";
-                    }
-                }
-            }
-        }catch(e instanceof Lang.Exception){data["sleepSource"]="FALLBACK";}
-    }
-    function refreshSleepCached(){
-        // Profile data is not a continuously changing sensor. Explicit Settings,
-        // opening the app, and native sleep/wake events still force a refresh.
-        if(number("sleepMode")==0 && (number("scheduleAt")==0 || now()<number("scheduleAt") || now()-number("scheduleAt")>=900 || number("profileZone")!=BeastSleep.zoneAt(now()))){refreshSleep();}
-    }
-    function isNight(){return BeastSleep.night(data,now());}
-    function isSleeping(){return BeastSleep.sleeping(data,now());}
-    function grump(){return BeastSleep.grump(data,now());}
-    function happiness(){return BeastSleep.happiness(data,now());}
     function wakeUp(){
         start();if(!isSleeping()){return false;}tick();var t=now();
         var until=number("sleepUntil");if(isNight()){until=max(until,BeastSleep.scheduleEnd(data,t));}
@@ -154,111 +25,16 @@ class TekuTekuBeastState {
         data["lights"]=mode==2?1:0;data["lightsUntil"]=mode==0?0l:now()+3600;commit();
     }
     function toggleLights(){setLighting(isDark()?1:2);}
-    function calendarMoment(key){
-        return Gregorian.moment({:year=>(key/10000).toNumber(),:month=>((key/100)%100).toNumber(),:day=>key%100,:hour=>0,:minute=>0,:second=>0}).value().toLong();
-    }
-    function commit(){if(!dev){
-        data["cachedName"]=speciesName();data["cachedMood"]=mood();data["cachedProgress"]=progress();
-        var s=stage();data["cachedSprite"]=s<3?s:3+(family()-1)*3+s-3;
-        if(store.changed(data)){store.write("v4",store.copy(data));}
-        // Never load the large inventory/history/session document in a 32KB
-        // Glance VM. This optional read-only cache does not own pet progress.
-        var summary={};var fields=["cachedName","cachedProgress","cachedSprite","poop","energy","fullness","happiness","friendship","lastCare","sleepMode","nextBed","nextWake","scheduleAt","watchBed","watchWake","bedMinute","wakeMinute","sleepUntil","awakeAt","awakeUntil","awakeZone","grumpAt","grumpLevel"];
-        for(var i=0;i<fields.size();i++){summary[fields[i]]=data[fields[i]];}
-        store.writeGlance(summary);}}
-    function xp(){return number("xp");} // genuine lifetime watch steps ONLY
-    function growth(){return BeastProgression.growth(data);}
-    function ageDays(){return BeastProgression.ageDays(data,now());}
-    function oldStage(x,a){return BeastProgression.oldStage(x,a);}
-    function stage(){
-        if(dev && number("forcedStage")>=0){return number("forcedStage");}
-        return BeastProgression.stage(data,now());
-    }
-    function hatchDurationHours(){
-        return BeastProgression.hatchDurationHours(data);
-    }
-    function mastery(){return BeastProgression.mastery(data,stage());}
-    function masteryProgress(){return BeastProgression.masteryProgress(data);}
-    function nextSteps(){return BeastProgression.nextSteps(stage());}
-    function nextAge(){return BeastProgression.nextAge(data,stage());}
-    function progress(){
-        return BeastProgression.progress(data,now(),stage());
-    }
-    function tick(){
-        start();var t=now();BeastProgression.advance(data,t);
-        var day=today();
-        // Persisted high-water local day prevents rollback reward refills.
-        if(day>number("day")){data["day"]=day;data["meals"]=2;data["games"]=0;data["careToday"]=0;
-            data["rested"]=0;data["activityMilestone"]=0;data["minutesBase"]=0;data["pushBase"]=0;}
-        var care=max(0l,t-number("lastCare"));
-        if(care>=3600){
-            var h=min(24,care/3600).toNumber();var old=(number("lastCare")/3600).toNumber();
-            data["fullness"]=max(30,number("fullness")-3*((old+h)/6-old/6));
-            data["happiness"]=max(40,number("happiness")-2*((old+h)/8-old/8));
-            data["energy"]=min(100,number("energy")+5*((old+h)/4-old/4));
-            for(var hour=0;hour<h;hour++){
-                var at=number("lastCare")+hour*3600+1800;
-                if(BeastSleep.sleeping(data,at)){data["energy"]=min(100,number("energy")+8);}
-            }
-            data["lastCare"]=care>86400?t:number("lastCare")+h*3600;
-        }
-        advancePoop(t);
-        var prior=number("stageFloor");var s=stage();data["stageFloor"]=max(prior,s);
-        if(s>prior && !(dev && number("forcedStage")>=0)){data["evolutionPending"]=1;}
-        if(s>=3){family();}if(s==5){var flag=1<<(family()-1);
-            if((number("collection")&flag)==0){data["collection"]|=flag;data["charms"]++;}}
-    }
-    // Watermark + XP + inventory saved in one atomic document, never separately.
-    function observe(day,total){
-        start();if(dev){return;}BeastActivityRules.observe(data,day,total);
-    }
     function syncToday(){syncFromInfo(dev || skipWatch?null:GarminActivity.info());}
     function syncFromInfo(info){
         syncActivity(GarminActivity.steps(info),GarminActivity.minutes(info),GarminActivity.pushes(info));
-    }
-    function syncActivity(steps,minutes,pushes){
-        start();refreshSleepCached();tick();
-        if(!dev && !skipWatch){if(steps!=null){observe(today(),steps);}
-            activityRewards(today(),steps,minutes,pushes);}
-        tick();commit();
     }
     function syncHistory(){
         start();if(!dev && !skipWatch){var h=GarminActivity.history();for(var i=0;i<h.size();i++){
             if(h[i].startOfDay!=null && h[i].steps!=null){observe(dateKey(h[i].startOfDay),h[i].steps);}}}
         refreshSleep();syncToday();
     }
-    function stepNoop(steps,minutes,pushes){
-        // Never throttle NEW steps, new reward thresholds, date/care/poop
-        // boundaries, or sleep/wake callbacks. Only duplicate step events may
-        // defer sub-minute passive-only catch-up, which remains exactly lazy.
-        var t=now();var day=today();
-        if(steps==null || steps<0 || day!=number("day") || t<number("lastGrowth") || t-number("lastGrowth")>=60 || t-number("lastCare")>=3600){return false;}
-        if(number("poopDue")>0 && t>=number("poopDue")){return false;}
-        if(number("sleepMode")==0 && (number("scheduleAt")==0 || t<number("scheduleAt") || t-number("scheduleAt")>=900)){return false;}
-        var eligible=BeastActivityRules.eligible(data,day,steps);
-        var prior=BeastActivityRules.credited(data,day);if(eligible>prior){return false;}
-        var n=prior/max(1,number("target"));
-        if(minutes!=null){if(number("minutesBase")<0){return false;}n=max(n,max(0,minutes-number("minutesBase"))/10);}
-        if(pushes!=null){if(number("pushBase")<0){return false;}n=max(n,max(0,pushes-number("pushBase"))/500);}
-        return min(5,n)<=number("activityMilestone");
-    }
-    function activityRewards(day,steps,minutes,pushes){
-        if(dev){return;}BeastActivityRules.rewards(data,day,steps,minutes,pushes);
-    }
-    function family(){
-        if(dev && number("forcedFamily")>0){return number("forcedFamily");}if(stage()<3){return 0;}
-        if(number("family")!=0){return number("family");}
-        data["family"]=BeastProgression.chooseFamily(data);return number("family");
-    }
     function familyName(){return ["MYSTERY","GROVE","EMBER","TIDE","WISP"][family()];}
-    function speciesName(){
-        var s=stage();if(s<3){return ["MYSTERY EGG","PIP","NIMBLE"][s];}
-        if(number("rare")!=0){return ["LUMENHART","ASHEN PHOENIX","MOONWATER KIRIN","ECLIPSE EIDOLON"][family()-1];}
-        return [["MOSSBIT","CINDERCUB","PUDDLEFIN","FLICKLET"],["THORNBUCK","PYROLYNX","CURRENTAIL","NOCTURNE"],
-            ["VERDANT ELDER","SOLFLARE","LEVIATHAN","STARWEAVER"]][s-3][family()-1];
-    }
-    function getTodaySteps(){return GarminActivity.todaySteps();}
-    function friendship(){return number("friendship");}function snacks(){return number("snacks");}
     function patsToday(){return number("patDay")==number("day")?number("pats"):0;}
     function careReward(points,personality){
         var credit=min(points,max(0,number("careCap")-number("careToday")));var before=number("careToday")/100;
@@ -267,13 +43,13 @@ class TekuTekuBeastState {
     }
     function pat(){
         start();if(isSleeping()){return false;}tick();var n=patsToday();if(n>=3){return false;}data["patDay"]=number("day");data["pats"]=n+1;
-        data["friendship"]=clamp(friendship()+2);data["happiness"]=clamp(number("happiness")+8);careReward(25,0);commit();return true;
+        data["friendship"]=clamp(friendship()+2);data["happiness"]=clamp(number("happiness")+5);careReward(25,0);commit();return true;
     }
     function feed(){return feedFood(false);}
     function feedFood(meal){
         start();if(isSleeping()){return false;}tick();var key=meal?"meals":"snacks";if(number(key)<1 || number("fullness")>=95){return false;}
-        data[key]--;data["fullness"]=clamp(number("fullness")+(meal?30:10));data["happiness"]=clamp(number("happiness")+6);
-        data["friendship"]=clamp(friendship()+5);scheduleFoodPoop();
+        data[key]--;data["fullness"]=clamp(number("fullness")+(meal?20:6));data["happiness"]=clamp(number("happiness")+3);
+        data["friendship"]=clamp(friendship()+5);scheduleFoodPoop(meal);
         careReward(25,0);commit();return true;
     }
     function clean(){
@@ -283,7 +59,7 @@ class TekuTekuBeastState {
         data["cleanliness"]=number("poop")==0?100:min(100-15*number("poop"),number("cleanliness")+15);
         // A backlog takes several actions, not several happiness/bond rewards.
         if(now()-number("lastCleanReward")>=14400){
-            data["lastCleanReward"]=now();data["happiness"]=clamp(number("happiness")+10);
+            data["lastCleanReward"]=now();data["happiness"]=clamp(number("happiness")+3);
             data["friendship"]=clamp(friendship()+3);careReward(30,2);
         }
         commit();return true;
@@ -295,7 +71,7 @@ class TekuTekuBeastState {
     }
     function gameReward(win,kind){
         start();if(isSleeping()){return "Beast is asleep.";}tick();if(number("games")>=3){return "PRACTICE";}if(number("energy")<10){return "REST FIRST";}
-        data["games"]++;data["energy"]-=10;data["happiness"]=clamp(number("happiness")+(win?15:5));
+        data["games"]++;data["energy"]-=10;data["happiness"]=clamp(number("happiness")+(win?8:3));
         data["friendship"]=clamp(friendship()+2);careReward(win?75:40,kind==0?1:3);commit();return win?"WELL PLAYED!":"NICE TRY!";
     }
     function beginSession(kind){
@@ -350,8 +126,8 @@ class TekuTekuBeastState {
     }
     function useItem(item){
         start();if(isSleeping()){return false;}tick();if(data["items"][item]<1){return false;}
-        if(item==0){if(number("fullness")>=95){return false;}data["items"][item]--;data["fullness"]=clamp(number("fullness")+10);scheduleFoodPoop();}
-        else if(item==1 || item==3 || item==6){BeastAffinity.credit(data,item==1?2:(item==3?3:4),1,number("day"));data["happiness"]=clamp(number("happiness")+10);careReward(25,item==1?1:3);}
+        if(item==0){if(number("fullness")>=95){return false;}data["items"][item]--;data["fullness"]=clamp(number("fullness")+6);scheduleFoodPoop(false);}
+        else if(item==1 || item==3 || item==6){BeastAffinity.credit(data,item==1?2:(item==3?3:4),1,number("day"));var room=max(0,number("careCap")-number("careToday"));if(room>0){data["happiness"]=clamp(number("happiness")+3);}careReward(25,item==1?1:3);}
         else{data["equipped"]=number("equipped")==item?-1:item;}
         commit();return true;
     }
@@ -364,9 +140,6 @@ class TekuTekuBeastState {
         data["personality"]=[0,0,0,0];data["affinity"]=[0,0,0,0];data["affinityToday"]=[0,0,0,0];data["affinityDay"]=number("day");
         data["temperament"]=BeastAffinity.temperament(number("birthEpoch"),number("petSerial"));data["lastGrowth"]=now();data["growthRemainder"]=0l;
         data["awakeAt"]=0l;data["awakeUntil"]=0l;data["grumpAt"]=0l;data["grumpLevel"]=0;commit();return true;
-    }
-    function mood(){
-        return BeastSleep.mood(data,now());
     }
     function enableDev(){
         syncHistory();var b=new TekuTekuBeastState();b.store=store;b.data=store.copy(data);b.dev=true;

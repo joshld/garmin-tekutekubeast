@@ -22,7 +22,7 @@ class TekuTekuBeastView extends WatchUi.View {
     var nightTint={:tintColor=>0xAAAAAA};
     var roamTicks=0.0;var petX=0.5;var petFoot=0.70;var roamOriginX=0.0;var roamOriginY=0.70;var wasSleeping=false;
     var creatureHeaderBottom=0;var petBounds=[0,0,0,0];var petFrame=0;var darkScene=false;
-    var poopRows=[8,28,30,62,127,127];
+    var poopRows=[8,28,30,62,127,127];var poopFill=[0,8,12,28,62,0];var poopShine=[0,8,8,0,0,0];
     const BG=0xAAFFAA;const INK=0x005500;const LIGHT=0x55AA55;
     function initialize(){View.initialize();beast=new TekuTekuBeastState();}
     function onShow(){
@@ -39,7 +39,7 @@ class TekuTekuBeastView extends WatchUi.View {
         var state=visualState();
         if(menu==null && page==0 && beast.number("motion")>0 && beast.stage()>0 && (state.equals("idle") || state.equals("wander") || state.equals("hop") || state.equals("happy"))){
             if(wasSleeping){roamTicks=0.0;roamOriginX=petX-0.5;roamOriginY=petFoot;wasSleeping=false;}
-            roamTicks+=step*(beast.number("motion")==1?0.25:1.0);
+            roamTicks+=step*(beast.number("motion")==1?0.25:1.0)*(beast.number("fullness")<45 || beast.number("happiness")<50 || beast.number("cleanliness")<45?0.5:1.0);
         }
         if(tick%80<step){beast.syncToday();loadSprite();}
         if(beast.dev && tick%4<step){beast.tick();loadSprite();}
@@ -98,7 +98,8 @@ class TekuTekuBeastView extends WatchUi.View {
             lightingStamp=lightingKey();
         }
         else if(menu.equals("Feed")){rows=["Meal: "+beast.number("meals"),"Snack: "+beast.snacks()];}
-        else if(menu.equals("Settings")){rows=["Developer: "+(beast.dev?"ON":"OFF"),"Sound: "+(beast.number("sound")==0?"OFF":"ON"),"Vibration: "+(beast.number("haptics")==0?"OFF":"ON"),"Motion: "+["OFF","LOW","NORMAL"][beast.number("motion")],"Activity target: "+beast.number("target"),"Bedtime","Feedback test","Version 0.6.1 beta","Vibe: "+(beast.number("vibeStyle")==0?"GENTLE":"EXPRESSIVE"),"Outdoor world"];}
+        else if(menu.equals("Care Difficulty")){rows=["Low Maintenance","Normal","High Maintenance"];selection=beast.number("careDifficulty");}
+        else if(menu.equals("Settings")){rows=["Developer: "+(beast.dev?"ON":"OFF"),"Sound: "+(beast.number("sound")==0?"OFF":"ON"),"Vibration: "+(beast.number("haptics")==0?"OFF":"ON"),"Motion: "+["OFF","LOW","NORMAL"][beast.number("motion")],"Activity target: "+beast.number("target"),"Bedtime","Feedback test","Version 0.6.1 beta","Vibe: "+(beast.number("vibeStyle")==0?"GENTLE":"EXPRESSIVE"),"Outdoor world","Care Difficulty"];}
         else if(menu.equals("Bedtime")){rows=["Schedule: "+["WATCH","MANUAL","OFF"][beast.number("sleepMode")],"Bed: "+clockText(beast.number("bedMinute")),"Wake: "+clockText(beast.number("wakeMinute")),"Bedtime dim: "+(beast.number("autoLights")==1?"ON":"OFF"),beast.number("sleepMode")==0?beast.data["sleepSource"]:"LOCAL SCHEDULE"];}
         else if(menu.equals("Feedback test")){rows=["Tone test","Vibration test",FeedbackManager.lastStatus,"Watch Alert Tones","must be ON for sound"];}
         else if(menu.equals("Set time")){rows=[];for(var hour=0;hour<48;hour++){rows.add(clockText(hour*30));}}
@@ -154,11 +155,12 @@ class TekuTekuBeastView extends WatchUi.View {
             return;
         }
         if(context.equals("Feed")){var fed=beast.feedFood(n==0);menu=null;toast(fed?"YUM!":"FULL / NONE",fed?"eat":"look");return;}
+        if(context.equals("Care Difficulty")){beast.setCareDifficulty(n);openMenu("Settings");return;}
         if(context.equals("Settings")){
             if(n==0){openMenu(beast.dev?"Discard DEV?":"Developer");return;}
             if(n==5){openMenu("Bedtime");return;}if(n==6){openMenu("Feedback test");return;}if(n==7){return;}
             if(n==8){beast.data["vibeStyle"]=1-beast.number("vibeStyle");beast.commit();updateRows();WatchUi.requestUpdate();return;}
-            if(n==9){openMenu("Outdoor world");return;}
+            if(n==9){openMenu("Outdoor world");return;}if(n==10){openMenu("Care Difficulty");return;}
             var keys=["","sound","haptics","motion","target"];var key=keys[n];
             if(n<3){beast.data[key]=1-beast.number(key);}else if(n==3){beast.data[key]=(beast.number(key)+1)%3;}
             else{beast.data[key]=beast.number(key)==2000?4000:(beast.number(key)==4000?8000:2000);}
@@ -277,7 +279,7 @@ class TekuTekuBeastView extends WatchUi.View {
     function back(){
         if(menu!=null){
             if(menu.equals("Lighting")){openMenu("Actions");return true;}
-            if(menu.equals("Outdoor world")){openMenu("Settings");return true;}
+            if(menu.equals("Outdoor world") || menu.equals("Care Difficulty")){openMenu("Settings");return true;}
             if(menu.equals("Environment") || menu.equals("Sun / location") || menu.equals("Sky preview")){openMenu("Outdoor world");return true;}
             if(menu.equals("Approx latitude") || menu.equals("Approx longitude")){openMenu("Sun / location");return true;}
             if(menu.equals("Set time")){openMenu("Bedtime");return true;}
@@ -385,6 +387,7 @@ class TekuTekuBeastView extends WatchUi.View {
         if(beast.number("energy")<20){return "tired";}
         if(animationTicks>0 && !animation.equals("idle")){return animation;}
         if(beast.number("fullness")<45){return tick%24<6?"look":"idle";}
+        if(beast.number("cleanliness")<45 || beast.number("happiness")<50){return tick%24<8?"look":"idle";}
         return "idle";
     }
     function pixelIcon(dc,x,top,rows,color,scale){
@@ -422,12 +425,15 @@ class TekuTekuBeastView extends WatchUi.View {
         // and above the growth bar; no collision solver or per-frame arrays.
         var mask=beast.poopMask();if(mask==0){return;}
         var scale=poopScale(dc.getWidth());var top=poopTop(dc.getHeight());
-        // Darker brown separates waste from the new warm leaf/field palettes.
-        var color=darkScene?0xFFAA55:(world!=null && world.theme>=4?0x550000:0xAA5500);
+        // Three fixed masks, same 7x6 coverage: dark outline inside the sprite.
         for(var slot=0;slot<5;slot++){
-            if((mask&(1<<slot))!=0){pixelIcon(dc,poopX(dc.getWidth(),slot),top,poopRows,color,scale);}
+            if((mask&(1<<slot))==0){continue;}var x=poopX(dc.getWidth(),slot);
+            pixelIcon(dc,x,top,poopRows,0x000000,scale);
+            pixelIcon(dc,x,top,poopFill,0xAA5500,scale);
+            pixelIcon(dc,x,top,poopShine,0xFFAA55,scale);
         }
     }
+
     function devBadge(dc,color){
         if(beast.dev){
             var scale=beast.max(2,(dc.getWidth()/140).toNumber());var x=dc.getWidth()/2-5.5*scale;

@@ -1,6 +1,6 @@
 // Deterministic mini-game calculations. Timing units are existing 250ms ticks.
 // No input/rendering, clock, storage, reward claims or session ownership.
-(:background)
+// Foreground only: game rounds/loot are never resolved by background callbacks.
 module BeastGameRules {
     function nextSeed(seed){return (seed*17+11)%65521;}
     function trailSeed(seed,route,node,choice){return (seed+route*97+node*41+choice*211)%65521;}

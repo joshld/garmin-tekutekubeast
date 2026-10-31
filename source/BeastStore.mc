@@ -24,11 +24,23 @@ class BeastStore {
         writes++;if(key.equals("v4")){canonical=value;}return true;
     }
     function same(a,b){
+        if(a==b){return true;}
         if(a instanceof Lang.Dictionary){if(!(b instanceof Lang.Dictionary) || a.size()!=b.size()){return false;}var keys=a.keys();for(var i=0;i<keys.size();i++){if(!b.hasKey(keys[i]) || !same(a[keys[i]],b[keys[i]])){return false;}}return true;}
         if(a instanceof Lang.Array){if(!(b instanceof Lang.Array) || a.size()!=b.size()){return false;}for(var i=0;i<a.size();i++){if(!same(a[i],b[i])){return false;}}return true;}
         if(a instanceof Lang.String){return b instanceof Lang.String && a.equals(b);}return a==b;
     }
     function changed(value){if(same(canonical,value)){skipped++;return false;}return true;}
+    function savePet(value){
+        if(!changed(value)){return false;}
+        // Free the obsolete baseline BEFORE building the replacement snapshot.
+        // Atomic writes preserve valid disk data; null forces snapshot/write retry.
+        canonical=null;
+        if(memory!=null){return write("v4",copy(value));}
+        // Serialize the working value first; a second full document must not
+        // coexist with the serializer's temporary buffers in the background VM.
+        var saved=write("v4",value);canonical=null;
+        if(saved){canonical=copy(value);}return saved;
+    }
     function writeGlance(value){
         if(!glanceLoaded){glanceBaseline=read("glance.v1");glanceLoaded=true;}
         if(same(glanceBaseline,value)){skipped++;return;}

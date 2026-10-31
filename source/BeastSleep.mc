@@ -85,22 +85,22 @@ module BeastSleep {
     function forecastEnergy(data,epoch){
         var energy=value(data,"energy",80);var h=careHours(data,epoch);var last=value(data,"lastCare",0l);
         var old=(last/3600).toNumber();energy+=5*((old+h)/4-old/4);
-        for(var hour=0;hour<h;hour++){if(sleeping(data,last+hour*3600+1800)){energy+=8;}}
+        for(var hour=0;hour<h && energy<100;hour++){if(sleeping(data,last+hour*3600+1800)){energy+=8;}}
         return energy>100?100:energy;
     }
     // Pure lazy-care projection for a cached Glance. It neither writes nor
     // advances growth and avoids stale SLEEPY after an unobserved night's rest.
     function previewMood(data,epoch){
-        var h=careHours(data,epoch);var old=(value(data,"lastCare",0l)/3600).toNumber();
-        var food=value(data,"fullness",75)-3*((old+h)/6-old/6);if(food<30){food=30;}
-        var joy=value(data,"happiness",65)-2*((old+h)/8-old/8);if(joy<40){joy=40;}joy-=grump(data,epoch);
+        var food=BeastCareRules.projected(data,epoch,true);
+        var joy=BeastCareRules.projected(data,epoch,false)-grump(data,epoch);
         return moodValues(data,epoch,forecastEnergy(data,epoch),food,joy);
     }
     function moodValues(data,epoch,energy,food,joy){
         if(sleeping(data,epoch)){return night(data,epoch)?"ASLEEP":"RESTING";}
         if(grump(data,epoch)>0){return "GRUMPY";}
         if(energy<20){return "SLEEPY";}
-        if(value(data,"poop",0)>0){return "MESSY";}
+        if(food<30){return "HUNGRY";}
+        if(value(data,"poop",0)>0 || value(data,"cleanliness",100)<45){return "MESSY";}
         if(food<45){return "HUNGRY";}
         if(joy<50){return "LONELY";}
         if(joy>=85){return "EXCITED";}

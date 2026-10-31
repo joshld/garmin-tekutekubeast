@@ -50,8 +50,12 @@ if "Service" in source:
     check("function onSteps()" in source["Service"], "Missing step background callback")
     check("Background.exit" in source["Service"], "Missing background exit")
 if "State" in source:
+    core = SRC / "BeastStateCore.mc"
+    check(core.is_file(), "Missing background-safe State core")
+    if core.is_file():
+        source["State"] += core.read_text(encoding="utf-8")
     for required in ["GarminActivity.info()", "GarminActivity.history()", "BeastActivityRules.observe(",
-                     'store.write("v4"', "function mastery()", "function syncToday()"]:
+                     'store.savePet(data)', "function mastery()", "function syncToday()"]:
         check(required in source["State"], "Missing expected state feature: " + required)
     check('if(!dev)' in source["State"], "Missing DEV commit guard")
     check('"baseGrowth"' in source["State"], "Missing separate passive growth")

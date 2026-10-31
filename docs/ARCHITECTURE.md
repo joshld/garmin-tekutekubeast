@@ -9,12 +9,14 @@ designs only when a specific historical decision is relevant.
 | Boundary | Responsibility |
 | --- | --- |
 | `BeastProgression` | Growth, hatch/stage/mastery calculations and read-only family selection. Explicit save document and epoch-seconds inputs; no Garmin imports. |
+| `BeastCareRules` | Portable difficulty rates, fractional elapsed needs, capped activity modifiers and compact delayed digestion. Explicit epoch/day inputs; no Garmin APIs, storage or timers. Read-only projections serve Glance. |
 | `BeastAffinity` | Portable family tendencies, stable innate temperament, actual-leader tie resolution and per-family daily caps. No activity, care-growth or platform dependencies. State preserves adult locks and old battle personality. |
 | `BeastActivityRules` | Deterministic step ledger, baseline/watermark and activity reward mutations; explicit local day and optional cumulative counters. No clock, watch or storage access. |
 | `GarminActivity` | Single normalization point for Garmin snapshots, history, optional active minutes and pushes. No new polling or storage. |
 | `BeastGameRules` | Pure mini-game timing, cue selection, seed transitions and loot choice. Views keep session transitions/buttons/drawing; State keeps atomic claims and inventory changes. |
 | `BeastBattleData` / `BeastBattleMoves` / `BeastBattleRules` | Issue #20 deterministic engine: generated shared definitions, 72 fixed named techniques, temporary combat snapshots, AI, effects and bounded progression calculations. No platform imports or pet-save mutation. |
-| `TekuTekuBeastState` | Application orchestration: migrations, clock/day sampling, care, transaction ownership, Developer Mode and save commits. |
+| `BeastStateCore` | Background-safe orchestration: migration, clocks, genuine activity, lazy care/growth, sleep and atomic commits. No game sessions, care actions or DEV controls. |
+| `TekuTekuBeastState` | Foreground subclass retaining the existing API: care actions, session claims, collections and isolated Developer Mode. |
 | `BeastStore` | Garmin persistence, dirty detection and compact Glance cache; injectable RAM backend for tests. |
 | Views/delegates | Drawing, artwork, input, timers and feedback. Glance uses its existing compact read-only cache. |
 | `BeastSleep` / `BeastSky` | Existing sleep/calendar and astronomy helpers. Sleep still depends on Garmin calendar/time APIs. |
@@ -36,12 +38,34 @@ Garmin's [bitmap tint API](https://developer.garmin.com/connect-iq/api-docs/Toyb
 is guarded by `has`; unsupported renderers keep the native sprite. No alpha
 framebuffer or GPU-only blending is required.
 
-Waste extends the existing canonical `v4` care fields, not a new save document:
-`poop` (0–5), `poopDue` and `lastPoop` retain their roles; optional `poopSlots`
-is a five-bit normalized floor-slot mask and `lastCleanReward` bounds rewards.
-State performs bounded elapsed-time catch-up/one-poop clean transactions; the
-view only projects slots to display coordinates using the existing icon mask.
-No per-poop objects, background registration or new bitmap cache is required.
+Care extends canonical `v4` additively: `careDifficulty` (0/1/2),
+`careAt`, `foodRemainder`/`joyRemainder` (need-seconds modulo 86,400),
+`careStepDay`/`careStepUnits` (2k-step high-water, maximum five),
+`digestion` (four due-epoch/unit pairs), `digestRemainder` (0-2),
+`digestDay`/`digestWaste` (daily food-waste cap). Existing `poop`, `poopDue`,
+`lastPoop`, `poopSlots` and `lastCleanReward` retain their units and upgrade
+values. The care marker initializes new food batches; `poopDue`/`lastPoop`
+then own the natural-waste clock, retaining the legacy pending-meal deadline
+for its first event. Food deadlines live in `digestion`, independently.
+State owns defaults, genuine ledger observation and atomic commits; rules use
+bounded arithmetic (four batches/five slots), never loops through absent days.
+Whole-hour care settlement avoids extra sub-hour Glance writes; mode changes
+settle remaining fractions. Glance adds only difficulty, care epoch/remainders
+and cleanliness, never digestion/affinity/inventory/history. Constrained legacy
+profiles exclude care/affinity orchestration from background scope and retain
+foreground catch-up. No extra timer, service, sensor, bitmap cache or save
+namespace. Old battle personality and new family affinity remain separate;
+difficulty never enters family selection, evolution or step XP.
+
+The measured care stress case required splitting foreground actions from the
+background core; no persistent key, field unit or gameplay API changed. Mini-game
+rules are foreground-only. `BeastStore.savePet` releases the obsolete dirty
+baseline before a write and builds its independent replacement after Garmin
+serialization. Real Storage values need no extra working-document clone; the
+RAM backend retains deep isolation. Failed writes retain the previous disk
+save; failed post-write snapshots leave a null baseline for an idempotent retry.
+Identity comparisons skip traversing already-shared immutable values. Energy
+sampling stops once saturated at 100, preserving the same recovery result.
 
 `BeastWorld` keeps optional `dailyRotation` in its existing foreground `world.v1`
 preferences. Calendar-derived cycling needs no saved random choice or daily write;
@@ -54,8 +78,8 @@ caches exactly one terrain layer; daily selection uses the current theme count.
 
 - Epochs are integer Unix seconds; calendar days remain local `YYYYMMDD` keys.
   Rule modules must receive these values, not read the clock themselves.
-- The existing `v4` document is the canonical schema. No renamed keys, changed
-  units or new migration is required for these extractions.
+- The existing `v4` document is the canonical schema. No renamed keys or changed
+  units; later care/affinity defaults are additive, as described above.
 - `BeastProgression.advance` mutates only passive-growth fields; calculations
   and family selection do not write storage. State owns all commits and DEV guards.
 - Genuine step XP is distinct from growth and must never be synthesized by ports.

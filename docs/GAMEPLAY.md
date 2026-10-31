@@ -1,7 +1,7 @@
 # Current gameplay and features
 
-Implemented behavior through v0.5.2, the Issue #19 refactor, Issue #21 lighting
-Issue #17 sleep interactions and Issue #20 battles (source changes, not a new Store release).
+Current source behavior includes offline battles, family tendencies and care
+difficulty. The latest family/care changes are not yet a Store release.
 This is the current gameplay guide, not an implementation wishlist. Normal play
 is native and offline; activity is optional, with no death, lost XP, de-evolution
 or recovery-day punishment. See [current validation](VALIDATION.md) for tested
@@ -75,23 +75,51 @@ owner hardware testing; simulator lifecycle tests cannot prove universal coverag
 
 ## Poop and cleaning
 
-- Natural waste arrives every four game hours, even without food or steps.
-  Feeding can bring the next arrival forward to three hours, but arrivals stay
-  at least four hours apart. Time away is reconciled on reopening/callbacks;
-  no extra timer, GPS, notification or overnight sound is needed.
-- Capacity is five. Full capacity still advances the waste clock, so cleaning
-  cannot release a hidden backlog or immediately refill the cleared slot.
-- Five fixed, separate grass slots persist as a compact occupancy mask. Cleaning
-  removes the leftmost occupied slot only; the remaining poops do not move.
-  Positions scale with the display and stay below the beast/above the growth bar.
-- Each arrival lowers cleanliness by 15; each cleanup restores 15 up to the
-  remaining-waste ceiling. Removing the last poop restores cleanliness to 100.
-  Clean remains blocked while asleep and never wakes the beast automatically.
-- Cleaning happiness/friendship/care rewards occur at most once per four game
-  hours, retain the existing daily care-growth cap and survive reopening/clock
-  rollback. Other poops can still be removed immediately without extra rewards.
-- Existing `v4` pets retain counts, pending food timers and all progress. Missing
-  natural timers start on upgrade rather than inventing pre-upgrade waste.
+Settings > Care Difficulty saves Low Maintenance, Normal (default), or High
+Maintenance. Switching settles elapsed care at the old rate first; it never
+resets progress, needs, rewards or pending food/natural-waste deadlines.
+
+| Mode | Food/day | Joy/day | Natural waste | Digestion delay | Extra food waste/day |
+| --- | ---: | ---: | --- | --- | ---: |
+| Low Maintenance | -6 | -4 | Every 24 hours | 4 hours | At most 1 |
+| Normal | -20 | -12 | Every 16 hours | 3 hours | At most 2 |
+| High Maintenance | -30 | -20 | Every 12 hours | 2 hours | At most 3 |
+
+- Care settles hourly with exact fractional remainders; switching settles partial
+  hours too. A single absence charges at most 72 hours of decay, then advances
+  the high-water clock through the entire absence. Food bottoms at 10, joy at
+  15; no death or permanent damage. Reopening/rollback cannot replay decay.
+- Each newly credited 2,000 genuine steps costs one food in Low/Normal, two in
+  High. At most five units/day; food caps 3/5/8, energy caps 2/4/5. Every second unit gives one
+  joy (maximum two/day). Beyond 10,000 steps there is no further care demand.
+  Existing credited steps on upgrade are not charged again; historical XP
+  catch-up remains intact. Mode switches never replay previously charged units.
+- Two free daily meals each restore 20 food. Snacks/berries restore six. Food
+  gives three joy, pats five, rewarded game wins eight (losses three), cleaning
+  three at most once/four hours. Friendship, care-growth and session reward
+  limits remain. Toys give three joy only while the daily care-growth budget
+  has room; repeated tapping cannot farm unlimited happiness. Existing rest
+  and scheduled-sleep energy recovery remains.
+- Natural waste needs no feeding or steps. Meals add two digestion units,
+  snacks/berries one; three matured units produce one extra poop. Four compact
+  pending batches/eight units maximum survive reopening. Excess feeding adds
+  no hidden waste backlog. Deadlines retain their original mode; subsequent
+  meals/natural intervals use the selected mode. No immediate poop per meal.
+- Five fixed grass slots persist as a bit mask. Every arrival lowers cleanliness
+  by 15. Each Clean removes only the leftmost occupied slot, restoring 15 up to
+  the remaining-waste ceiling; the final Clean restores 100. Other poops stay
+  put. Events due at capacity/daily cap are consumed, preventing hidden refills.
+- Mood priority: sleep, temporary grumpiness, tiredness, severe hunger,
+  waste/poor cleanliness, hunger, low joy. Poor needs slow wandering and add
+  subdued looks. Existing feeding/cleaning/rest/new-poop reactions remain;
+  sleeping actions stay blocked until deliberate waking.
+- Poop retains its 7x6 silhouette, scale and positions, with a black internal
+  outline, brown fill and restrained highlights. No ring, label or bitmap cache.
+- Additive canonical v4 migration defaults existing pets to Normal, preserving
+  needs, waste slots/timer, progress, inventory and identities. New care time
+  starts at upgrade; no invented old decay or meals. Developer Mode is isolated.
+  No new timer, GPS, polling or background registration; Glance projects the
+  same food/joy rules without loading digestion/history or writing saves.
 
 ## Wild battles
 
@@ -323,7 +351,7 @@ Waking a nap before five minutes or after thirty minutes causes no grumpiness;
 the small bell-shaped response peaks around 15-20 minutes. Effective happiness
 temporarily falls by at most two points, recovering within five minutes. Night
 waking causes at most one point for two minutes, with no effect near bedtime or
-scheduled waking. Natural waking has no penalty. Saved base happiness and family
+scheduled waking. Natural waking has no penalty. Saved base happiness and battle
 personality are never reduced by waking. Reopening retains the bounded wake/grump
 window; clock rollback before waking or a time-zone change invalidates the wake
 override. Lighting and the astronomical sky remain independent: waking does not

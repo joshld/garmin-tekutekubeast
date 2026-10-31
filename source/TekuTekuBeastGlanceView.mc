@@ -37,7 +37,7 @@ class TekuTekuBeastGlanceView extends WatchUi.GlanceView {
         var name="EGG";var mood="OPEN GAME";var progress=0.0;
         if(snapshot!=null && snapshot.hasKey("cachedName")){
             name=snapshot["cachedName"];mood=BeastSleep.previewMood(snapshot,Time.now().value());progress=snapshot["cachedProgress"];
-            if(snapshot["poop"]>0 && BeastSleep.grump(snapshot,Time.now().value())==0 && !BeastSleep.sleeping(snapshot,Time.now().value()) && BeastSleep.forecastEnergy(snapshot,Time.now().value())>=20){mood="CLEANUP";}
+            if(mood.equals("MESSY")){mood="CLEANUP";}
         }
         var font=Graphics.FONT_XTINY;var left=50;var width=dc.getWidth()-left-12;
         var lines=[name];var split=name.find(" ");

@@ -41,6 +41,7 @@ def public_source(name, text, tests):
             text = remove_function(text, method)
         text = replace(text, '    var virtualNow=0l; var anchor=0l; var speed=1;\n')
         text = replace(text, 'function now(){return dev?virtualNow+max(0l,realNow()-anchor)*speed:realNow();}', 'function now(){return realNow();}')
+    if name == "BeastStateCore.mc":
         text = replace(text, '        if(dev && number("forcedStage")>=0){return number("forcedStage");}\n')
         text = replace(text, 'if(dev && number("forcedFamily")>0){return number("forcedFamily");}', '')
         text = replace(text, 'if(s>prior && !(dev && number("forcedStage")>=0))', 'if(s>prior)')

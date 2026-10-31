@@ -6,7 +6,7 @@ class TekuTekuBeastService extends System.ServiceDelegate {
     function initialize() { ServiceDelegate.initialize(); }
     function onSteps(){reconcile(false);}
     function reconcile(forceSleep) {
-        var began=System.getTimer();var beast = new TekuTekuBeastState();beast.start();
+        var began=System.getTimer();var beast = new BeastStateCore();beast.start();
         var info=GarminActivity.info();var steps=GarminActivity.steps(info);
         var minutes=GarminActivity.minutes(info);var pushes=GarminActivity.pushes(info);
         if(!forceSleep && beast.stepNoop(steps,minutes,pushes)){

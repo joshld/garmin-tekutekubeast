@@ -1,6 +1,67 @@
 # Current source validation checkpoint
 
-## Family variety � 2026-10-31 (Issue #25)
+## Care rebalance - 2026-10-31 (Issues #25/#26)
+
+- Actual SDK 9.2 native execution: **110 Enduro 4 tests passed**; **11 focused
+  Fenix 6S Pro care/storage tests passed**. Includes migration, difficulty/time
+  switching, 1/3/7/14-day absences, caps, digestion, cleaning, rollback/reopening,
+  sleep, family neutrality and existing progression/battle/session regressions.
+- Final care-menu navigation after visiting scenery settings was rechecked
+  separately: one selected native test passed.
+- Real SDK Storage tests verify independent deserialization, write failure,
+  post-write snapshot failure, retry, snapshot isolation and unchanged-save skips.
+- Actual Enduro 4 renderer: **972 scenes, zero failures**, covering ten themes,
+  four palettes, both lighting modes, Pip/Nimble and all waste counts 0-5, plus
+  environment menu labels. Sampled foreground heap **163,240 / 781,976 bytes**;
+  this is a sample, not allocator-wide peak. Original poop dimensions/slots remain.
+- Background stress initially reproduced serialization OOM. Foreground actions
+  now extend the smaller background core; unused game rules stay foreground.
+  Storage avoids a third working copy and snapshots after serialization. No save
+  format/identity change; sleep energy stops sampling when already saturated.
+- Actual background VM (isolated QA temporal trigger calling production reconcile):
+  three paused games, 24-hour catch-up, six mature food units, natural waste and
+  initial energy zero passed at **48,352 / 61,344 bytes sampled**, two writes,
+  SDK timer **15 ms**. XP 123456, three games and inventory 18 preserved; three
+  poops/two food-waste events committed. Previous full-energy case also passed
+  (48,656 bytes, with extra QA instrumentation). Timings are simulator samples,
+  not physical CPU/battery measurements. No new production timer/registration.
+- Signed release-mode owner Enduro 4 and public Enduro 4/Fenix 6S Pro device
+  builds pass; public DEV/test exclusion remains enforced. UUIDs, signing setup,
+  47-profile manifest, artwork and existing Store packages unchanged. No Store export,
+  physical installation, publication or full device matrix.
+- Glance compiles; care projection/mood priority have native coverage. Its live
+  launch/memory recheck remains **unverified**: computer control failed to start
+  (missing kernel-assets path), and the CLI Glance attempt produced no audit.
+  Physical upgrade, mode pacing, sunlight/night visibility, Glance and battery
+  acceptance remain open; no physical-watch testing was performed.
+
+### Balance scenarios (14 simulated days)
+
+Each visit uses available free meals, up to three daily pats, and one Clean per
+poop. No mini-games/snacks/toys rescue these scenarios. Steps are simulated inputs
+to the genuine-ledger API, never changes to Garmin's actual counter.
+
+| Scenario | Lowest food / joy | After final care |
+| --- | --- | --- |
+| Normal, inactive, visits every two days | 35 / 41 | 75 / 65 |
+| Normal, 5,000 steps/day, daily | 53 / 54 | 100 / 100 |
+| Normal, 10,000 steps/day, daily | 50 / 55 | 100 / 100 |
+| Normal, runner 20,000-40,000/day | 50 / 55 | 100 / 100 |
+| High Maintenance, inactive, twice daily | 60 / 55 | 100 / 100 |
+| Normal, returns once/week | 10 / 17 | 50 / 41 |
+
+Requested food/joy decay rates are retained exactly. The 72-hour absence cap and
+recoverable floors bound neglect; returning players can use existing games and
+toys to recover further. Smaller food/joy gains and bounded toy rewards retain
+meaningful care without increasing progression thresholds or requiring activity.
+
+Evidence: `bin/care-{build,native,focused-native,fenix6spro-native,background-final,
+scenery-native,preflight}.log` and `bin/care-*-build.log` (ignored local logs).
+Reproducers: `tests/care/source`, `tests/care/background/monkey.jungle`,
+`tests/family/source`, `tests/scenery/monkey.jungle`; normal build guidance is in
+[BUILD.md](BUILD.md). Existing historical evidence below is preserved.
+
+## Family variety - 2026-10-31 (Issue #25)
 
 - Seven activity-neutral affinity tests plus existing Enduro 4 native regressions:
   **99 passed, 0 failed/errors**, actual SDK 9.2 simulator native execution.

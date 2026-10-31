@@ -1,0 +1,16 @@
+<iq:manifest xmlns:iq="http://www.garmin.com/xml/connectiq" version="1">
+  <iq:application id="42D4B18292604CBA86E7FE31D653E11F" type="watch-app" name="@Strings.BackgroundQA" entry="CareBackgroundApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="3.2.0">
+    <iq:products>
+      <iq:product id="enduro4" />
+      </iq:products>
+    <iq:permissions>
+      <iq:uses-permission id="Background" />
+      <iq:uses-permission id="UserProfile" />
+      <iq:uses-permission id="Positioning" />
+    </iq:permissions>
+    <iq:languages>
+      <iq:language>eng</iq:language>
+    </iq:languages>
+    <iq:barrels><iq:depends name="SceneryPack" version="1.0.0" /></iq:barrels>
+  </iq:application>
+</iq:manifest>

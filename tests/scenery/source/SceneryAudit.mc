@@ -13,7 +13,7 @@ class MatrixApp extends TekuTekuBeastApp {
 class SceneryAudit extends TekuTekuBeastView {
     var auditing=true;var cursor=0;var failures=0;var peak=0;var autoExit=true;
     function initialize(){TekuTekuBeastView.initialize();beast=new ArtPreviewState();ensureWorld();scenery.audit=true;}
-    function onShow(){refresher=new Toybox.Timer.Timer();refresher.start(method(:refresh),100,true);}
+    function onShow(){refresher=new Toybox.Timer.Timer();refresher.start(method(:refresh),50,true);}
     function refresh() as Void {if(auditing){WatchUi.requestUpdate();}else{TekuTekuBeastView.refresh();}}
     function back(){if(menu==null){openMenu("Environment");selection=7;WatchUi.requestUpdate();return true;}return TekuTekuBeastView.back();}
     function switchPage(delta){
@@ -36,15 +36,15 @@ class SceneryAudit extends TekuTekuBeastView {
     function onUpdate(dc){
         if(!auditing){TekuTekuBeastView.onUpdate(dc);return;}
         var model=beast as ArtPreviewState;
-        var landscapes=BeastWorld.THEME_COUNT*32;var total=landscapes+BeastWorld.THEME_COUNT+2;
+        var landscapes=BeastWorld.THEME_COUNT*96;var total=landscapes+BeastWorld.THEME_COUNT+2;
         if(cursor>=landscapes){
             openMenu("Environment");selection=cursor-landscapes;TekuTekuBeastView.onUpdate(dc);
             cursor++;if(cursor==total){finishAudit();}return;
         }
-        var theme=(cursor/32).toNumber();var phase=((cursor%32)/8).toNumber();
+        var theme=(cursor/96).toNumber();var phase=((cursor%96)/24).toNumber();
         model.previewStage=cursor%2==0?1:2;model.data["motion"]=2;model.data["sleepMode"]=2;
         model.data["energy"]=80;model.data["fullness"]=80;model.data["happiness"]=80;
-        model.data["poop"]=cursor%4<2?0:5;model.repairPoop();model.setLighting(cursor%8<4?1:2);
+        model.data["poop"]=((cursor%24)/4).toNumber();model.repairPoop();model.setLighting(cursor%4<2?1:2);
         world.setTheme(theme+1);world.preview=phase;world.invalidate();menu=null;page=0;
         loadSprite();roamTicks=((cursor%8)*48+31).toFloat();tick=roamTicks.toNumber();
         drawPet(dc);var held=scenery.layer;drawPet(dc);

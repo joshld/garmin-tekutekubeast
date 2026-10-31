@@ -1,0 +1,4 @@
+project.manifest = manifest.xml
+base.barrelPath = ../../../bin/scenery-barrel/SceneryPack.barrel
+base.sourcePath = ../../../source;../../background/source;.
+base.resourcePath = ../../../resources-pet144;../../background/resources;../../../resources-world280
