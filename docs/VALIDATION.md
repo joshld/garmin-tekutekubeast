@@ -1,4 +1,36 @@
 # Current source validation checkpoint
+
+## Final v0.7.0 packages - source ac49e39
+
+Final public and private Developer Beta packages were exported from
+[ac49e39](https://github.com/joshld/garmin-tekutekubeast/commit/ac49e39132e10221a74d96223a91bd0cb3530e9d)
+and include the update-reminder feature. These replace the earlier exports at
+the same filenames; their historical hashes and evidence remain below.
+
+- Public: `bin/TekuTekuBeast-Public-0.7.0.iq` (23,648,459 bytes), UUID
+  `53C660EBC4454BCF9292E5591EEC18DA`; SHA-256
+  `3ea0afeb61011367a70707e4c10ba486300e6485e4150bbbcf4c2e827f25ff6d`.
+- Private: `bin/TekuTekuBeast-Dev-0.7.0.iq` (23,874,523 bytes), original UUID
+  `54A4F9D3B6584CA4B01C232D20438E5B`; SHA-256
+  `1de78ef73e4b200fb22b5c378c6b2d75903108f39c00a5820ca403106bf50613`.
+
+Both retain the original pinned signing key and verify manifest RSA-4096/SHA-256
+signatures, archive integrity, version 0.7.0, UUIDs and all **47 profiles / 72
+hardware programs**. Public excludes Developer Mode; private retains it. The
+latest reminder feature is present in all programs. Download copies match.
+No application identity or save-format change was introduced by packaging.
+
+Local evidence: `bin/{public070,private070}-refresh-{export,verify}.log` and
+`bin/TekuTekuBeast-{Public,Dev}-0.7.0.verification.json` (per-program hashes).
+These generated records are local, not committed GitHub attachments. Existing
+native/simulator evidence is reused; no tests were rerun for this correction.
+Physical-watch acceptance remains open in [#24](https://github.com/joshld/garmin-tekutekubeast/issues/24),
+[#20](https://github.com/joshld/garmin-tekutekubeast/issues/20) and
+[#28](https://github.com/joshld/garmin-tekutekubeast/issues/28). Garmin publication
+status is not established by package verification. Advance each update-manifest
+channel only after its release is approved and available; see
+[publication order](BUILD.md#published-update-manifest).
+
 ## In-app update reminders - 2026-10-31
 
 - Daily asynchronous checks, generated stable/Beta version/channel metadata,
@@ -12,17 +44,22 @@
   on both targets and private Enduro build pass; UUID/key/DEV/channel checks pass.
 - [Manifest](https://raw.githubusercontent.com/joshld/garmin-tekutekubeast/main/updates/versions.json)
   is live: desktop HTTP **200**, valid JSON. Stable **0.6.1**, Beta **0.5.2** are
-  conservative confirmed floors; owner says neither 0.7.0 candidate is uploaded.
+  conservative confirmed floors at the feature checkpoint; publication must be
+  confirmed separately before advancing either channel.
 - SDK HTTPS returns **-1001** for both manifest and Garmin HTTPS control. Recorded
   environment limitation; no further retries. Physical HTTPS fetch, prompt/button
   readability and reminder persistence through reboot remain unverified.
 - Logs under `bin/`: `update-full-regression.log`, `update-*-final-native.log`,
   `update-*-storage-final.log`, `update-layout-*.log`, `update-network-*.log`,
   `update-build-verification.log`, `update-preflight.log`. Fixtures: `tests/updates/`.
-  Preflight/link/diff checks pass. Existing IQs predate this feature and remain
-  unchanged; no installation, export or Garmin publication. Unrelated notes preserved.
+  Preflight/link/diff checks passed at this feature checkpoint. The earlier IQs
+  then predated this feature; the final ac49e39 exports above include it. This
+  feature checkpoint did not install, export or publish to Garmin.
 
 ## v0.7.0 public and private package candidates - 2026-10-31
+
+**Historical, superseded exports:** the records below describe the earlier
+packages, not the current files at those paths. Final ac49e39 hashes are above.
 
 Owner-requested version bump and both full signed IQ exports completed. Each
 contains **47 existing SDK profiles / 72 hardware programs**, including Enduro 4
