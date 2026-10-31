@@ -134,6 +134,19 @@ Settings still displays **0.5.2 beta**; the filename/hash identifies this newer
 source. SHA256: `E6870E3903568545BCCCE5855A8A2C7C23D8CF59225BDF73F40825AFC9A83562`.
 The original Beta UUID/key are retained; public UUID and QA code are absent.
 
+For this historical acceptance milestone, the owner requested a **private
+Developer Beta IQ** for Connect IQ delivery. This older package is superseded;
+use [current install guidance](BUILD.md#installation-and-publication) for updates.
+Its retained output location is
+`D:\working\garmin-tekutekubeast\bin\private-acceptance-118bdff\TekuTekuBeast-Dev-0.5.2.iq`;
+see [verification](VALIDATION.md#private-developer-beta-acceptance-iq-historical).
+Use a computer to upload that file as an update of the **existing Developer
+Beta listing only**, retaining its Beta visibility. After Garmin makes the
+update available, update/sync that same installed Beta through Connect IQ.
+Opening the IQ file on a phone does not install it. Do not uninstall, create a
+new listing, update the public app or copy saves. Codex has not uploaded or
+installed anything; physical retention/acceptance is still pending.
+
 ### Owner-operated update, only after identity/filename confirmation
 
 1. Photograph the real pet's name/stage, XP/growth, friendship, inventory and
@@ -144,8 +157,8 @@ The original Beta UUID/key are retained; public UUID and QA code are absent.
    `54A4F9D3B6584CA4B01C232D20438E5B`. Do not guess a random PRG filename, select
    the public UUID, or create a second installation. If the Store-managed file
    cannot be identified/accessed unambiguously, **stop before copying**. Request
-   a read-only mapping check or explicit approval for a private-Beta IQ/update
-   instead; no new IQ or Store update was prepared here.
+   a read-only mapping check or use the private-Beta Store update route above
+   instead, after the owner uploads it. Do not mix installation methods blindly.
 3. For a confirmed accessible in-place USB update, use a PC copy of this PRG
    bearing the **same existing Beta filename**, and replace only that program.
    Garmin's [USB sideload procedure](https://developer.garmin.com/connect-iq/connect-iq-basics/your-first-app/)

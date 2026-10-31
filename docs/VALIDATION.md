@@ -472,6 +472,18 @@ Recent evidence (historical records below remain unchanged):
 - [Registered inputs and interruption safety](#issue-14---registered-inputs-and-interruption-safety-2026-10-19)
 - [Physical-watch acceptance](WATCH_ACCEPTANCE.md) and [build/package guidance](BUILD.md)
 
+## Private Developer Beta acceptance IQ (historical)
+
+The owner-requested private export for source `118bdff` is retained at
+`bin/private-acceptance-118bdff/TekuTekuBeast-Dev-0.5.2.iq`.
+SHA-256: `366E477F8E8CFDA8487F0B4EEB7D4A06962EA43AB62762E248E797FAEF34C6CE`.
+A documentation-only check matched the previously verified artifact hash;
+`bin/private-acceptance-118bdff/export.log` is retained, but no separate
+`verification.log` exists. Earlier SDK/signing/acceptance evidence is reused.
+This older 0.5.2-labelled artifact is superseded by the later candidates above;
+see [current build/install guidance](BUILD.md#installation-and-publication),
+not this historical record, for updates. No new build, installation or upload.
+
 ## Physical acceptance preparation - source 118bdff
 
 Rebuilt the signed Enduro 4 owner program with `-Owner -Release -Device enduro4`
