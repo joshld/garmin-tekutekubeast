@@ -17,6 +17,8 @@
 - Do not trade correctness, security, saved progress or meaningful testing for token savings.
 
 ## 2. Device testing and compatibility
+- **Minimum sufficient validation (default):** docs/config-only = diff/format checks, no compile; small UI = one affected-device build and focused layout check; isolated logic = focused unit tests; new feature = focused tests plus one Enduro 4 build/simulator check. Add extra targets/tests only for a specific changed risk. Do not run a full regression suite automatically after each fix.
+- **Test escalation:** fix a failure, rerun only the failing test, then perform one appropriately scoped final validation. Reuse valid earlier results; do not rerun an unchanged passing suite. A release or save/migration/background change still needs its relevant safety checks.
 - **Default: Enduro 4 (`enduro4`) only** for routine changes. Run focused builds, unit/layout tests and simulator checks relevant to the changed functionality.
 - Do **not** routinely invoke `scripts/device-matrix.ps1`, `scripts/glance-matrix.ps1` or equivalent full multi-device suites.
 - For Fenix 6-generation changes, test `fenix6spro` (or the actually affected SDK profile) plus `enduro4`. For touch/input, display, API, memory or background risks, add only relevant representative affected profiles.
@@ -31,6 +33,9 @@
 - Never upload or publish to Garmin Connect IQ without explicit owner approval.
 
 ## 4. Efficient investigation and implementation
+- **Output budget:** redirect verbose builds/tests to local log files; read a short status, failing assertions and small surrounding excerpts only. Never paste full passing simulator transcripts into model context.
+- **No diagnostic loops:** after one reproducible environmental failure and one distinct diagnostic/control attempt, stop; record the limitation and required physical validation. Retry only with a new hypothesis or changed environment.
+- **No speculative expansion:** avoid broad repository scans, unrelated cleanups, optional tests and multi-device sweeps unless required for the task's acceptance criteria.
 - Inspect directly relevant files first; prefer targeted searches over dumping full source files. Expand only when evidence warrants it.
 - Do not reread unchanged files, rediscover documented build commands or repeat successful investigations without reason.
 - Reuse existing helpers, artwork, scripts and conventions. Avoid unrelated refactoring or rewriting working code without a concrete need.
@@ -48,7 +53,7 @@
 - Update documentation only where behavior or workflow actually changes; reserve extensive release notes, screenshots, matrices and evidence bundles for release preparation.
 - Keep verbose build/test logs in ignored local files. Avoid repetitive transcripts, duplicate screenshots and overlapping reports.
 - Give progress updates at meaningful milestones or blockers. Completion summary: changed behavior/files, test scope/outcome, exact artifact path, commit SHA and remaining limitations.
-- Maintain one concise current validation record referencing existing detailed evidence; distinguish new results from reused results.
+- Keep routine validation notes to a short outcome and links to existing logs; do not append long run transcripts or duplicate historical evidence to `docs/VALIDATION.md`. Distinguish new results from reused results.
 
 ## 7. Application and player-data safety
 - **Never change either application UUID or the signing identity** without explicit approval. The existing Developer Beta is `54A4F9D3B6584CA4B01C232D20438E5B` (root manifest, real existing pet); the owner-approved separate public application is `53C660EBC4454BCF9292E5591EEC18DA` (generated public manifest). Fixed identities are in `config/build-identities.json`.
