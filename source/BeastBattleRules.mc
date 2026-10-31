@@ -108,7 +108,11 @@ module BeastBattleRules {
         }
         return result;
     }
-    function available(state,slot){return versioned(state) && integer(slot,0,3) && state["status"]==0 && (slot!=3 || state["actors"][0]["cooldown"]==0);}
+    function availableAt(state,index,slot){
+        return versioned(state) && integer(index,0,1) && integer(slot,0,3) && state["status"]==0 &&
+            (slot!=3 || state["actors"][index.toNumber()]["cooldown"]==0);
+    }
+    function available(state,slot){return availableAt(state,0,slot);}
     // Ring affinity: Grove > Tide > Ember > Wisp > Grove; never blocks a move.
     function affinity(a,b){
         if(a==0 || b==0 || a==b){return 0;}
@@ -143,15 +147,21 @@ module BeastBattleRules {
     }
     function turn(state,slot){
         if(!versioned(state)){return null;}
+        if(!available(state,slot)){return copy(state);}
+        // Keep the existing pre-turn AI choice and seed order exactly intact.
+        return pairedTurn(state,slot,ai(state));
+    }
+    // Friend battles supply both choices; every effect remains in the same act().
+    // Actor zero acts first, exactly as in wild battles. No rewards are applied.
+    function pairedTurn(state,first,second){
+        if(!versioned(state)){return null;}
         var result=copy(state);
-        if(!available(state,slot)){return result;}
-        slot=slot.toNumber();
-        // AI peeks at next seed first; player damage, then surviving opponent
-        // damage each advance RNG once. Guard/buff moves consume no random draw.
-        result["events"]=[];var choice=ai(result);result["turn"]++;result["uses"][slot]++;
-        act(result,0,slot);
+        if(!availableAt(state,0,first) || !availableAt(state,1,second)){return result;}
+        first=first.toNumber();second=second.toNumber();
+        result["events"]=[];result["turn"]++;result["uses"][first]++;
+        act(result,0,first);
         if(result["actors"][1]["hp"]<=0){result["status"]=1;return result;}
-        act(result,1,choice);
+        act(result,1,second);
         if(result["actors"][0]["hp"]<=0){result["status"]=2;}
         else if(result["turn"]>=BeastBattleData.MAX_TURNS){result["status"]=3;}
         return result;
