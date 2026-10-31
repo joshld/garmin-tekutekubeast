@@ -1,6 +1,6 @@
 # Build, test and release packaging
 
-Current workflow for v0.6.1 beta using the existing fixed application identities. Run from the repository root.
+Current workflow for v0.7.0 beta using the existing fixed application identities. Run from the repository root.
 [Validation](VALIDATION.md) records executed checks; commands below are
 instructions, not claims of new runs.
 
@@ -158,18 +158,18 @@ build-time checks/preparation; never generate artwork on the watch.
 
 ## Public versus private Store packages
 
-Current guards pin version/filenames to 0.6.1. Preserve original signed 0.5.2/0.6.0
+Current guards pin version/filenames to 0.7.0. Preserve original signed 0.5.2/0.6.0
 artifacts and their historical hashes/evidence. Full exports require explicit approval.
 
 ```powershell
 # Public .iq: all advertised hardware parts; DEV excluded
-& scripts/build.ps1 -Export -Release -Output bin/TekuTekuBeast-Public-0.6.1.iq
+& scripts/build.ps1 -Export -Release -Output bin/TekuTekuBeast-Public-0.7.0.iq
 # Owner-requested PRIVATE Beta .iq: original UUID; DEV included
 & scripts/build.ps1 -DeveloperBetaExport
 ```
 
 `-Export -Owner` is rejected. The explicit private exception rejects QA input
-and the public filename; it produces `bin/TekuTekuBeast-Dev-0.6.1.iq`.
+and the public filename; it produces `bin/TekuTekuBeast-Dev-0.7.0.iq`.
 Never attach that binary to a published public GitHub release or public Garmin
 listing. Any private draft download must remain restricted to maintainers.
 
@@ -196,8 +196,8 @@ Never relabel these old checks as fresh source validation.
 
 Public IQ belongs to the separate public listing; private Developer Beta IQ
 updates the existing Beta listing. The historical ambiguous
-`TekuTekuBeast-0.5.2.iq` is not for a new public app. The current in-app string is `0.6.1 beta`; use `0.6.1` when an approved
-0.6.1 package is uploaded. Existing Store releases remain unchanged.
+`TekuTekuBeast-0.5.2.iq` is not for a new public app. The current in-app string is `0.7.0 beta`; use `0.7.0` when an approved
+0.7.0 package is uploaded. Existing Store releases remain unchanged.
 
 The owner handles uploads through the
 [developer dashboard](https://apps-developer.garmin.com/developer/dashboard).

@@ -1,4 +1,34 @@
 # Current source validation checkpoint
+## v0.7.0 public and private package candidates - 2026-10-31
+
+Owner-requested version bump and both full signed IQ exports completed. Each
+contains **47 existing SDK profiles / 72 hardware programs**, including Enduro 4
+and standard Fenix 6S Pro. Both manifest RSA-4096/SHA-256 signatures verify with
+the original pinned signing key. Every archived program passes extraction CRC,
+compiled UUID, `Version 0.7.0 beta` and DEV-marker checks. Public generation also
+passes the existing fail-closed owner-method exclusion. Public DEV is absent;
+private Developer Mode is retained. No identity, save format or gameplay change.
+
+- Public: `bin/TekuTekuBeast-Public-0.7.0.iq` (23,312,775 bytes), UUID
+  `53C660EBC4454BCF9292E5591EEC18DA`; SHA-256
+  `2a1aec60a37a029342d76c0814b9aa9affe3202e0a9c001751d136e956c3fe02`.
+- Private: `bin/TekuTekuBeast-Dev-0.7.0.iq` (23,536,842 bytes), original UUID
+  `54A4F9D3B6584CA4B01C232D20438E5B`; SHA-256
+  `786e88b5df6ddc5909399274807a440fa99c8a53dd1811a1ebc405351277f214`.
+
+The only Monkey C change since `06d1cd4` is the Settings version label. Reuse
+that milestone's focused native/layout/background evidence below; no full
+simulator matrix was run. Structural preflight and diff checks pass. Logs:
+`bin/{public070,private070}-{export,verify}.log`; per-program hashes and identity
+checks are in each IQ's adjacent `.verification.json`. Download copies under
+workspace `outputs/v0.7.0/` match the originals. Earlier signed IQs are untouched.
+
+These are **candidates**, not evidence of physical ANT pairing/range/battery or
+public/Beta interoperability. [Issue #20](https://github.com/joshld/garmin-tekutekubeast/issues/20)
+retains two-watch acceptance. Nothing installed, uploaded or published to Garmin.
+Use each package only for its corresponding existing listing; do not uninstall
+or copy pet data between the two identities. Enter **0.7.0** in the upload form.
+
 ## Direct ANT friend battles - 2026-10-31 (Issue #20)
 
 - Foundation [e09f369](https://github.com/joshld/garmin-tekutekubeast/commit/e09f369):

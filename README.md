@@ -4,10 +4,11 @@ A native, offline Garmin virtual-beast game. Grow through time, care and play;
 real watch activity adds growth and adventure rewards. No exercise, phone,
 account or internet connection is required for normal gameplay.
 
-**0.6.1 beta candidate:** ten outdoor environments, daily scenery rotation,
-five-poop care, offline battles and interaction improvements. Existing compatibility
-evidence covers 47 SDK profiles, including standard Fenix 6S Pro. The current
-private acceptance package targets Enduro 4 only; Store releases remain unchanged.
+**0.7.0 beta candidate:** direct, reward-free ANT friend battles, rebalanced care
+and activity-neutral family tendencies, alongside ten outdoor environments,
+mini-games and offline wild battles. Existing compatibility evidence covers 47
+SDK profiles, including standard Fenix 6S Pro. Two-watch radio acceptance remains
+pending; preparing packages does not publish a Garmin Store update.
 
 [GitHub Issues](https://github.com/joshld/garmin-tekutekubeast/issues) is the
 authoritative development backlog and acceptance tracker. Guides describe current
