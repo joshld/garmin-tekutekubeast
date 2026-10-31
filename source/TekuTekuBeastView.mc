@@ -116,7 +116,7 @@ class TekuTekuBeastView extends WatchUi.View {
         else if(menu.equals("Animations")){rows=["idle","wander","hop","blink","look","eat","happy","clean","sleep","evolve","sound test","vibration test"];}
         else if(menu.equals("Balance settings")){rows=["Passive: "+beast.number("passiveRate"),"Care cap: "+beast.number("careCap"),"Hatch hours: "+beast.number("hatchHours"),"Legend days: "+beast.number("legendDays")];}
         else if(menu.equals("Play")){rows=["Beast Bounce","Follow My Lead","Tiny Adventures","Wild battles"];}
-        else if(menu.equals("Wild battles")){var fight=new BeastBattle(beast);fight.clearFinishedBattle();var match=fight.battleSession();rows=[fight.hasUnfinishedBattle()?"Resume battle":(match!=null?"View result":"Meet: "+fight.battleQueueCount()+" waiting"),"Practice match","Later","Decline next","Battle XP: "+fight.battleXp(),"Techniques","Wild journal","Walk, care or explore","5 rewarded matches/day"];}
+        else if(menu.equals("Wild battles")){var fight=new BeastBattle(beast);fight.clearFinishedBattle();var match=fight.battleSession();rows=[fight.hasUnfinishedBattle()?"Resume battle":(match!=null?"View result":"Meet: "+fight.battleQueueCount()+" waiting"),"Practice match","Later","Decline next","Battle XP: "+fight.battleXp(),"Techniques","Wild journal","Walk, care or explore","5 rewarded matches/day","Battle a friend"];}
         else if(menu.equals("Techniques")){var fight=new BeastBattle(beast);rows=[];var moves=BeastBattleMoves.names(BeastBattleMoves.form(beast.stage(),beast.family(),beast.number("rare")));for(var i=0;i<moves.size();i++){rows.add(moves[i]+": "+fight.battleMastery(i));}if(rows.size()==0){rows.add("Hatch before battling");}}
         else if(menu.equals("Wild journal")){var fight=new BeastBattle(beast);rows=[];for(var form=0;form<18;form++){if((fight.data["seen"]&(1<<form))!=0){rows.add(BeastBattleMoves.species(form));}}if(rows.size()==0){rows.add("Meet your first wild beast");}}
         else if(menu.equals("Collection")){rows=["Discoveries","Rare evolution","Archive / new egg","Toys / accessories","Museum"];}
@@ -237,6 +237,11 @@ class TekuTekuBeastView extends WatchUi.View {
         if(context.equals("Toys / accessories")){menu=null;toast(beast.useItem(n)?name.toUpper():"TRY TRAIL","happy");return;}
         if(context.equals("Archive / new egg")){menu=null;toast(n==1 && beast.newEgg()?"NEW JOURNEY":"BEAST KEPT","evolve");return;}
         if(context.equals("Wild battles")){
+            if(n==9){
+                if(beast.isSleeping() || beast.stage()==0){menu=null;toast(beast.isSleeping()?"Beast is asleep.":"Hatch before battling","idle");return;}
+                frames=null;sprite=null;spriteStage=-1;
+                var friend=new BeastFriendView(beast);friend.petView=self;WatchUi.pushView(friend,new BeastBattleInput(friend),WatchUi.SLIDE_LEFT);return;
+            }
             var fight=new BeastBattle(beast);
             if(n==0 || n==1){
                 if(beast.isSleeping()){menu=null;toast("Beast is asleep.","idle");return;}

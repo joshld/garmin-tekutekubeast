@@ -1,4 +1,49 @@
 # Current source validation checkpoint
+## Direct ANT friend battles - 2026-10-31 (Issue #20)
+
+- Foundation [e09f369](https://github.com/joshld/garmin-tekutekubeast/commit/e09f369):
+  **116/116 Enduro 4 SDK native tests**, including existing battle goldens,
+  care/migrations and six new codec/paired-turn tests. Rules/data/72 moves unchanged.
+- Session [b067792](https://github.com/joshld/garmin-tekutekubeast/commit/b067792):
+  final **17/17 focused native tests on each of Enduro 4 and Fenix 6S Pro**.
+  Two-peer mock transport covers pairing/readiness, all outcomes, packet loss,
+  duplicates/order/stale/invalid input, retries/timeouts/cancel, detached snapshots,
+  unchanged pet/solo journal, serial counter, actual controller buttons, event
+  presentation and lifecycle shutdown. These are not physical RF tests.
+- Actual SDK foreground renderer: **368 scenes / zero failures on each target**,
+  including Host/Join digits, identical beasts, all 18 forms/72 moves, both
+  ownership orientations, waiting/ready and action/results. Initial audits exposed
+  FRIEND label edge/header crowding; only friend label/header placement changed.
+  Existing solo layout defaults remain unchanged. Sampled QA heap: Enduro 4
+  **185,064 / 781,976**, Fenix **255,304 / 1,306,136 bytes**. Previous solo audits
+  sampled 162,536/226,848 bytes; different fixture counts mean these are not a
+  controlled production delta or allocator-wide peaks. Real radio heap/battery
+  cost and manual visual acceptance remain unmeasured.
+- Actual Enduro background VM stress: **47,992 / 61,344 bytes**, **two writes**,
+  **16ms** SDK work; XP123456, three saved games and inventory18 retained, with
+  three waste slots/two food units reconciled. Previous care run 48,352 bytes /
+  two writes / 15ms is consistent; do not infer battery improvement from this.
+  No friend class has background/Glance annotations; no new graphics/resources.
+  Existing Glance rendering evidence reused; no new live Glance test claimed.
+- Four signed device-only release-mode builds in `bin/friend-acceptance/`:
+  `TekuTekuBeast-{Dev,Public}-{Enduro4,Fenix6SPro}.prg`. Both original UUIDs found
+  in compiled programs; original key fingerprint matches pinned identity.
+  Public DEV/QA symbols excluded; private DEV retained. Version stays **0.6.1 beta**.
+  No existing Store IQ, release version, save format or product list changed.
+- Installed SDK capability audit: all 47 existing profiles expose GenericChannel;
+  only these two targets were built/tested. Unsupported/busy radio paths fail
+  gracefully. No full matrix, IQ export, installation or Garmin upload.
+- Evidence: `bin/friend-{wire-native,focused-final,fenix-native,layout-enduro4,
+  layout-fenix6spro,background,identity,preflight}.log`; reproducers in
+  `tests/friend/` and existing `tests/care/background/`. Structural preflight,
+  portable data checks, scoped documentation links and diff checks pass.
+- **NOT VERIFIED:** physical ANT pairing/range/recovery, public/Beta radio
+  interoperability, sensor coexistence, real-watch readability and battery.
+  [First two-watch procedure](WATCH_ACCEPTANCE.md#first-two-watch-friend-test-issue-20)
+  and [Issue #20](https://github.com/joshld/garmin-tekutekubeast/issues/20) retain
+  these acceptance gaps. Computer-control initialization is unavailable; no
+  manual simulator GUI/button playthrough or actual ANT USB radio is claimed.
+
 
 ## Care rebalance - 2026-10-31 (Issues #25/#26)
 

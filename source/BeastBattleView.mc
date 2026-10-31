@@ -179,6 +179,11 @@ class BeastBattleView extends TekuTekuBeastView {
         }
         compactGrid=moveFont!=null;if(moveFont==null){moveFont=Graphics.FONT_XTINY;}
     }
+    function opponentLabel(){return "WILD";}
+    function battlePrompt(dc){
+        label(dc,y(dc,compactGrid?0.62:0.65),battleSleeping?"Beast is asleep.":battleNotice,Graphics.FONT_XTINY);
+        label(dc,y(dc,0.75),"BACK: PAUSE",Graphics.FONT_XTINY);
+    }
     function moveHint(){
         if(moveChoice==3){var cooldown=battle["actors"][0]["cooldown"];return cooldown>0?"Ready in "+cooldown+" moves":"Strong hit";}
         return ["Hit the wild beast","Soften next hit","Boost next 2 hits"][moveChoice];
@@ -204,13 +209,15 @@ class BeastBattleView extends TekuTekuBeastView {
         }
         return beast.max(0,beast.min(actor["maxHp"],hp));
     }
+    function fighterLabelPosition(index){return index==0?0.30:0.70;}
     function fighterLabel(dc,index){
-        var cx=dc.getWidth()*(index==0?0.30:0.70);var top=y(dc,compactGrid?0.11:(dc.getWidth()<240?0.14:0.125));
+        var cx=dc.getWidth()*fighterLabelPosition(index);var top=y(dc,compactGrid?0.11:(dc.getWidth()<240?0.14:0.125));
         if(!compactGrid && battlePhase==2 && burst>0 && battle["events"][eventIndex()]["actor"]==index){
             dc.setColor(INK,Graphics.COLOR_TRANSPARENT);dc.drawLine(cx-16,top+dc.getFontHeight(moveFont),cx+16,top+dc.getFontHeight(moveFont));
         }
-        battleText(dc,cx,top,dc.getWidth()*0.24,index==0?"YOU":"WILD");
+        battleText(dc,cx,top,dc.getWidth()*0.24,index==0?"YOU":opponentLabel());
     }
+    function nativePhaseHeader(){return true;}
     function battleFeedback(dc){
         var events=battle["events"];var current=eventIndex();var youRows=0;var wildRows=0;
         var visible=current+(resultVisible()?1:0);
@@ -228,11 +235,11 @@ class BeastBattleView extends TekuTekuBeastView {
         }
         var action=events[current];
         if(!compactGrid){
-            if(dc.getWidth()>=240){battleText(dc,dc.getWidth()/2,y(dc,0.06),dc.getWidth()*0.32,replaying?"REPLAY":(resultVisible()?"RESULT":"MOVE"));}
+            if(dc.getWidth()>=240 && nativePhaseHeader()){battleText(dc,dc.getWidth()/2,y(dc,0.06),dc.getWidth()*0.32,replaying?"REPLAY":(resultVisible()?"RESULT":"MOVE"));}
             battleText(dc,dc.getWidth()/2,y(dc,0.74),dc.getWidth()*0.46,BeastBattleMoves.name(action["move"]));return;
         }
         battleText(dc,dc.getWidth()/2,y(dc,0.71),dc.getWidth()*0.58,
-            (action["actor"]==0?"YOU":"WILD")+(resultVisible()?" RESULT":" MOVE"));
+            (action["actor"]==0?"YOU":opponentLabel())+(resultVisible()?" RESULT":" MOVE"));
         battleText(dc,dc.getWidth()/2,y(dc,0.78),dc.getWidth()*0.54,BeastBattleMoves.name(action["move"]));
     }
     function hpFont(dc,top,index){
@@ -309,8 +316,7 @@ class BeastBattleView extends TekuTekuBeastView {
         hpBar(dc,dc.getWidth()*0.56,hpTop,dc.getWidth()*0.27,1);
         battleSprite(dc,0);battleSprite(dc,1);
         if(battleSleeping || battleNotice.length()>0){
-            label(dc,y(dc,compactGrid?0.62:0.65),battleSleeping?"Beast is asleep.":battleNotice,Graphics.FONT_XTINY);
-            label(dc,y(dc,0.75),"BACK: PAUSE",Graphics.FONT_XTINY);return;
+            battlePrompt(dc);return;
         }
         if(battlePhase==3){
             var resultTop=compactGrid?y(dc,0.61):y(dc,0.63)+2;var lineHeight=dc.getFontHeight(Graphics.FONT_XTINY);

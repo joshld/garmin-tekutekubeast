@@ -181,8 +181,27 @@ journal rewards. Techniques and Wild journal in the battle menu show progress.
 Battle progression does not alter the existing evolution/step-XP ledgers or
 mini-game reward slots. Reopening cannot claim a match twice. The separate
 `battle.v1` save is isolated in Developer Mode and independent of the canonical
-pet save. There is no multiplayer or watch-to-watch communication yet.
+pet save. Friend battles use the separate temporary session described below.
 
+## Nearby friend battles
+
+Play > Wild battles > Battle a friend offers Host and Join. The host shares a
+four-digit code; the other watch enters it using UP/DOWN and SELECT. Both beasts
+appear before both players confirm Ready. Each chooses one of its own four named
+techniques. The host resolves both choices with the existing battle rules, acting
+first; both watches verify and present the same moves, effects and HP.
+
+Matches use ANT directly, fully offline, with no phone/account. Public and
+Developer Beta builds can communicate when their protocol/rules versions match.
+Keep both apps open. Temporary signal loss is retried; cancellation, interruption,
+no-input timeout or unrecoverable loss ends this temporary match. Reconnect for a
+new match; friend matches are not saved or resumed. A brief final acknowledgement
+grace may show FINISHING before Exit. Unsupported/busy radios fail gracefully.
+
+Friend battles grant **no XP, mastery, growth, items or recorded wins/losses** and
+spend no Energy or wild encounters. The real pet and saved single-player battle
+remain unchanged. Sleeping beasts must be intentionally woken before starting.
+Physical two-watch connectivity and battery behavior still require acceptance.
 ## Separate ledgers
 
 - `xp`: genuine lifetime watch-recorded steps, deduplicated by local day.

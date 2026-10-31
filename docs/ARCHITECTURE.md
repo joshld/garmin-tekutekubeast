@@ -149,8 +149,8 @@ seed, events, HP, guard, buff, cooldown and uses), XP and mastery increments.
 Replay across export/JSON encode/decode/import boundaries and reject invalid or
 unknown versions. Fixtures cover RNG, moves, damage, effects and rewards; changing
 expected values requires an intentional rule/version review, not merely updating
-tests to match a new port. No phone app, ESP32 firmware or multiplayer transport
-(ANT, BLE or ESP-NOW) is implemented by this contract.
+tests to match a new port. No phone app or ESP32 firmware is implemented. The
+foreground ANT adapter below is separate from this portable rules contract.
 
 `BeastBattle` is the foreground transaction owner. Its separate atomic
 `battle.v1` document contains queue, watermarks, active snapshot, reward claim,
@@ -164,6 +164,62 @@ State's `battleData` is only a foreground cache, not a saved pet field. DEV uses
 an independent copy and never writes the real battle document. The battle view
 owns compact cached poses, button/touch input and short animation bursts only.
 
+## Direct friend protocol v1
+
+`BeastFriendWire` and `BeastFriendLink` are pure rules/session modules; injected
+monotonic milliseconds drive deadlines. `BeastFriendModel` reads a detached beast
+snapshot, never constructs the solo transaction owner, and allocates only a
+separate `friend.serial.v1` counter. `BeastFriendAnt` owns one foreground public
+ANT master/slave channel. `BeastFriendView` reuses battle HP, move, pose and event
+rendering, rotating the joiner's display so YOU always identifies its own beast.
+Neither radio nor session classes enter background/Glance scope.
+
+Every packet is eight unsigned bytes: `[0xB1, op, sidLow, sidMid, sidHigh, seq,
+a, b]`. The 24-bit host session counter never wraps; join supplies a fresh 16-bit
+challenge. Ordered reliable sequence numbers 1–240 do not wrap. Ops: ACK=0,
+beacon=1, hello=2, welcome=3, snapshot chunks=4–9, ready=10, start=11, move=12,
+result chunks=13–18, confirm=19, go=20, final=21, cancel=22, heartbeat=23.
+Beacon/heartbeat use sequence zero. ACK echoes sequence and original op. A
+stop-and-wait sender retries at 750ms, at most 12 attempts; ACKs have priority.
+Duplicate previous frames are re-ACKed, not reapplied. Out-of-order/foreign
+sessions are ignored. Cancellation explicitly ends the matching session even
+when an earlier packet was lost. Phase/no-input timeout is 90s, initial discovery 45s, receive
+silence 12s, overall cap 10min. These are safety bounds, not gameplay timers.
+
+A snapshot is 12 bytes: form, friendship, temperament, training level, then four
+little-endian 16-bit mastery values. Stats are reconstructed and range checked;
+remote HP/stats are never trusted. Six result chunks encode turn, both slots,
+HP, seed, outcome, guard/buff/cooldowns and digest. The joiner recomputes
+`pairedTurn` and validates the complete result before committing. CONFIRM/GO
+synchronize presentation; FINAL/ACK confirms terminal outcomes. No result is
+claimed after unconfirmed loss. An eight-second result grace drains retries;
+OS termination can still break a link and never awards anything.
+
+The engine tag is the first two SHA-256 bytes of sorted compact ASCII JSON
+`data/battle-v1.json` (currently 0x60C5), checked during discovery. An intentional
+rules/ordering change must also revise protocol compatibility, not just the data
+hash. Existing portable battle goldens still apply; `pairedTurn(state, hostSlot,
+joinSlot)` replaces AI selection only. Preserve host-first ordering, RNG and
+integer truncation in future JavaScript/C++ ports. Wire golden examples are in
+`tests/friend/source/FriendWireTests.mc`; mock two-peer fault and lifecycle tests
+live beside them. No transport abstraction framework or multiplayer rewards.
+
+ANT uses public network (no ANT+ private key), device type 117, transmission 1,
+RF 66, period 8192 (4Hz), low-priority search 30s and high-priority search disabled.
+The four-digit channel code is convenient pairing, **not encryption or identity
+authentication**. Only anonymous battle stats are exchanged. Both applications
+request `Ant`; UUIDs/signing do not identify radio peers. The adapter is explicitly
+released on hide/stop/cancel/timeout. One 250ms foreground timer pumps protocol;
+redraws occur only for visible changes or bounded existing event presentations.
+
+[Garmin GenericChannel](https://developer.garmin.com/connect-iq/api-docs/Toybox/Ant/GenericChannel.html)
+supports the required direct link. The installed SDK exposes it on all 47 current
+profiles; that capability audit is not physical connectivity testing. Garmin's
+[BLE API](https://developer.garmin.com/connect-iq/api-docs/Toybox/BluetoothLowEnergy.html)
+is central/GATTC, without the peer peripheral server role. Communications/Wi-Fi
+has no documented direct peer socket/server alternative. Simulator ANT needs a
+USB radio for actual RF; two-peer mock execution requires none. The watches need
+no external hardware. Physical pairing must be tested before release acceptance.
 ## Deliberately not rewritten
 
 Mini-game periods, cue durations, gaps and jumps use 250 ms logical ticks (not
