@@ -1,0 +1,12 @@
+project.manifest = manifest-audit.xml
+base.sourcePath = ../../source;../art-preview/source;audit
+base.resourcePath = ../../resources;../art-preview/resources;../../resources-world280
+enduro4.resourcePath = ../../resources-pet144;../art-preview/resources;../../resources-world280
+base.barrelPath = ../../bin/scenery-barrel/SceneryPack.barrel
+fenix6spro.sourcePath = ../../bin/legacy-source;../art-preview/source;audit
+fenix6spro.resourcePath = ../../resources-legacy;../../bin/legacy-world240;../art-preview/resources;../../resources-deferred
+fr255s.resourcePath = ../../resources;../../resources-world218;../art-preview/resources
+venu.sourcePath = ../../bin/legacy-source;../art-preview/source;audit
+venu.resourcePath = ../../resources-legacy-native144;../../bin/legacy-world390;../art-preview/resources;../../resources-deferred
+fr965.resourcePath = ../../resources-native192;../art-preview/resources;../../resources-world454
+fr265s.resourcePath = ../../resources-native144;../../resources-world360;../art-preview/resources

@@ -18,6 +18,7 @@ designs only when a specific historical decision is relevant.
 | `BeastStateCore` | Background-safe orchestration: migration, clocks, genuine activity, lazy care/growth, sleep and atomic commits. No game sessions, care actions or DEV controls. |
 | `TekuTekuBeastState` | Foreground subclass retaining the existing API: care actions, session claims, collections and isolated Developer Mode. |
 | `BeastStore` | Garmin persistence, dirty detection and compact Glance cache; injectable RAM backend for tests. |
+| `BeastUpdateRules` / `BeastUpdates` / `BeastUpdatePrompt` / `BeastBuild` | Bounded pure SemVer/reminder rules; foreground-only async request, separate `updates.v1` preferences and two-choice idle-Pet UI. Build version/channel is generated from configuration. No background/Glance work or pet-clock dependency. |
 | Views/delegates | Drawing, artwork, input, timers and feedback. Glance uses its existing compact read-only cache. |
 | `BeastSleep` / `BeastSky` | Existing sleep/calendar and astronomy helpers. Sleep still depends on Garmin calendar/time APIs. |
 

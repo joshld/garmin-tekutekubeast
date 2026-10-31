@@ -1,0 +1,21 @@
+<iq:manifest xmlns:iq="http://www.garmin.com/xml/connectiq" version="1">
+  <iq:application id="AE139BC3EF3E450E979D5177E66E713D" type="watch-app" name="@Strings.AppName" entry="UpdateAuditApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="3.2.0">
+    <iq:products>
+      <iq:product id="enduro4" />
+      <iq:product id="fenix6spro" />
+    </iq:products>
+    <iq:permissions>
+      <iq:uses-permission id="Communications" />
+      <iq:uses-permission id="Ant" />
+      <iq:uses-permission id="Background" />
+      <iq:uses-permission id="UserProfile" />
+      <iq:uses-permission id="Positioning" />
+    </iq:permissions>
+    <iq:languages>
+      <iq:language>eng</iq:language>
+    </iq:languages>
+    <iq:barrels>
+      <iq:depends name="SceneryPack" version="1.0.0" />
+    </iq:barrels>
+  </iq:application>
+</iq:manifest>

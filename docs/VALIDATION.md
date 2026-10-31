@@ -1,4 +1,47 @@
 # Current source validation checkpoint
+## In-app update reminders - 2026-10-31
+
+- Implemented daily asynchronous checks, numeric SemVer/prerelease comparison,
+  compiled public/stable versus private/beta channels, idle-Pet-only two-choice
+  UI, default Remind me later, per-version dismissal and restart-safe preferences.
+  `updates.v1` is separate from pet/battle data. Failed attempts are throttled;
+  unreadable/unwritable metadata fails closed. No new timers, background work,
+  assets, settings or per-frame version parsing. Generated build metadata shares
+  the existing configuration and Settings version label.
+- **137/137 Enduro 4 native regressions passed once**. **10/10 focused Fenix 6S
+  Pro notifier/parser tests passed** after replacing API-5.0 String.compareTo
+  with API-1.3 character operations. Final read/write-failure, persistence and
+  throttle checks passed **3/3 on each target**, without repeating the full suite.
+- Actual SDK renderer: **12 Enduro 4 + 24 Fenix scenes, zero failures**; Fenix
+  includes a logical 218px viewport with its native font, not another device run.
+  Cases include both choices, long bounded versions and circle/highlight/text
+  bounds. Sampled QA heap 175,744 / 211,280 bytes, not production peak/battery data.
+- Signed public Enduro 4/Fenix 6S Pro and private Owner Enduro 4 builds pass.
+  Compiled UUIDs, original key fingerprint, version label, public DEV exclusion,
+  private DEV retention and public/stable versus private/beta metadata verified.
+  New updater classes have no background/Glance annotations. Product list stays
+  47 profiles; no full device matrix or IQ export.
+- Manifest [updates/versions.json](../updates/versions.json) is live at the
+  [unauthenticated HTTPS endpoint](https://raw.githubusercontent.com/joshld/garmin-tekutekubeast/main/updates/versions.json):
+  desktop GET **200**, valid JSON. Initial confirmed floors are stable **0.6.1**,
+  beta **0.5.2**; owner confirmed neither 0.7.0 candidate is uploaded.
+- **Watch-side HTTPS success remains unverified.** The SDK simulator returns
+  `-1001` (SECURE_CONNECTION_REQUIRED) for both the manifest and a Garmin HTTPS
+  control, despite HTTPS URLs and permitted network execution. Treat this as an
+  environment limitation; no further retry or TLS workaround. The error path is
+  silent in production. Physical paired-phone/supported-Wi-Fi fetch, button
+  readability and reminder/ignore persistence through a watch reboot remain.
+- Evidence: `bin/update-full-regression.log`, `update-{enduro4,fenix6spro}-final-native.log`,
+  `update-{enduro4,fenix6spro}-storage-final.log`, `update-layout-{enduro4-final,fenix6spro}.log`,
+  `update-network-{permitted,control}.log`, `update-build-verification.log` and
+  `update-preflight.log` (all under `bin/`). Reproducers are in `tests/updates/`;
+  network/layout probes use an isolated QA identity, not either real pet.
+- Structural preflight, documentation links and scoped diff checks pass. Existing
+  unrelated acceptance notes remain unstaged. Existing signed 0.7.0 IQs predate
+  this feature and are unchanged; a future approved release build must include
+  this commit. Nothing installed or published to Garmin.
+
+
 ## v0.7.0 public and private package candidates - 2026-10-31
 
 Owner-requested version bump and both full signed IQ exports completed. Each

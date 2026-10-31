@@ -19,6 +19,7 @@ class TekuTekuBeastView extends WatchUi.View {
     var world=null;var scenery=null;var sky=[1,0.5,true];var sceneInk=INK;
     var lastVisual=null;var redrawRequests=0;var displayedSteps=null;
     var lightingStamp=null;
+    var updates=null;var updatePrompt=null;var updateVisible=false;
     var nightTint={:tintColor=>0xAAAAAA};
     var roamTicks=0.0;var petX=0.5;var petFoot=0.70;var roamOriginX=0.0;var roamOriginY=0.70;var wasSleeping=false;
     var creatureHeaderBottom=0;var petBounds=[0,0,0,0];var petFrame=0;var darkScene=false;
@@ -26,14 +27,29 @@ class TekuTekuBeastView extends WatchUi.View {
     const BG=0xAAFFAA;const INK=0x005500;const LIGHT=0x55AA55;
     function initialize(){View.initialize();beast=new TekuTekuBeastState();}
     function onShow(){
+        updateVisible=true;
         if(refresher!=null){refresher.stop();refresher=null;}
         Application.getApp().activeView=self;if(!beast.dev){beast.data=null;}
         beast.syncHistory();new BeastBattle(beast);loadSprite();ensureWorld();world.beginVisit(beast.today());world.readWatch(beast.realNow(),beast.skipWatch);refresher=new Timer.Timer();timerPeriod=desiredPeriod();refresher.start(method(:refresh),timerPeriod,true);consumeEvolution();
         if(menu!=null && menu.equals("Wild battles")){updateRows();}
+        if(Application.getApp().gameView==self){
+            if(updates==null){updates=new BeastUpdates(new BeastStore(),BeastBuild.VERSION,BeastBuild.CHANNEL,method(:updateReady));}
+            updates.start(updateNow());considerUpdate();
+        }
     }
-    function onHide(){if(refresher!=null){refresher.stop();refresher=null;}if(scenery!=null){scenery.release();}beast.commit();}
+    function onHide(){updateVisible=false;if(refresher!=null){refresher.stop();refresher=null;}if(scenery!=null){scenery.release();}beast.commit();}
     function ensureWorld(){if(world==null || world.dev!=beast.dev){world=new BeastWorld(beast);}if(scenery==null){scenery=new BeastScenery();}}
+    function updateNow(){return Toybox.Time.now().value().toLong();}
+    function updateEligible(){return updateVisible && Application.getApp().gameView==self && Application.getApp().activeView==self && menu==null && page==0 && notice==null && animationTicks==0;}
+    function considerUpdate(){
+        if(updates==null || !updates.review || updates.offered || updatePrompt!=null || !updateEligible()){return;}
+        var version=updates.offer(updateNow());if(version!=null){updatePrompt=new BeastUpdatePrompt(version);tunePetTimer();}
+    }
+    function updateReady(){if(updatePrompt==null && updateEligible()){considerUpdate();if(updatePrompt!=null){WatchUi.requestUpdate();}}}
+    function dismissUpdate(choice){updates.dismiss(updatePrompt.version,choice,updateNow());updatePrompt=null;tunePetTimer();WatchUi.requestUpdate();}
     function refresh() as Void {
+        if(updatePrompt!=null){return;}
+
         var poopBefore=beast.number("poop");
         var step=timerPeriod/250;tick=(tick+step)%8000;
         var state=visualState();
@@ -59,6 +75,7 @@ class TekuTekuBeastView extends WatchUi.View {
         var wanted=desiredPeriod();if(refresher!=null && wanted!=timerPeriod){timerPeriod=wanted;refresher.stop();refresher.start(method(:refresh),timerPeriod,true);}
     }
     function desiredPeriod(){
+        if(updatePrompt!=null){return 5000;}
         if(visualState().equals("tired")){return 5000;}
         if(visualState().equals("grumpy") || visualState().equals("wake")){return beast.number("motion")==0 || menu!=null || page!=0?5000:1000;}
         if(animationTicks>0 || noticeTicks>0){return beast.number("motion")==2 && !visualState().equals("sleep")?250:1000;}
@@ -99,7 +116,7 @@ class TekuTekuBeastView extends WatchUi.View {
         }
         else if(menu.equals("Feed")){rows=["Meal: "+beast.number("meals"),"Snack: "+beast.snacks()];}
         else if(menu.equals("Care Difficulty")){rows=["Low Maintenance","Normal","High Maintenance"];selection=beast.number("careDifficulty");}
-        else if(menu.equals("Settings")){rows=["Developer: "+(beast.dev?"ON":"OFF"),"Sound: "+(beast.number("sound")==0?"OFF":"ON"),"Vibration: "+(beast.number("haptics")==0?"OFF":"ON"),"Motion: "+["OFF","LOW","NORMAL"][beast.number("motion")],"Activity target: "+beast.number("target"),"Bedtime","Feedback test","Version 0.7.0 beta","Vibe: "+(beast.number("vibeStyle")==0?"GENTLE":"EXPRESSIVE"),"Outdoor world","Care Difficulty"];}
+        else if(menu.equals("Settings")){rows=["Developer: "+(beast.dev?"ON":"OFF"),"Sound: "+(beast.number("sound")==0?"OFF":"ON"),"Vibration: "+(beast.number("haptics")==0?"OFF":"ON"),"Motion: "+["OFF","LOW","NORMAL"][beast.number("motion")],"Activity target: "+beast.number("target"),"Bedtime","Feedback test",BeastBuild.LABEL,"Vibe: "+(beast.number("vibeStyle")==0?"GENTLE":"EXPRESSIVE"),"Outdoor world","Care Difficulty"];}
         else if(menu.equals("Bedtime")){rows=["Schedule: "+["WATCH","MANUAL","OFF"][beast.number("sleepMode")],"Bed: "+clockText(beast.number("bedMinute")),"Wake: "+clockText(beast.number("wakeMinute")),"Bedtime dim: "+(beast.number("autoLights")==1?"ON":"OFF"),beast.number("sleepMode")==0?beast.data["sleepSource"]:"LOCAL SCHEDULE"];}
         else if(menu.equals("Feedback test")){rows=["Tone test","Vibration test",FeedbackManager.lastStatus,"Watch Alert Tones","must be ON for sound"];}
         else if(menu.equals("Set time")){rows=[];for(var hour=0;hour<48;hour++){rows.add(clockText(hour*30));}}
@@ -136,6 +153,7 @@ class TekuTekuBeastView extends WatchUi.View {
     function clockText(minute){return (minute/60).format("%02d")+":"+(minute%60).format("%02d");}
     var needKey=null;
     function selectAction(){
+        if(updatePrompt!=null){dismissUpdate(updatePrompt.choice);return;}
         if(menu==null){openMenu("Actions");return;}
         var name=rows[selection];var n=selection;var context=menu;
         if(beast.isSleeping() && ((context.equals("Actions") && (name.equals("Feed") || name.equals("Pat") || name.equals("Play") || name.equals("Clean") || name.equals("Rest"))) || context.equals("Feed") || context.equals("Play") || context.equals("Toys / accessories"))){
@@ -276,12 +294,14 @@ class TekuTekuBeastView extends WatchUi.View {
         return false;
     }
     function switchPage(delta){
+        if(updatePrompt!=null){updatePrompt.move(delta);WatchUi.requestUpdate();return;}
         if(menu!=null){selection=(selection+delta+rows.size())%rows.size();}
         else{page=(page+delta+3)%3;notice=null;}
         tunePetTimer();WatchUi.requestUpdate();
     }
     function touch(point){selectAction();}
     function back(){
+        if(updatePrompt!=null){dismissUpdate(0);return true;}
         if(menu!=null){
             if(menu.equals("Lighting")){openMenu("Actions");return true;}
             if(menu.equals("Outdoor world") || menu.equals("Care Difficulty")){openMenu("Settings");return true;}
@@ -477,6 +497,6 @@ class TekuTekuBeastView extends WatchUi.View {
         label(dc,y(dc,0.79),(selection+1)+" / "+rows.size(),Graphics.FONT_XTINY);
     }
     function pageDots(dc){for(var i=0;i<3;i++){dc.setColor(i==page?(page==0?sceneInk:INK):LIGHT,Graphics.COLOR_TRANSPARENT);dc.fillCircle(dc.getWidth()/2+(i-1)*14,y(dc,0.92),3);}}
-    function onUpdate(dc){darkScene=menu==null && page==0 && beast.isDark();dc.setColor(darkScene?0x000000:BG,darkScene?0x000000:BG);dc.clear();
+    function onUpdate(dc){considerUpdate();if(updatePrompt!=null){updatePrompt.draw(self,dc);return;}darkScene=menu==null && page==0 && beast.isDark();dc.setColor(darkScene?0x000000:BG,darkScene?0x000000:BG);dc.clear();
         if(menu!=null){drawMenu(dc);}else{if(page==0){drawPet(dc);}else if(page==1){drawCare(dc);}else{drawStats(dc);}pageDots(dc);}}
 }

@@ -156,6 +156,41 @@ See [rule contracts](ARCHITECTURE.md) and
 `scripts/verify_v051_art.py` and `scripts/prepare_v051_world.py` retain existing
 build-time checks/preparation; never generate artwork on the watch.
 
+## Published update manifest
+
+[updates/versions.json](../updates/versions.json) on `main` is served without
+GitHub API authentication at:
+[public HTTPS manifest](https://raw.githubusercontent.com/joshld/garmin-tekutekubeast/main/updates/versions.json).
+It contains only two SemVer strings, for example:
+
+```json
+{"stable": "0.6.1", "beta": "0.5.2"}
+```
+
+After a release is **approved and available from Garmin**, edit only the matching
+channel and push `main`; allow GitHub's short cache delay. Never copy an unpublished
+candidate's version automatically. The owner confirmed neither 0.7.0 package is
+uploaded yet, so the initial feed retains conservative confirmed public/Beta
+versions. Do not lower published version numbers: stale lower responses are ignored.
+Manifest versions are limited to 20 ASCII characters for small-screen readability;
+use numeric major/minor/patch, optionally standard prerelease/build identifiers.
+
+The installed version comes from `config/build-identities.json` through generated
+`source/BeastBuild.mc`. The build wrapper runs `scripts/prepare_build_info.py`, and
+structural preflight rejects stale generated metadata. Public preparation sets
+`CHANNEL="stable"`; Owner/Developer Beta retains `CHANNEL="beta"`. The Settings
+label comes from the same metadata, without relying on newer watch APIs.
+
+The foreground request uses [Garmin's async makeWebRequest API](https://developer.garmin.com/connect-iq/api-docs/Toybox/Communications.html#makeWebRequest-instance_function),
+the Communications permission and explicit JSON response decoding (GitHub raw
+serves text/plain). Connectivity uses supported Wi-Fi or the normal paired-phone
+route; gameplay remains offline-capable. No player data, credentials or account
+identifiers are sent. No polling/background timer or updater settings are added.
+`updates.v1` holds the last attempt, highest validated release and per-version
+reminder/dismissal state. An unreadable/unwritable throttle record prevents a
+request, rather than causing retry spam. Clock rollback cannot accelerate checks.
+Only initial launch/response processing parses versions; idle frames do not.
+
 ## Public versus private Store packages
 
 Current guards pin version/filenames to 0.7.0. Preserve original signed 0.5.2/0.6.0

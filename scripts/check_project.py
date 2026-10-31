@@ -6,12 +6,15 @@ import struct
 import re
 import xml.etree.ElementTree as ET
 from prepare_battle_data import render as render_battle_data
+from prepare_build_info import render as render_build_info
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "source"
 MANIFEST = ROOT / "manifest.xml"
 NS = "{http://www.garmin.com/xml/connectiq}"
 errors = []
+if not (SRC/"BeastBuild.mc").exists() or (SRC/"BeastBuild.mc").read_text(encoding="utf8") != render_build_info():
+    errors.append("Build version metadata is stale; run scripts/prepare_build_info.py")
 
 def check(condition, message):
     if not condition:

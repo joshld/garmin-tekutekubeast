@@ -19,6 +19,8 @@ if (!$java) {$java='C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot\bi
 $temp=Join-Path $project 'bin/build-temp'
 New-Item -ItemType Directory -Force -Path $temp | Out-Null
 $battlePython="$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
+& $battlePython "$PSScriptRoot/prepare_build_info.py"
+if($LASTEXITCODE -ne 0){throw 'Cannot prepare build version metadata'}
 & $battlePython "$PSScriptRoot/prepare_battle_data.py" --check
 if($LASTEXITCODE -ne 0){throw 'Portable battle data is out of sync; refusing to build'}
 if($Tests){

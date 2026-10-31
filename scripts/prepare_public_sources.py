@@ -36,6 +36,8 @@ def remove_function(text, name):
 
 
 def public_source(name, text, tests):
+    if name == "BeastBuild.mc":
+        text = replace(text, 'const CHANNEL="beta";', 'const CHANNEL="stable";')
     if name == "TekuTekuBeastState.mc":
         for method in ["enableDev", "setSpeed", "jump", "devSet", "simulateSleep"]:
             text = remove_function(text, method)

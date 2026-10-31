@@ -73,6 +73,18 @@ playing if desired. See Garmin's [Enduro 4 System Settings](https://www8.garmin.
 Actual phone messages/calls, native alarms and other overlays still require
 owner hardware testing; simulator lifecycle tests cannot prove universal coverage.
 
+## Update reminders
+
+Opening the full app starts an optional asynchronous version check, at most once
+per 24 hours, including failed attempts. Public builds check the stable channel;
+private Developer Beta builds check beta, regardless of the in-game DEV toggle.
+A newer release is offered only on the idle Pet screen, never during games,
+battles, menus or action feedback. Remind me later is selected by default and
+allows another reminder after 24 hours on a later suitable launch. Don't remind
+me suppresses that version; a newer version is eligible again. BACK acts as
+Remind me later. Preferences persist independently of the pet save. Offline and
+network failures are silent; normal gameplay still needs no connection.
+
 ## Poop and cleaning
 
 Settings > Care Difficulty saves Low Maintenance, Normal (default), or High
