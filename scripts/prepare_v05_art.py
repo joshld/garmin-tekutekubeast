@@ -9,6 +9,7 @@ and origin. Glance resource generation remains unchanged.
 from pathlib import Path
 from PIL import Image, ImageOps
 from pet_art_repair import repair_nimble, repair_game
+from prepare_pet_resources import ROOT as PET_ROOT, CATALOGUE, render as pet_catalogue
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -70,4 +71,6 @@ for folder, extent in variants:
                 ET.SubElement(tree.getroot(),"bitmap",{"id":identifier,"filename":filename,"dithering":"none"})
     ET.indent(tree,space="    ")
     tree.write(resource/"drawables/drawables.xml",encoding="unicode")
+# Reapply declaration pruning after pixel/catalogue regeneration.
+(PET_ROOT / CATALOGUE).write_text(pet_catalogue(), encoding="utf-8")
 print("Retained Pet/Glance pixels and sizes; repaired reviewed game atlas bleed at original scale/origin.")

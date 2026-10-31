@@ -11,6 +11,14 @@ retains 40px curled Glance sprites. Six-pose V5Game resources use
 80px MIP / 128px or 144px AMOLED canvases, keeping game jumps inside the circle.
 Old V4 small resources remain for ordinary Glance poses. No affine bitmap
 transformations run on the watch.
+
+`resources-pet144/drawables/drawables.xml` is derived from the canonical
+`resources/drawables/drawables.xml` by `scripts/prepare_pet_resources.py`; it keeps
+production array/indirect references, launcher and Glance resources only. The
+art generator reapplies this filter, and builds regenerate/check it. Original
+PNGs and historical QA artwork remain available; no second hand-maintained
+resource list or Fenix resource change is introduced.
+
 Only the current Pet's eight poses (six plus two mirrored) are loaded; the egg
 shares a single bitmap. `scripts/verify_v051_art.py` checks 480 Pet variants
 against historical v0.4 pixels and verifies unchanged game/Glance assets.

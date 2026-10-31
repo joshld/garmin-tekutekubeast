@@ -14,7 +14,12 @@ Monkey C extension provide installation/verification. Keep the existing
 to update an existing app.
 
 Use `scripts/build.ps1`: it prepares constrained-profile catalogs/scopes, the
-resource-only scenery barrel and fail-closed public exclusions. The barrel is
+resource-only scenery barrel and fail-closed public exclusions. The wrapper also
+regenerates the native-96px Pet catalogue with `scripts/prepare_pet_resources.py`
+from canonical art and public/Beta production references. `check_project.py`
+rejects stale catalogues; `python tests/resources/test_pet_catalogue.py` checks
+array, indirect XML, launcher, Glance and newly added references. No PNGs are
+deleted; constrained/Fenix catalogue generation is unchanged. The barrel is
 created on first build and refreshed for legacy-device builds/full exports. Direct `monkey.jungle` compilation, including
 `scripts/build.sh` on Linux/macOS, is owner input, **not public Store input**.
 Windows SDK builds are validated; equivalent non-Windows public packaging is
