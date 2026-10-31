@@ -686,10 +686,10 @@ function progressionGoldenVectorsTest(logger){
 (:test)
 function progressionPurityAndAdvanceTest(logger){
     var s=TestSupport.fixture();var before=s.store.copy(s.data);
-    Test.assertEqual(BeastProgression.chooseFamily(s.data),1);
+    Test.assertEqual(BeastProgression.chooseFamily(s.data),BeastAffinity.choose(s.data));
     Test.assert(TestSupport.same(before,s.data));
     for(var family=0;family<4;family++){
-        s.data["personality"]=[0,0,0,0];s.data["personality"][family]=2;
+        s.data["personality"]=[0,0,0,0];s.data["personality"][family]=2;s.data["affinity"]=[0,0,0,0];s.data["affinity"][family]=20;
         Test.assertEqual(BeastProgression.chooseFamily(s.data),family+1);
     }
     var xp=s.xp();var storeWrites=s.store.writes;var start=s.now();
@@ -1023,7 +1023,7 @@ function stepsAndAlternativesTest(logger){
 }
 (:test)
 function familiesTest(logger){
-    for(var f=0;f<4;f++){var s=TestSupport.fixture();s.data["personality"][f]=20;s.testNow+=25*86400;s.tick();Test.assertEqual(s.family(),f+1);
+    for(var f=0;f<4;f++){var s=TestSupport.fixture();s.data["personality"][f]=20;s.data["affinity"][f]=20;s.testNow+=25*86400;s.tick();Test.assertEqual(s.family(),f+1);
         s.data["friendship"]=70;Test.assert(s.rareEvolve());Test.assertEqual(s.number("rare"),1);Test.assertEqual(s.xp(),0l);}
     return true;
 }

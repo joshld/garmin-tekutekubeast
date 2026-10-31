@@ -199,12 +199,19 @@ unrelated watch app, and games never fabricate Garmin activity.
 
 ## Automatic families
 
-Adult family selection combines activity pattern bonuses and care personality.
-Patting/feeding favours Grove; Beast Bounce favours Ember; cleaning/rest favours
-Tide; Follow My Lead favours Wisp. Trail choices and toys also influence scores.
-Activity can add Grove/Ember/Tide biases but never locks out a nonactivity path.
-Ties use a durable birth/serial seed, not an unconditional Wisp fallback. The
-family then stays locked except explicit temporary developer previews.
+Egg, Pip and Nimble are shared early forms; branching happens automatically at
+Adult (at least seven days). Details shows a short tendency hint before then.
+Steps affect growth/rewards, never family. Feeding, pats, rest and cleaning are
+family-neutral. Each egg has a small stable innate temperament (two points).
+Completed Beast Bounce favours Ember; Follow My Lead favours Wisp; Tiny
+Adventures/scouting favours its chosen destination's family (Forest/Grove,
+Meadow/Ember, Lakeside/Tide, Garden/Wisp). Kite/Shell/Crystal favour Ember/Tide/Wisp.
+Completion earns two tendency points (one for a failed game), toys one; at most
+six points per family/day, independently of growth/reward caps. No-step practice
+and scouting can influence family without loot or additional rewards.
+Ties select only among actual leaders using the durable birth/serial seed.
+Existing adult branches remain locked; upgrades never reroll them. Old battle
+personality values retain their meaning; new tendency scores are separate.
 
 | Family | Adult | Champion | Legendary | Rare variant |
 |---|---|---|---|---|

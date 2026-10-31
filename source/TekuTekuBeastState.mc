@@ -71,6 +71,12 @@ class TekuTekuBeastState {
             "awakeAt"=>0l,"awakeUntil"=>0l,"awakeZone"=>null,"grumpAt"=>0l,"grumpLevel"=>0,
             "poopSlots"=>0,"lastCleanReward"=>0l};
         var keys=defaults.keys();for(var i=0;i<keys.size();i++){if(!data.hasKey(keys[i])){data[keys[i]]=defaults[keys[i]];}}
+        // Freeze an already-adult legacy branch before introducing new tendencies.
+        if(!data.hasKey("affinity")){
+            if(number("family")==0 && stage()>=3){data["family"]=BeastProgression.chooseFamily(data);}
+            data["affinity"]=[0,0,0,0];data["affinityToday"]=[0,0,0,0];data["affinityDay"]=number("day");
+            data["temperament"]=BeastAffinity.temperament(number("birthEpoch"),number("petSerial"));
+        }
         repairPoop();
         // Old saves without a pending meal start a new interval, not retroactive
         // waste for time before this feature existed. Keep an already-due meal.
@@ -319,6 +325,7 @@ class TekuTekuBeastState {
         if(current==null || current["id"]!=session["id"] || data["gameClaims"][kind]>=session["id"]){return "ALREADY SAVED";}
         // Claim + final inventory/reward + removal are one atomic Storage write.
         data["gameClaims"][kind]=session["id"];data["sessions"][kind]=null;
+        BeastAffinity.credit(data,kind==2?session["route"]+1:(kind==0?2:4),win?2:1,number("day"));
         if(kind==2){
             if(session.hasKey("practice") && session["practice"]){commit();return "SCOUT COMPLETE";}
             // Route choices shape loot pools; an unowned item is favoured without
@@ -334,7 +341,7 @@ class TekuTekuBeastState {
     }
     function explore(choice){
         start();if(isSleeping()){return "Beast is asleep.";}tick();if(number("adventure")<1){return "EARN ENERGY";}data["adventure"]--;data["encounters"]++;
-        var item=(number("encounters")+choice)%8;data["items"][item]++;data["discoveryMask"]=number("discoveryMask")|(1<<item);data["personality"][choice%4]++;
+        var item=(number("encounters")+choice)%8;data["items"][item]++;data["discoveryMask"]=number("discoveryMask")|(1<<item);data["personality"][choice%4]++;BeastAffinity.credit(data,choice%4+1,2,number("day"));
         if(item==0){data["snacks"]=min(12,snacks()+1);}commit();return ["BERRY","KITE","RIBBON","SHELL","LANTERN","CROWN","CRYSTAL","COMPASS"][item];
     }
     function rareEvolve(){
@@ -344,7 +351,7 @@ class TekuTekuBeastState {
     function useItem(item){
         start();if(isSleeping()){return false;}tick();if(data["items"][item]<1){return false;}
         if(item==0){if(number("fullness")>=95){return false;}data["items"][item]--;data["fullness"]=clamp(number("fullness")+10);scheduleFoodPoop();}
-        else if(item==1 || item==3 || item==6){data["happiness"]=clamp(number("happiness")+10);careReward(25,item==1?1:3);}
+        else if(item==1 || item==3 || item==6){BeastAffinity.credit(data,item==1?2:(item==3?3:4),1,number("day"));data["happiness"]=clamp(number("happiness")+10);careReward(25,item==1?1:3);}
         else{data["equipped"]=number("equipped")==item?-1:item;}
         commit();return true;
     }
@@ -354,7 +361,8 @@ class TekuTekuBeastState {
         if(!dev){store.write("v4.archive",store.copy(data));}
         data["petSerial"]++;data["birthEpoch"]=now();data["baseGrowth"]=0l;data["careGrowth"]=0l;data["activityBonus"]=0l;
         data["petXpBaseline"]=xp();data["stageFloor"]=0;data["evolutionPending"]=0;data["family"]=0;data["rare"]=0;
-        data["personality"]=[0,0,0,0];data["lastGrowth"]=now();data["growthRemainder"]=0l;
+        data["personality"]=[0,0,0,0];data["affinity"]=[0,0,0,0];data["affinityToday"]=[0,0,0,0];data["affinityDay"]=number("day");
+        data["temperament"]=BeastAffinity.temperament(number("birthEpoch"),number("petSerial"));data["lastGrowth"]=now();data["growthRemainder"]=0l;
         data["awakeAt"]=0l;data["awakeUntil"]=0l;data["grumpAt"]=0l;data["grumpLevel"]=0;commit();return true;
     }
     function mood(){

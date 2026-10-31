@@ -1,5 +1,15 @@
 # Current source validation checkpoint
 
+## Family variety � 2026-10-31 (Issue #25)
+
+- Seven activity-neutral affinity tests plus existing Enduro 4 native regressions:
+  **99 passed, 0 failed/errors**, actual SDK 9.2 simulator native execution.
+- Seven-day production care/game/session routines reached all four families with
+  0/6,000/40,000 simulated steps/day and both care/play orders; duplicate claims,
+  fair partial ties, additive migration, save/reopen and adult locks passed.
+- Logs: `bin/affinity-build.log`, `bin/affinity-native.log` (local, ignored).
+  No real pet access, physical-watch testing, package export or Store changes.
+
 ## Signed public 0.6.1 package (2026-10-30)
 
 Source milestone `95c428043d62fa5378247b16904d8323cab83c30` exported with SDK 9.2:

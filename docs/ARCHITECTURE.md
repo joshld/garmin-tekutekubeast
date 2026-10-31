@@ -9,6 +9,7 @@ designs only when a specific historical decision is relevant.
 | Boundary | Responsibility |
 | --- | --- |
 | `BeastProgression` | Growth, hatch/stage/mastery calculations and read-only family selection. Explicit save document and epoch-seconds inputs; no Garmin imports. |
+| `BeastAffinity` | Portable family tendencies, stable innate temperament, actual-leader tie resolution and per-family daily caps. No activity, care-growth or platform dependencies. State preserves adult locks and old battle personality. |
 | `BeastActivityRules` | Deterministic step ledger, baseline/watermark and activity reward mutations; explicit local day and optional cumulative counters. No clock, watch or storage access. |
 | `GarminActivity` | Single normalization point for Garmin snapshots, history, optional active minutes and pushes. No new polling or storage. |
 | `BeastGameRules` | Pure mini-game timing, cue selection, seed transitions and loot choice. Views keep session transitions/buttons/drawing; State keeps atomic claims and inventory changes. |

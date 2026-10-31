@@ -42,6 +42,7 @@ module BeastProgression {
     }
     // Selection is read-only; the orchestrator decides when to persist it.
     function chooseFamily(data){
+        if(data.hasKey("affinity")){return BeastAffinity.choose(data);}
         var p=data["personality"];var scores=[p[0],p[1],p[2],p[3]];
         var big=0;var steady=0;var moderate=0;var easy=0;
         for(var i=0;i<32;i++){if(data["days"][i]==0){continue;}var n=data["counts"][i];

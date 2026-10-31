@@ -453,7 +453,7 @@ class TekuTekuBeastView extends WatchUi.View {
         label(dc,y(dc,0.38),beast.familyName()+" / "+beast.growth(),Graphics.FONT_XTINY);
         label(dc,y(dc,0.49),"WATCH "+beast.xp(),Graphics.FONT_XTINY);
         label(dc,y(dc,0.60),beast.stage()==0?"HATCH "+beast.hatchDurationHours().toFloat().format("%.0f")+"H":"NEXT "+(beast.nextSteps()/1000)+"K BOND "+beast.friendship(),Graphics.FONT_XTINY);
-        label(dc,y(dc,0.71),beast.stage()==5?"MASTERY "+beast.mastery():"AGE GATE "+beast.nextAge()+" DAYS",Graphics.FONT_XTINY);
+        label(dc,y(dc,0.71),beast.stage()<3?BeastAffinity.hint(beast.data):(beast.stage()==5?"MASTERY "+beast.mastery():"AGE GATE "+beast.nextAge()+" DAYS"),Graphics.FONT_XTINY);
         label(dc,y(dc,0.82),"ADVENTURE "+beast.number("adventure"),Graphics.FONT_XTINY);
     }
     function drawMenu(dc){
