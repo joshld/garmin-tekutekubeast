@@ -161,6 +161,18 @@ See [rule contracts](ARCHITECTURE.md) and
 `scripts/verify_v051_art.py` and `scripts/prepare_v051_world.py` retain existing
 build-time checks/preparation; never generate artwork on the watch.
 
+## Focused persistence checkpoint QA
+
+Build `tests/persistence/monkey.jungle` with `-Owner -Tests -Device enduro4`
+(or the affected `fenix6spro`) to an isolated `bin/matrix-persistence27-*.prg`.
+Select the seven `persistence*Test` functions with the SDK runner's `-t` name
+list; do not run the entire owner suite by default. Relevant existing migration,
+claim and failure tests can be selected independently. A normal launch of the
+same QA program renders the Pet screen and measures real SDK storage writes over
+15 minutes/one accelerated hour, then verifies a forced hide checkpoint and exits.
+All inputs/saves are synthetic under the fixture identity; no real steps or
+physical-watch battery results are implied.
+
 ## Published update manifest
 
 [updates/versions.json](../updates/versions.json) on `main` is served without

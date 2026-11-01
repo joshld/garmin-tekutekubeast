@@ -1,6 +1,7 @@
 // Foreground care, games and owner tools. Canonical data/API remain inherited.
 class TekuTekuBeastState extends BeastStateCore {
     var battleData=null;
+    var idleSync=false;
     var virtualNow=0l; var anchor=0l; var speed=1;
     function initialize(){BeastStateCore.initialize();}
     function now(){return dev?virtualNow+max(0l,realNow()-anchor)*speed:realNow();}
@@ -25,6 +26,35 @@ class TekuTekuBeastState extends BeastStateCore {
         data["lights"]=mode==2?1:0;data["lightsUntil"]=mode==0?0l:now()+3600;commit();
     }
     function toggleLights(){setLighting(isDark()?1:2);}
+    // Only the Pet timer may defer passive-only checkpoints. Default commits,
+    // actions, lifecycle saves and the background core remain immediate.
+    function syncIdle(){
+        idleSync=true;
+        try{syncToday();}catch(e instanceof Toybox.Lang.Exception){idleSync=false;throw e;}
+        idleSync=false;
+    }
+    function commit(){
+        if(idleSync && !dev && deferPassiveCheckpoint()){return;}
+        BeastStateCore.commit();
+    }
+    function deferPassiveCheckpoint(){
+        var saved=store.canonical;
+        if(saved==null || !saved.hasKey("lastGrowth") || saved.size()!=data.size()){return false;}
+        var elapsed=now()-saved["lastGrowth"];
+        if(elapsed<0 || elapsed>=60){return false;}
+        // Sleep/mood boundaries must not wait for the passive deadline.
+        if(!data.hasKey("cachedMood") || !store.same(data["cachedMood"],mood())){return false;}
+        var keys=data.keys();
+        for(var i=0;i<keys.size();i++){
+            var key=keys[i];
+            if(key.equals("baseGrowth") || key.equals("growthRemainder") ||
+               key.equals("lastGrowth") || key.equals("cachedProgress")){continue;}
+            if(!saved.hasKey(key) || !store.same(saved[key],data[key])){return false;}
+        }
+        // Keep the durable baseline unchanged; a reboot replays elapsed growth
+        // from that timestamp, and any intervening action flushes all progress.
+        return true;
+    }
     function syncToday(){syncFromInfo(dev || skipWatch?null:GarminActivity.info());}
     function syncFromInfo(info){
         syncActivity(GarminActivity.steps(info),GarminActivity.minutes(info),GarminActivity.pushes(info));

@@ -1,5 +1,26 @@
 # Current source validation checkpoint
 
+## Foreground passive checkpoints - 2026-11-01 (local candidate, Issue #27)
+
+- Based on `46e9293`: only Pet-timer passive growth checkpoints defer to 60s.
+  Actions, steps, care/evolution/mood boundaries, sessions/rewards and hide/stop
+  stay immediate. Background core, save schema/IDs and artwork are unchanged.
+- Actual SDK storage/production-renderer smoke on **both Enduro 4 and Fenix 6S
+  Pro**: 15-minute writes **90 -> 30**, one-hour **360 -> 120**, identical growth
+  5125/5500; pending hide flush **2 writes**. Times/steps are controlled QA inputs,
+  not physical-watch or battery measurements. Existing baseline logs reused.
+- Seven new persistence tests plus four applicable migration/claim/failure/core
+  checks pass on each target. Enduro results are 10 + 1; an initially selected
+  public-only DEV-absence assertion was inapplicable to Owner QA and replaced
+  with the existing owner-compatible battle test. Fenix selection passes 11/11.
+- Signed public device builds pass, original public UUID/version/DEV exclusion
+  verified; Enduro 5,026,380 bytes, Fenix 4,127,532 bytes. Preflight/link/diff pass.
+- Local logs: `bin/persistence27-{native,battle,smoke,build,public-build}-*.log`,
+  `bin/persistence27-preflight.log`; fixture `tests/persistence/monkey.jungle`.
+  No matrix/IQ export/publication. Physical update/reboot, real steps/background
+  overlap, alerts/exit and Glance freshness/battery acceptance remain pending.
+
+
 ## Final v0.7.0 packages - source ac49e39
 
 Final public and private Developer Beta packages were exported from

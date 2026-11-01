@@ -57,7 +57,7 @@ class TekuTekuBeastView extends WatchUi.View {
             if(wasSleeping){roamTicks=0.0;roamOriginX=petX-0.5;roamOriginY=petFoot;wasSleeping=false;}
             roamTicks+=step*(beast.number("motion")==1?0.25:1.0)*(beast.number("fullness")<45 || beast.number("happiness")<50 || beast.number("cleanliness")<45?0.5:1.0);
         }
-        if(tick%80<step){beast.syncToday();loadSprite();}
+        if(tick%80<step){beast.syncIdle();loadSprite();}
         if(beast.dev && tick%4<step){beast.tick();loadSprite();}
         if(beast.number("poop")>poopBefore){animation="hop";animationTicks=8;} // silent reaction
         consumeEvolution();

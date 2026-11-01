@@ -1,0 +1,6 @@
+project.manifest = manifest.xml
+base.sourcePath = ../../source;source;../care/source;../release/source
+base.resourcePath = ../../resources-pet144;../../resources-world280
+base.barrelPath = ../../bin/scenery-barrel/SceneryPack.barrel
+fenix6spro.sourcePath = ../../bin/legacy-source;source;../care/source;../release/source
+fenix6spro.resourcePath = ../../resources-legacy;../../bin/legacy-world240;../../resources-deferred

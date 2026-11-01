@@ -406,3 +406,12 @@ See the [v0.5.1 release notes](releases/v0.5.1/RELEASE_0_5_1.md) and
 [v0.5.1 artwork/captures](../art/store/v0.5.1/README.md).
 The retained v0.4 500px family-art cover is promotional artwork, not a screenshot.
 These files are not evidence of a Garmin submission.
+
+### Passive progress checkpoints
+
+While the Pet screen is idle, passive growth continues normally and is saved at
+one-minute checkpoints; its Glance growth cache may lag by up to a minute.
+Gameplay actions and important state changes still save immediately, and normal
+exit/interruption flushes pending progress. Reopening recovers elapsed growth
+from the last saved timestamp, including after a reboot. No saved-data migration
+or change to growth/evolution rules is introduced.

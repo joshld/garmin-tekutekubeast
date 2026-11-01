@@ -75,6 +75,16 @@ preferences. Calendar-derived cycling needs no saved random choice or daily writ
 as 7–10. Manual/family AUTO selection turns daily cycling off. Scenery still
 caches exactly one terrain layer; daily selection uses the current theme count.
 
+Foreground Pet timer reconciliation uses `State.syncIdle()`: only passive growth,
+its timestamp/remainder and cached progress may defer persistence for less than
+60 seconds since the durable growth timestamp. Any other field or mood change,
+missing baseline, clock rollback or ordinary `commit()` forces normal persistence.
+The durable comparison baseline never advances on deferral; reopening replays
+elapsed growth from the existing saved timestamp. Actions, sessions, rewards,
+lifecycle saves and the background `BeastStateCore` remain immediate. The policy
+adds no save keys/timers and resets its transient flag before propagating errors.
+Glance growth can lag by up to one minute during otherwise quiet foreground use.
+
 ## Rule contracts
 
 - Epochs are integer Unix seconds; calendar days remain local `YYYYMMDD` keys.
