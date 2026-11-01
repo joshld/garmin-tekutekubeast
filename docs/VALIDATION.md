@@ -1,5 +1,46 @@
 # Current source validation checkpoint
 
+## Pet-generation isolation - 2026-11-01 (local candidate, Issue #29)
+
+- Baseline `f702d71`: SDK reproductions confirmed paused games/unfinished wild
+  battles could survive Archive/start egg. Local fix clears games atomically
+  with the egg, binds battle state to existing petSerial, and rejects stale
+  battle objects. Completed results settle once before archiving. Queues,
+  inventory, collections, daily limits and Battle XP/mastery carry forward.
+- Seven new native tests cover all three games, wild retirement, earned result
+  settlement during sleep, legacy/same-pet resume, carry-forward state,
+  three injected write failures/reload/retry, and DEV isolation. All pass on
+  Enduro 4 and Fenix 6S Pro; five affected existing regressions also pass on both.
+  Initial three QA failures came from shared synthetic battle records; isolated
+  fixture records and reran affected cases. No real pet storage was accessed.
+- Signed public device builds pass: Enduro 5,026,828 bytes; Fenix 4,128,108 bytes.
+  Build checks confirm original public identity and DEV exclusion. No IQ export.
+- Rendered Enduro SDK smoke passes, including unchanged one-hour idle counts
+  (120 writes) and pending hide flush. Structural preflight/diff checks pass.
+- Local logs: `bin/generation29-*.log`; tests extend the existing
+  isolated persistence QA app in `tests/persistence/source/GenerationQA.mc`.
+- Canonical v4 format unchanged; battle.v1 adds an optional owner marker. Existing
+  unmarked records are preserved as current-generation, not retrospectively
+  purged. Physical archive/reopen/interrupt acceptance remains pending.
+
+### Transactional claim recovery follow-up (local, 2026-11-01)
+
+- Pre-commit review found unsaved claimed/XP/mastery values could contaminate
+  the shared cache after a failed reward write; the new SDK baseline test fails.
+  Claims now persist a candidate before updating live/cache/baseline, preserving
+  shared object identities and propagating failures. No reward balance/schema
+  changes. The candidate uses the existing commit snapshot budget.
+- Three added regressions cover three repeated failures, same-process and new
+  battle-object retries, archive/restart, duplicate callbacks, last-durable-state
+  recovery and interrupted generation retirement; XP/mastery/claims/caps checked.
+  Final focused selection: **21/21 pass on both Enduro 4 and Fenix 6S Pro**.
+- Latest signed production device builds pass: Enduro **5,027,100 bytes**, Fenix
+  **4,128,396 bytes**; original public identity/DEV exclusion verified. Enduro
+  rendered SDK smoke completes with unchanged 120 hourly writes and hide flush.
+  Local evidence: bin/generation29-claim-*.log. Earlier results above retained.
+- Structural, changed-guide link and diff checks pass. Physical-watch acceptance
+  remains pending. No commit/push, migration, release export or publication.
+
 ## Foreground passive checkpoints - 2026-11-01 (local candidate, Issue #27)
 
 - Based on `46e9293`: only Pet-timer passive growth checkpoints defer to 60s.

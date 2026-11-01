@@ -289,6 +289,13 @@ currently uses an earned crown overlay, not a separate full sprite atlas.
 Keep a favourite forever with ongoing mastery, or explicitly confirm Archive
 and start egg after Legendary. The last archived pet's full snapshot is retained;
 normal/rare family registrations and inventory remain. This is never automatic.
+Starting an egg retires unfinished mini-games and the previous pet's active
+wild/practice match without rewards or refunds. Queued encounters, earned Battle
+XP/mastery, discoveries, inventory, lifetime steps, daily limits and monotonic
+claim/session IDs carry forward. A completed battle result is settled once before
+archiving, even if the beast is sleeping; no new turn or pet-care reward occurs.
+Existing care needs, digestion, nap deadlines and settings keep their previous
+carry-forward behaviour, so archiving cannot refill daily care/reward allowances.
 The trail Compass is currently a cosmetic collectible; a future cross-family
 Wanderer's Compass exception is not implemented.
 

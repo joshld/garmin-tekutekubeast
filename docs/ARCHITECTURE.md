@@ -85,6 +85,24 @@ lifecycle saves and the background `BeastStateCore` remain immediate. The policy
 adds no save keys/timers and resets its transient flag before propagating errors.
 Glance growth can lag by up to one minute during otherwise quiet foreground use.
 
+Generation ownership uses the existing canonical `petSerial`. `newEgg()` clears
+`sessions`/legacy `session` in the same atomic `v4` write as the generation change,
+without resetting IDs, inventory or daily caps. `battle.v1` gains an additive
+`petSerial` owner: legacy records bind to the current pet without discarding
+progress; an owner mismatch lazily retires the active match while keeping its
+queue, counters, claims, XP and mastery. Battle objects reject stale-generation
+mutations. Completed results settle through existing reward rules before the
+archive/new-pet write; any write failure stops the transition and reload/retry
+keeps one-time claims. Reward claims compute an independent candidate, persist
+it, then publish scalar rewards, mastery and the claimed flag to the shared live
+objects. A failed write propagates with live data/cache/baseline unchanged;
+same-process retries and newly constructed battle objects see an unclaimed
+result. The candidate replaces the normal commit snapshot, not another cache.
+The existing archive and pet writes remain separate, not
+a new cross-document transaction. Old unmarked records cannot retroactively
+prove their historical owner, so upgrades preserve them as current-generation.
+No canonical schema bump, background dependency, timer or transport change.
+
 ## Rule contracts
 
 - Epochs are integer Unix seconds; calendar days remain local `YYYYMMDD` keys.

@@ -163,8 +163,14 @@ class TekuTekuBeastState extends BeastStateCore {
     }
     function newEgg(){
         if(stage()!=5){return false;}
+        // Settle earned account-level battle results before the generation changes.
+        // Persist the old battle owner first, so a failed pet write is recoverable.
+        var fight=new BeastBattle(self);fight.claimFinishedBattle();
         // DEV archives are never persisted, including this explicit operation.
         if(!dev){store.write("v4.archive",store.copy(data));}
+        // Retire unfinished games atomically with the new egg. IDs/caps remain
+        // monotonic: delayed callbacks cannot reward the replacement pet.
+        data["sessions"]=[null,null,null];data["session"]=null;
         data["petSerial"]++;data["birthEpoch"]=now();data["baseGrowth"]=0l;data["careGrowth"]=0l;data["activityBonus"]=0l;
         data["petXpBaseline"]=xp();data["stageFloor"]=0;data["evolutionPending"]=0;data["family"]=0;data["rare"]=0;
         data["personality"]=[0,0,0,0];data["affinity"]=[0,0,0,0];data["affinityToday"]=[0,0,0,0];data["affinityDay"]=number("day");
