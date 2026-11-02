@@ -2,8 +2,77 @@
 class TekuTekuBeastState extends BeastStateCore {
     var battleData=null;
     var idleSync=false;
+    var pendingSession=null;var savingSession=false;
+    // RAM-only controller invalidation, not another authoritative session copy.
+    var sessionOwners=[null,null,null];
     var virtualNow=0l; var anchor=0l; var speed=1;
     function initialize(){BeastStateCore.initialize();}
+    function start(){
+        if(pendingSession!=null && !savingSession){retrySession();}
+        BeastStateCore.start();
+    }
+    // RAM-only intent: operation, owner, kind, detached session, outcome, prior slot.
+    // Replay against the latest document, never merge a stale whole-pet image.
+    function sessionOperation(op,kind,session,win){
+        if(dev || savingSession){return applySession(op,kind,session,win);}
+        if(pendingSession!=null){
+            var previous=pendingSession;var result=retrySession();
+            // A changed payload must not bypass a rejected stale checkpoint.
+            if(op!=0 && previous[2]==kind && previous[3]!=null &&
+               previous[3]["id"]==session["id"] &&
+               (result==false || (result instanceof Toybox.Lang.String && result.equals("SESSION CHANGED")))){
+                return op==2?"SESSION CHANGED":false;
+            }
+            if(previous[0]==op && previous[2]==kind &&
+               (op==0 || (previous[3]["id"]==session["id"] &&
+                (op!=1 || store.same(previous[3],session))))){return result;}
+        }
+        BeastStateCore.start();
+        pendingSession=[op,number("petSerial"),kind,store.copy(session),win,
+            (op==1 || op==2)?store.copy(data["sessions"][kind]):null];
+        return runSession(false);
+    }
+    function retrySession(){return runSession(true);}
+    function runSession(reload){
+        var intent=pendingSession;savingSession=true;
+        try{
+            if(reload){
+                // Drop both old full documents before loading their replacement.
+                data=null;store.canonical=null;BeastStateCore.start();
+            }
+            var result=null;
+            if(number("petSerial")!=intent[1]){
+                result=intent[0]==2?"ALREADY SAVED":(intent[0]==0?null:false);
+            }else{
+                var current=data["sessions"][intent[2]];
+                // A newer checkpoint of this same session wins over our old
+                // checkpoint/result. Claims and different IDs are handled below.
+                var conflict=reload && (intent[0]==1 || intent[0]==2) &&
+                    current!=null && current["id"]==intent[3]["id"] &&
+                    !store.same(current,intent[5]) && !store.same(current,intent[3]);
+                result=conflict?(intent[0]==2?"SESSION CHANGED":false):
+                    applySession(intent[0],intent[2],intent[3],intent[4]);
+            }
+            // A lifecycle/start caller may consume the rejection result. Keep
+            // invalidation observable until each affected view explicitly reloads.
+            if(reload && (number("petSerial")!=intent[1] || result==false ||
+               (result instanceof Toybox.Lang.String &&
+                (result.equals("SESSION CHANGED") || result.equals("ALREADY SAVED"))))){
+                sessionOwners[intent[2]]=null;
+            }
+            pendingSession=null;savingSession=false;return result;
+        }catch(e instanceof Toybox.Lang.Exception){savingSession=false;throw e;}
+    }
+    function applySession(op,kind,session,win){
+        if(op==0){return beginSessionCore(kind);}
+        if(op==1){return saveSessionCore(session);}
+        if(op==2){return completeSessionCore(session,win);}
+        return abandonSessionCore(session);
+    }
+    function beginSession(kind){return sessionOperation(0,kind,null,false);}
+    function saveSession(session){return sessionOperation(1,session["kind"],session,false);}
+    function completeSession(session,win){return sessionOperation(2,session["kind"],session,win);}
+    function abandonSession(session){return session==null?false:sessionOperation(3,session["kind"],session,false);}
     function now(){return dev?virtualNow+max(0l,realNow()-anchor)*speed:realNow();}
     function scheduleFoodPoop(meal){BeastCareRules.feed(data,now(),meal);}
     function setCareDifficulty(mode){
@@ -22,6 +91,7 @@ class TekuTekuBeastState extends BeastStateCore {
     function lightingMode(){return BeastSleep.lightingMode(data,now());}
     function lightingMinutes(){return BeastSleep.lightingMinutes(data,now());}
     function setLighting(mode){
+        start();
         if(mode<0 || mode>2){return;}
         data["lights"]=mode==2?1:0;data["lightsUntil"]=mode==0?0l:now()+3600;commit();
     }
@@ -34,6 +104,7 @@ class TekuTekuBeastState extends BeastStateCore {
         idleSync=false;
     }
     function commit(){
+        if(pendingSession!=null && !savingSession){retrySession();}
         if(idleSync && !dev && deferPassiveCheckpoint()){return;}
         BeastStateCore.commit();
     }
@@ -104,7 +175,7 @@ class TekuTekuBeastState extends BeastStateCore {
         data["games"]++;data["energy"]-=10;data["happiness"]=clamp(number("happiness")+(win?8:3));
         data["friendship"]=clamp(friendship()+2);careReward(win?75:40,kind==0?1:3);commit();return win?"WELL PLAYED!":"NICE TRY!";
     }
-    function beginSession(kind){
+    function beginSessionCore(kind){
         start();if(isSleeping()){return null;}tick();var current=data["sessions"][kind];if(current!=null){return store.copy(current);}
         data["gameSerial"]++;var seed=((realNow()%100000)+number("gameSerial")*719).toNumber();
         var session={"id"=>number("gameSerial"),"kind"=>kind,"round"=>0,"elapsed"=>0,"attempts"=>0,
@@ -114,21 +185,24 @@ class TekuTekuBeastState extends BeastStateCore {
         if(kind==2 && !session["practice"]){data["adventure"]--;}
         data["sessions"][kind]=session;commit();return store.copy(session);
     }
-    function abandonSession(session){
+    function abandonSessionCore(session){
         if(session==null){return false;}
         var kind=session["kind"];var current=data["sessions"][kind];
         if(current==null || current["id"]!=session["id"]){return false;}
         // Retire without completing: no result, reward, refund or daily claim.
         data["sessions"][kind]=null;commit();return true;
     }
-    function saveSession(session){
+    function saveSessionCore(session){
         var kind=session["kind"];var current=data["sessions"][kind];
         if(current==null || current["id"]!=session["id"] || data["gameClaims"][kind]>=session["id"]){return false;}
-        if(!store.same(current,session)){data["sessions"][kind]=store.copy(session);commit();}return true;
+        if(!store.same(current,session)){data["sessions"][kind]=store.copy(session);commit();}
+        return true;
     }
-    function completeSession(session,win){
+    function completeSessionCore(session,win){
         start();if(isSleeping()){return "Beast is asleep.";}tick();var kind=session["kind"];var current=data["sessions"][kind];
-        if(current==null || current["id"]!=session["id"] || data["gameClaims"][kind]>=session["id"]){return "ALREADY SAVED";}
+        if(current==null || current["id"]!=session["id"] || data["gameClaims"][kind]>=session["id"]){
+            return "ALREADY SAVED";
+        }
         // Claim + final inventory/reward + removal are one atomic Storage write.
         data["gameClaims"][kind]=session["id"];data["sessions"][kind]=null;
         BeastAffinity.credit(data,kind==2?session["route"]+1:(kind==0?2:4),win?2:1,number("day"));
@@ -151,6 +225,7 @@ class TekuTekuBeastState extends BeastStateCore {
         if(item==0){data["snacks"]=min(12,snacks()+1);}commit();return ["BERRY","KITE","RIBBON","SHELL","LANTERN","CROWN","CRYSTAL","COMPASS"][item];
     }
     function rareEvolve(){
+        start();
         if(stage()!=5 || friendship()<70 || number("charms")<1 || number("rare")!=0){return false;}
         data["charms"]--;data["rare"]=1;data["rareCollection"]|=1<<(family()-1);commit();return true;
     }
@@ -162,6 +237,7 @@ class TekuTekuBeastState extends BeastStateCore {
         commit();return true;
     }
     function newEgg(){
+        start();
         if(stage()!=5){return false;}
         // Settle earned account-level battle results before the generation changes.
         // Persist the old battle owner first, so a failed pet write is recoverable.

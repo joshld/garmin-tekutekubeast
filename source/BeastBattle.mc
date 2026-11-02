@@ -127,7 +127,13 @@ class BeastBattle {
         var next=BeastBattleRules.turn(current,slot);
         // UI/persistence metadata is outside the deterministic combat protocol.
         next["practice"]=current["practice"];next["claimed"]=false;next["outcome"]="";
-        data["active"]=next;commit();return battleSession();
+        data["active"]=next;
+        try{commit();}catch(e instanceof Toybox.Lang.Exception){
+            // Rules returned a detached turn. Restore the shared cache pointer
+            // on failure so another controller cannot adopt an unsaved turn.
+            data["active"]=current;throw e;
+        }
+        return battleSession();
     }
     function finishBattle(){
         if(beast.isSleeping()){return "Beast is asleep.";}

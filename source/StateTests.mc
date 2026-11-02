@@ -819,10 +819,12 @@ function v051MemoryAndStarTimingTest(logger){
     m.elapsed=m.tempo()+m.cueGap();Test.assertEqual(m.displayedMove(),0);
     m.elapsed=2*(m.tempo()+m.cueGap())-1;Test.assertEqual(m.displayedMove(),-1);
     m.checkpoint();var old=s.store.copy(m.session);old.remove("timingV051");old["elapsed"]=6;
+    s.data["sessions"][1]=s.store.copy(old);s.commit();
     var resumed=new BeastGameView(s,1);resumed.restore(old);Test.assertEqual(resumed.elapsed,7);Test.assertEqual(resumed.sequence[0],0);
     var star=new BeastGameView(s,0);Test.assertEqual(star.period(),16);star.round=1;Test.assertEqual(star.period(),12);
     star.round=2;Test.assertEqual(star.period(),9);Test.assertEqual(star.jumpDuration(),5);
     star.begin();star.elapsed=10;star.hits=2;star.checkpoint();var prior=s.store.copy(star.session);prior.remove("timingV051");
+    s.data["sessions"][0]=s.store.copy(prior);s.commit();
     var again=new BeastGameView(s,0);again.restore(prior);Test.assertEqual(again.elapsed,8);Test.assertEqual(again.hits,2);Test.assertEqual(again.session["id"],prior["id"]);
     s.data["easy"]=1;star.round=0;Test.assertEqual(star.period(),24);star.round=1;Test.assertEqual(star.period(),20);star.round=2;Test.assertEqual(star.period(),16);
     Test.assertEqual(m.tempo(),8);Test.assertEqual(m.cueGap(),1);Test.assertEqual(s.xp(),0l);return true;
@@ -1095,6 +1097,7 @@ function memoryRegisteredButtonFeedbackTest(logger){
     game.checkpoint();var reopened=new BeastGameView(s,1);reopened.restore(s.data["sessions"][1]);
     Test.assertEqual(reopened.expectedMove,1);Test.assertEqual(reopened.registeredMove,0);Test.assert(reopened.hint.equals(game.hint));
     var old=s.store.copy(s.data["sessions"][1]);old.remove("memoryNeed");old.remove("memoryGot");old.remove("memoryFlash");
+    s.data["sessions"][1]=s.store.copy(old);s.commit();
     reopened.restore(old);Test.assertEqual(reopened.expectedMove,-1);Test.assertEqual(reopened.registeredMove,-1);
     Test.assertEqual(s.number("games"),0);Test.assertEqual(s.xp(),0l);return true;
 }

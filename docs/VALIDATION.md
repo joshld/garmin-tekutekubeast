@@ -1,5 +1,131 @@
 # Current source validation checkpoint
 
+## Snapshot and callback ownership - 2026-11-02 (current local candidate, #14)
+
+- Two SDK red reproductions: restoring an old supplied snapshot let the next
+  checkpoint regress durable elapsed **12 -> 1**; an old completion method after
+  refresh incorrectly persisted claim **1**. Evidence: bin/session-owner-red.log.
+- Restore now reloads the authoritative durable session, never the argument's
+  fields. Views bind petSerial/ID and the existing immutable checkpoint baseline.
+  Unique per-game RAM owner tokens replace adoptable counters; replacement
+  controllers revoke predecessors. Timer/completion callbacks capture their
+  owner at creation and cannot adopt a later refresh's binding. Completion
+  requires that captured capability; stale callbacks cannot claim rewards.
+- Six ownership cases cover all games, stale restore/checkpoint, delayed timer
+  and completion methods across repeated refreshes, current completion, failed
+  persistence/controller replacement, retirement, durable restart recovery and
+  unchanged-period timer handoff. Existing timers are re-armed with the new
+  captured binding rather than silently retaining a rejected callback.
+  Two legacy test fixtures now persist their legacy records before restore;
+  their migration assertions remain unchanged. No production save keys added.
+- **55 focused SDK cases pass per device (15 + 15 + 17 + 8)**: previous 47,
+  six ownership/timer cases and the two legacy-restore checks. Generation,
+  transactional claim, interruption/retry and #27 controls remain included.
+- Signed public production builds pass: Enduro **5,030,044 bytes**, Fenix 6S Pro
+  **4,132,236 bytes**. Fixed public identity/DEV-exclusion guards pass; no IQ,
+  version, signing-key or release change. Compared with the previous candidate,
+  installed sizes increase 1,152 / 1,456 bytes.
+- Evidence: bin/session-owner-final-*.log, bin/session-owner-public-build-*.log.
+  Added test-only durable legacy fixture setup in source/StateTests.mc; all seven
+  earlier local files retained. Physical OS/power-loss acceptance remains open.
+- Both rendered SDK smokes pass: **30 writes / 15 minutes, 120 / hour**,
+  growth 5125/5500 and hide flush 2 writes. #27 policy/counts remain unchanged.
+  Logs: bin/session-owner-smoke-{enduro4,fenix6spro}.log.
+- Extended normal-budget three-session probes now include a production game view,
+  an owner token and retained/replaced callback bindings: Enduro **185,928 /
+  781,976 bytes** (596,048 free); Fenix **232,360 / 1,306,136** (1,073,776 free).
+  Logs: bin/session-owner-memory-*.log. Samples include QA overhead and are not
+  full-renderer/allocator-wide peaks. Earlier probe lacked this view setup, so
+  its difference is not an isolated measurement of token allocation cost.
+  No per-frame token allocation or extra full-pet snapshot; background code/save
+  shape unchanged, prior background evidence below remains historical.
+- Structural preflight, 35 changed-guide local links/anchors and diff checks pass.
+
+## Earlier storage-notification controller conflict - 2026-11-02 (current local candidate, #14)
+
+- Production onStorageChanged -> syncHistory -> start reproduction failed before
+  this fix: stale checkpoint accepted, durable elapsed regressed **12 -> 7**.
+  The isolated QA app invokes the actual production handler explicitly; no
+  physical OS storage-notification delivery is claimed.
+- Rejected rebases now increment a tiny RAM-only per-game controller epoch.
+  Views discard stale sessions before checkpoint/completion or interactive
+  resume/restart. Only begin/restore adopts the latest epoch and durable session.
+  Repeated stale callbacks cannot write or claim rewards; no second session copy,
+  persistent key, timer, save-format or background change.
+- **47 SDK cases pass per device (15 + 15 + 17)**: all previous 44 plus three
+  regressions covering all games, consumed rejection, repeated stale checkpoints,
+  completion/restart, refresh/resume, retired/claimed sessions and new generations.
+- Signed public production builds pass: Enduro **5,028,892 bytes**, Fenix 6S Pro
+  **4,130,780 bytes**; fixed identity/DEV-exclusion guards pass. Compared with the
+  prior candidate this adds 416/624 installed bytes. No export/version change.
+- Both rendered SDK smokes pass: **30 writes / 15 minutes, 120 / hour**,
+  growth 5125/5500, hide flush 2 writes; #27 remains unchanged. Structural
+  preflight, 35 local documentation links/anchors and diff checks pass.
+  Evidence: bin/session-notify-smoke-{enduro4,fenix6spro}.log.
+- Logs: bin/session-notify-red.log, bin/session-notify-final-*.log,
+  bin/session-notify-public-build-*.log. Prior memory samples below are historical
+  persistence-path samples, not fresh whole-app peaks; only small RAM counters
+  added. Physical power-loss/OS scheduling acceptance remains pending.
+
+## Earlier stale mini-game retry / background interleaving - 2026-11-02 (local candidate, #14)
+
+- Original SDK reproduction: failed checkpoint, separate background core saves
+  4000 step XP, foreground retries, then load-only restart. All three games
+  incorrectly restored **0 XP instead of 4000** before history reconciliation.
+- Replaced full cached-pet retry with a compact RAM-only session intent. Retry
+  drops stale full documents and reloads durable storage before replaying the
+  owned operation. Latest progression/care/inventory/caps win; generation,
+  retirement, claims and newer same-ID checkpoints reject stale operations.
+  Rewards and Energy are applied against latest state, not copied from old RAM.
+- **44 focused SDK cases pass on each target (15 + 15 + 14)**, retaining all
+  previous 30 cases plus ten interleaving/failure/lifecycle cases and four
+  generation regressions. Tests assert final durable fields after load-only
+  restart, repeated failures, post-write errors, conflicts and duplicate claims.
+- Signed production builds pass: Enduro 4 **5,028,476 bytes**, Fenix 6S Pro
+  **4,130,156 bytes**. Public identity and DEV-exclusion guards retained.
+- Normal-budget three-session persistence probes sample Enduro **181,488 /
+  781,976 bytes** (600,488 free), Fenix **227,208 / 1,306,136** (1,078,928 free).
+  Includes QA overhead; not full-renderer or allocator-wide peak measurements.
+  Background code/save shape unchanged: reuse historical maximum-shape Enduro
+  **52,088 / 61,344** sample (9,256 free), not a new worst-case guarantee.
+- Rendered SDK smokes pass on both targets: **30 writes / 15 minutes, 120 /
+  hour**, growth 5125/5500, hide flush 2 writes. Unchanged #27 baseline;
+  duplicate successful claims add zero writes. Structural preflight, 35 local
+  guide links/anchors and diff checks pass. Smoke logs:
+  bin/session-interleave-smoke-{enduro4,fenix6spro}.log.
+- Evidence: tests/persistence/source/SessionInterleaveQA.mc;
+  bin/session-interleave-baseline-native.log (red), bin/session-final-*.log,
+  bin/session-memory-*-final.log and bin/session-interleave-public-build-*.log.
+- Pending intent is not persisted: hard termination before success recovers the
+  last durable checkpoint. Physical power-loss/OS scheduling acceptance pending.
+  No save schema, background service, asset, identity, release or version change.
+
+## Earlier mini-game and battle retry reliability - 2026-11-02 (#14/#20)
+
+Historical local-candidate evidence below; the full cached-save retry policy is
+superseded by the durable rebase above. Timer cleanup and battle rollback remain.
+
+- Baseline main 646b3fc; the read-only audit reproduced five failed assertions
+  on each target. Mini-game begin/checkpoint/completion now flush a pending
+  failed save before ACK; re-show retries it before reload. Pause/hide cancels
+  the timer before checkpointing. A failed battle-turn commit restores its prior
+  shared active reference; pure rules and #29 reward claims remain unchanged.
+- All **30 selected cases pass on each Enduro 4/Fenix 6S Pro**: original five
+  regressions plus all 11 controls, four repeated-failure/reconstruction/restart
+  cases, and relevant persistence, reward and pause regressions. Enduro is
+  28 + 2; SDK truncated a 1025-character test-name list, so only the omitted two
+  were rerun. Fenix used two 15-test batches. No gameplay test failure remains.
+- Signed production device builds pass: Enduro 5,027,372 bytes; Fenix 4,128,732.
+  Identity/DEV-exclusion guards retained. No Store package or version changes.
+- Rendered SDK smoke and real Storage counts on both profiles: 15 minutes
+  **30 writes**, one hour **120**, matching #27 (original 90/360); growth remains
+  5125/5500 and pending hide flush is 2 writes. Repeated successful session ACKs
+  and unchanged battle postpones add zero writes in focused tests.
+- Fixture: tests/persistence/source/ReliabilityAuditQA.mc in the existing
+  isolated QA app. Logs: bin/reliability-fix-*.log; original red evidence remains
+  in bin/reliability-audit-*.log. No real watch/pet storage or physical acceptance
+  exercised. Source, architecture and test changes remain local/uncommitted.
+
 ## Pet-generation isolation - 2026-11-01 (Issue #29)
 
 Committed as [4d334b0](https://github.com/joshld/garmin-tekutekubeast/commit/4d334b098b23244126f0659333636fa75055f07b).

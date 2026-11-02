@@ -103,6 +103,46 @@ a new cross-document transaction. Old unmarked records cannot retroactively
 prove their historical owner, so upgrades preserve them as current-generation.
 No canonical schema bump, background dependency, timer or transport change.
 
+Mini-game failures retain a compact RAM-only intent: operation, petSerial,
+kind, detached session/outcome and prior session slot. Before retry, discard the
+old working document and dirty baseline, load current v4 through normal migration,
+and replay the existing operation. No stale full-pet image/delta is copied back.
+Unrelated durable steps, care, inventory and progression win; rewards use latest
+limits. A durable claim, retirement, different session ID or generation wins.
+For the same owned session, a checkpoint is replayable only if the durable slot
+matches its prior or desired value; a different newer checkpoint wins, rejects
+the stale view/result, and can be resumed normally. A pending start resumes an
+already saved slot or uses the latest Energy/serial; it never debits twice.
+
+Foreground start/commit and game re-show resolve pending intents before other
+mutations/reload. Exceptions retain the intent and clear the replay guard.
+A successful write followed by interrupted acknowledgement is recognized by
+existing IDs/claims on reload. Hard termination before a successful save still
+recovers only the last durable checkpoint; the intent is intentionally not a
+new persistent journal. See Garmin's [storage reload contract](https://developer.garmin.com/connect-iq/articles/core-topics/Persisting_Data.html).
+A rejected rebase revokes a RAM-only per-game owner token. A view accepts a
+snapshot only by loading the current durable session through normal migration;
+restore's supplied argument is never authoritative. It records petSerial/session
+ID and a reference to the existing immutable dirty-baseline checkpoint, without
+another full-pet copy. A newer checkpoint/claim or generation rejects the view.
+Successful owned retries can adopt their now-durable desired checkpoint.
+
+Each begin/restore creates a unique owner token and replaces the previous
+controller's registration. Each timer binding captures that owner in a small
+callback object; completion explicitly requires the captured callback identity.
+Refresh/replacement never changes old callbacks' tokens. Hide revokes the timer
+binding; replacing a live binding re-arms the existing timer even at the same
+period. Queued old callbacks remain rejected even after resume or repeated
+refresh. Only explicit restore/begin adopts latest durable state. No persistent
+version, schema, background work or extra timer is introduced.
+Repeated unchanged ACKs remain write-free; idle #27 policy is unchanged.
+
+Game pause/hide stops its timer before checkpointing, so failures propagate
+without retaining a hidden timer. Battle turns already produce a detached next
+state; failed commit restores the prior shared active-state reference. #29's
+reward snapshot and generation policy remain unchanged. No new save field,
+background dependency, artwork, transaction framework or full-pet cache.
+
 ## Rule contracts
 
 - Epochs are integer Unix seconds; calendar days remain local `YYYYMMDD` keys.

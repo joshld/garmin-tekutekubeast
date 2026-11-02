@@ -3,12 +3,29 @@ using Toybox.Graphics;
 using Toybox.System;
 using Toybox.Application;
 
+// One lightweight capability per timer/controller binding. Retained callbacks
+// keep their original identity; refreshing the view never updates that identity.
+class BeastGameCallbacks {
+    var view;var owner;
+    function initialize(target){view=target;owner=target.ownership;}
+    function valid(){
+        if(view.callbacks!=self || view.ownership!=owner){return false;}
+        if(owner==null){return view.session==null;}
+        if(!view.sessionCurrent()){return false;}
+        return view.beast.sessionOwners[view.kind]==owner &&
+            owner[0]==view.beast.number("petSerial") && view.session!=null &&
+            owner[1]==view.session["id"];
+    }
+    function refresh(){if(valid()){view.refresh();}}
+    function finish(win){view.finish(win,self);}
+}
+
 // Durable whole sessions. Exit saves; only explicit Abandon/New Game discards.
 // Interruption/reopening preserves checkpoints without another energy charge.
 class BeastGameView extends TekuTekuBeastView {
     var kind;var phase=0;var elapsed=0;var attempts=0;var hits=0;var result="";
     var sequence=[];var cursor=0;var trail=0;var scanning=false;var touchWidth=280;
-    var session=null;var round=0;var score=0;var combo=0;var best=0;var retries=0;
+    var session=null;var ownership=null;var checkpointBase=null;var callbacks=null;var round=0;var score=0;var combo=0;var best=0;var retries=0;
     var lane=1;var target=1;var jumpTicks=0;var caught=false;var resultChoice=0;
     var node=0;var choice=0;var travel=0;var hint="";var replayRound=false;var gameBounds=[0,0,0,0];
     var lastGameVisual=null;var gameRedraws=0;
@@ -31,27 +48,47 @@ class BeastGameView extends TekuTekuBeastView {
         if(!gameHidden && refresher!=null){return;}
         if(refresher!=null){refresher.stop();refresher=null;}
         gameHidden=false;resumeTicks=0;pauseOptions.reset();memoryReplay=false;
-        Application.getApp().activeView=self;if(!beast.dev){beast.data=null;}beast.syncHistory();loadSprite();
+        Application.getApp().activeView=self;
+        // Resolve the compact intent against latest storage before lifecycle
+        // reload; never write the stale foreground pet over background progress.
+        if(!beast.dev){if(beast.pendingSession!=null){beast.retrySession();}beast.data=null;}
+        beast.syncHistory();loadSprite();
         var saved=beast.data["sessions"][kind];
         paused=false;
-        if(saved!=null && !beast.isSleeping()){restore(saved);paused=true;}sleepGate();
+        if(saved==null && session!=null){session=null;phase=0;} // A retried completion retired it.
+        if(saved!=null && !beast.isSleeping()){paused=restore(saved);}sleepGate();
         lastGameVisual=null;lastCallback=-1;
         if(!paused){startGameTimer();}WatchUi.requestUpdate();
+    }
+    function ownSnapshot(){
+        ownership=[beast.number("petSerial"),session["id"]];
+        beast.sessionOwners[kind]=ownership;
+        checkpointBase=beast.store.canonical==null?null:beast.store.canonical["sessions"][kind];
+    }
+    function bindCallbacks(){
+        callbacks=new BeastGameCallbacks(self);
+        // Rebind an existing timer even when the new scene uses the same period.
+        // Do not allocate a timer merely to load/inspect a saved session.
+        if(refresher!=null && !gameHidden && !paused){
+            refresher.stop();lastCallback=gameClock();refresher.start(callbacks.method(:refresh),timerPeriod,true);
+        }
     }
     function gameClock(){return System.getTimer();}
     function inProgress(){return session!=null && phase!=3;}
     function startGameTimer(){
         if(gameHidden || paused){return;}
         if(refresher==null){refresher=new Toybox.Timer.Timer();}else{refresher.stop();}
-        timerPeriod=desiredGamePeriod();lastCallback=gameClock();refresher.start(method(:refresh),timerPeriod,true);
+        timerPeriod=desiredGamePeriod();lastCallback=gameClock();bindCallbacks();
     }
     function pauseGame(){
         if(!inProgress()){return;}
-        paused=true;pauseOptions.reset();resumeTicks=0;lastCallback=-1;checkpoint();
+        paused=true;pauseOptions.reset();resumeTicks=0;lastCallback=-1;
         if(refresher!=null){refresher.stop();refresher=null;}
+        checkpoint();
         WatchUi.requestUpdate();
     }
     function resumeInput(){
+        if(!sessionCurrent()){WatchUi.requestUpdate();return true;}
         if(!paused){return resumeTicks>0;}
         if(sleepGate()){return true;}
         // Consume SELECT as readiness only. A short frozen interval protects
@@ -62,6 +99,7 @@ class BeastGameView extends TekuTekuBeastView {
         startGameTimer();WatchUi.requestUpdate();return true;
     }
     function pauseSelect(){
+        if(!sessionCurrent()){WatchUi.requestUpdate();return;}
         if(pauseOptions.confirming){
             if(pauseOptions.choice==0){pauseOptions.reset();WatchUi.requestUpdate();return;}
             if(pauseOptions.abandoning){
@@ -78,6 +116,7 @@ class BeastGameView extends TekuTekuBeastView {
         onHide();returnToPet();
     }
     function restartGame(){
+        if(!sessionCurrent()){WatchUi.requestUpdate();return;}
         if(sleepGate()){return;}
         if(!beast.abandonSession(session)){return;}
         session=null;phase=0;paused=false;resumeTicks=0;pauseOptions.reset();
@@ -91,15 +130,29 @@ class BeastGameView extends TekuTekuBeastView {
     }
     function tuneGameTimer(){
         var wanted=desiredGamePeriod();
-        if(refresher!=null && timerPeriod!=wanted){timerPeriod=wanted;lastCallback=gameClock();refresher.stop();refresher.start(method(:refresh),timerPeriod,true);}
+        if(refresher!=null && timerPeriod!=wanted){timerPeriod=wanted;lastCallback=gameClock();refresher.stop();bindCallbacks();}
     }
     function onHide(){
         if(gameHidden){return;}
-        gameHidden=true;paused=inProgress();resumeTicks=0;lastCallback=-1;
+        callbacks=null;gameHidden=true;updateVisible=false;paused=inProgress();resumeTicks=0;lastCallback=-1;
+        // Cleanup cannot depend on successful persistence; propagate save errors.
+        if(refresher!=null){refresher.stop();refresher=null;}
         checkpoint();TekuTekuBeastView.onHide();
     }
     function restore(saved){
-        session=beast.store.copy(saved);phase=session["phase"];elapsed=session["elapsed"];
+        // An external snapshot is only a request to resume this game kind.
+        // Reload the owning document; never confer authority on that argument.
+        callbacks=null;
+        if(!beast.dev){
+            if(beast.pendingSession!=null){beast.retrySession();}
+            beast.data=null;beast.store.canonical=null;
+        }
+        beast.start();saved=beast.data["sessions"][kind];
+        if(saved==null || beast.data["gameClaims"][kind]>=saved["id"]){
+            session=null;phase=0;paused=false;resumeTicks=0;memoryReplay=false;return false;
+        }
+
+        session=beast.store.copy(saved);ownSnapshot();phase=session["phase"];elapsed=session["elapsed"];
         attempts=session["attempts"];hits=session["hits"];score=session["score"];combo=session["combo"];
         best=session["best"];round=session["round"];cursor=session["cursor"];sequence=beast.store.copy(session["sequence"]);
         retries=session["retries"];trail=session["route"];node=session["node"];choice=session["choice"];travel=session["travel"];
@@ -125,9 +178,27 @@ class BeastGameView extends TekuTekuBeastView {
         if(kind==2 && phase==1){phase=5;incomplete=true;}
         if(kind==0 && phase==1 && !session.hasKey("target")){target=random(3);incomplete=true;}
         if(incomplete){checkpoint();}
+        bindCallbacks();return session!=null;
+    }
+    function sessionCurrent(){
+        if(session==null){return true;}
+        var valid=ownership!=null && beast.sessionOwners[kind]==ownership &&
+            ownership[0]==beast.number("petSerial") && ownership[1]==session["id"];
+        // Compare only a small immutable checkpoint already held by the dirty
+        // baseline. No second pet document, persisted version or per-frame copy.
+        if(valid && !beast.dev && beast.pendingSession==null && beast.store.canonical!=null){
+            var current=beast.store.canonical["sessions"][kind];
+            valid=beast.store.same(checkpointBase,current) || beast.store.same(session,current);
+            if(valid){checkpointBase=current;}
+        }
+        if(valid){return true;}
+        // Never refresh inside a delayed completion: discard the old controller.
+        callbacks=null;ownership=null;checkpointBase=null;session=null;phase=0;
+        paused=false;resumeTicks=0;memoryReplay=false;pauseOptions.reset();lastGameVisual=null;WatchUi.requestUpdate();return false;
     }
     function checkpoint(){
-        if(session==null || phase==3){return;}
+        if(!sessionCurrent()){return false;}
+        if(session==null || phase==3){return true;}
         session["phase"]=phase;session["elapsed"]=elapsed;session["attempts"]=attempts;session["hits"]=hits;
         session["score"]=score;session["combo"]=combo;session["best"]=best;session["round"]=round;
         session["cursor"]=cursor;session["sequence"]=beast.store.copy(sequence);session["retries"]=retries;
@@ -136,11 +207,18 @@ class BeastGameView extends TekuTekuBeastView {
         session["hint"]=hint;
         if(kind==1){session["memoryGot"]=registeredMove;session["memoryNeed"]=expectedMove;session["memoryFlash"]=inputTicks;}
         session["timingV051"]=1;
-        beast.saveSession(session);
+        if(!beast.saveSession(session)){
+            // Do not let a stale controller overwrite or complete the durable
+            // replacement. START can resume the current saved session normally.
+            session=null;phase=0;paused=false;resumeTicks=0;memoryReplay=false;
+            lastGameVisual=null;return false;
+        }
+        checkpointBase=beast.store.canonical==null?null:beast.store.canonical["sessions"][kind];
+        return true;
     }
     function random(limit){session["seed"]=BeastGameRules.nextSeed(session["seed"]);return session["seed"]%limit;}
     function begin(){
-        if(sleepGate()){return;}session=beast.beginSession(kind);if(session==null){result="CARE / PLAY EARNS IT";return;}
+        if(sleepGate()){return;}session=beast.beginSession(kind);if(session==null){result="CARE / PLAY EARNS IT";return;}ownSnapshot();
         // A paused session is resumed, not replaced or charged twice.
         if(session["elapsed"]>0 || session["node"]>0 || session["sequence"].size()>0 || session["travel"]>0){restore(session);pauseGame();return;}
         phase=kind==2?5:1;round=0;elapsed=0;attempts=0;hits=0;score=0;combo=0;best=0;retries=0;node=0;
@@ -148,7 +226,7 @@ class BeastGameView extends TekuTekuBeastView {
         registeredMove=-1;expectedMove=-1;inputTicks=0;
         if(kind==0){target=random(3);}
         if(kind==1){makeSequence();}
-        checkpoint();tuneGameTimer();
+        checkpoint();bindCallbacks();tuneGameTimer();
     }
     function makeSequence(){
         registeredMove=-1;expectedMove=-1;inputTicks=0;
@@ -156,6 +234,7 @@ class BeastGameView extends TekuTekuBeastView {
         cursor=0;elapsed=0;phase=1;
     }
     function refresh() as Void {
+        if(!sessionCurrent()){WatchUi.requestUpdate();return;}
         if(gameHidden || paused){return;}
         var now=gameClock();
         if(inProgress()){
@@ -231,18 +310,19 @@ class BeastGameView extends TekuTekuBeastView {
         // merely by hitting an invisible timing bar.
         if(check){if(jumpTicks==0){jumpTicks=jumpDuration();}return;}
         attempts++;if(!caught){combo=0;hint="NEXT STAR!";}
-        if(attempts>=15){finish(hits>=7);return;}
+        if(attempts>=15){finish(hits>=7,callbacks);return;}
         round=attempts/5;target=random(3);caught=false;jumpTicks=0;elapsed=0;checkpoint();
     }
-    function finish(win){
+    function finish(win,owner){
+        if(owner==null || !owner.valid() || gameHidden || paused || resumeTicks>0){return;}
         if(phase==3 || session==null){return;}
-        checkpoint();result=beast.completeSession(session,win);session=null;phase=3;resultChoice=0;
+        if(!checkpoint()){WatchUi.requestUpdate();return;}result=beast.completeSession(session,win);session=null;phase=3;resultChoice=0;
         new FeedbackManager().cue(beast,win?"happy":"miss");
     }
     function continueMemory(){
         registeredMove=-1;expectedMove=-1;inputTicks=0;
         if(replayRound){replayRound=false;elapsed=0;phase=1;cursor=0;}
-        else{round++;if(round>=3){finish(hits>=2);return;}retries=0;makeSequence();}
+        else{round++;if(round>=3){finish(hits>=2,callbacks);return;}retries=0;makeSequence();}
         checkpoint();
     }
     function memoryInput(value){
@@ -272,7 +352,7 @@ class BeastGameView extends TekuTekuBeastView {
         phase=4;elapsed=0;checkpoint();
     }
     function nextTrail(){
-        node++;if(node>=3){finish(true);return;}phase=5;travel=0;elapsed=0;checkpoint();
+        node++;if(node>=3){finish(true,callbacks);return;}phase=5;travel=0;elapsed=0;checkpoint();
     }
     function sleepGate(){
         if(!beast.isSleeping()){
@@ -285,6 +365,7 @@ class BeastGameView extends TekuTekuBeastView {
         return true;
     }
     function selectAction(){
+        if(!sessionCurrent()){WatchUi.requestUpdate();return;}
         if(gameHidden || resumeTicks>0){return;}
         if(paused){pauseSelect();return;}
         if(memoryReplay){return;}
@@ -301,6 +382,7 @@ class BeastGameView extends TekuTekuBeastView {
         tuneGameTimer();WatchUi.requestUpdate();
     }
     function switchPage(delta){
+        if(!sessionCurrent()){WatchUi.requestUpdate();return;}
         if(gameHidden || resumeTicks>0){return;}
         if(paused){pauseOptions.move(delta);WatchUi.requestUpdate();return;}
         if(memoryReplay){return;}
