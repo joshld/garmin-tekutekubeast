@@ -1,6 +1,10 @@
 # TekuTekuBeast for the standard Fenix 6S Pro
 
-Compatibility beta candidate: **0.5.2**. Not yet published to Garmin.
+Current development acceptance: **0.7.0 beta**. Confirm the artifact's source,
+identity and approval using [current acceptance](WATCH_ACCEPTANCE.md#current-enduro-4-acceptance---v070-development)
+and the [public/Developer Beta identity table](BUILD.md#environment-and-safe-inputs).
+Public and Developer Beta have separate pets; neither publication nor a new
+private test build is implied by this guide. The 0.5.2 package records below are historical.
 Use the `fenix6spro` program, not `fenix6s` (non-Pro), not an Enduro program.
 Garmin's 6S Pro profile also covers Sapphire/Pro Solar variants; the standard
 6S Pro is the primary tested simulator target. Physical-watch acceptance remains.
@@ -18,7 +22,8 @@ use an update of that existing installation once the owner approves publication.
 2. Open the watch in File Explorer and find its `GARMIN/APPS` folder. If the
    folder isn't exposed, check the watch's USB/MTP mode or use Garmin's normal
    USB support; do not format/reset the watch.
-3. Copy only the verified signed **TekuTekuBeast-Public-0.5.2-fenix6spro.prg** into
+3. Copy only the verified signed, current-source **fenix6spro .prg for the
+   intended public or Developer Beta identity** into
    `GARMIN/APPS`. Do not copy the `.iq`, QA programs or signing key.
 4. Safely disconnect. On the watch press START and find TekuTekuBeast in the
    activity/app list; add it to favourites if desired.
@@ -57,7 +62,7 @@ where activity is deferred. GPS is never continuously enabled for scenery.
 ## First-watch check
 
 Use the shared [physical-watch procedure](WATCH_ACCEPTANCE.md#physical-acceptance-procedure).
-On this model specifically confirm 0.5.2 beta in Settings, round-screen readability,
+On this model confirm 0.7.0 beta and the recorded source/hash, round-screen readability,
 all five-button inputs and daily foreground catch-up; launch from START/apps,
 not an unsupported native watch-app Glance.
 

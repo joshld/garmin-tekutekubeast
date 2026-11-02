@@ -1,6 +1,10 @@
 # Current source validation checkpoint
 
-## Pet-generation isolation - 2026-11-01 (local candidate, Issue #29)
+## Pet-generation isolation - 2026-11-01 (Issue #29)
+
+Committed as [4d334b0](https://github.com/joshld/garmin-tekutekubeast/commit/4d334b098b23244126f0659333636fa75055f07b).
+The records below describe local validation before that commit; physical acceptance
+remains pending in the [current checklist](WATCH_ACCEPTANCE.md#current-enduro-4-acceptance---v070-development).
 
 - Baseline `f702d71`: SDK reproductions confirmed paused games/unfinished wild
   battles could survive Archive/start egg. Local fix clears games atomically
@@ -41,7 +45,10 @@
 - Structural, changed-guide link and diff checks pass. Physical-watch acceptance
   remains pending. No commit/push, migration, release export or publication.
 
-## Foreground passive checkpoints - 2026-11-01 (local candidate, Issue #27)
+## Foreground passive checkpoints - 2026-11-01 (Issue #27)
+
+Committed as [f702d71](https://github.com/joshld/garmin-tekutekubeast/commit/f702d713f2c7d75cb1baad465eed8d24531ea366).
+The original local validation record follows; physical acceptance remains pending.
 
 - Based on `46e9293`: only Pet-timer passive growth checkpoints defer to 60s.
   Actions, steps, care/evolution/mood boundaries, sessions/rewards and hide/stop
@@ -603,7 +610,7 @@ the SDK used the existing key, never regenerated it. Build log:
 this is a newer source acceptance program, not a relabelled/final v0.6.0 release.
 
 Safe conditional installation and the physical procedure are in
-[watch acceptance](WATCH_ACCEPTANCE.md#current-enduro-4-acceptance-build).
+[watch acceptance](WATCH_ACCEPTANCE.md#historical-enduro-4-acceptance-build---v052-source-118bdff).
 [#24](https://github.com/joshld/garmin-tekutekubeast/issues/24) owns proposed
 v0.6.0 release gates: owner acceptance, balance disposition, targeted constrained
 renderer checks and subsequently approved versioning/all-part packaging.

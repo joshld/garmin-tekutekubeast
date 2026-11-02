@@ -1,54 +1,59 @@
 # Physical-watch acceptance and user reports
 
-## First two-watch friend test (Issue #20)
+## Current Enduro 4 acceptance - v0.7.0 development
 
-Use the matching identity; never uninstall, reset Storage or install the public
-build over the Developer Beta. No watch has been installed automatically.
+Use this section for current development; historical artifacts below are not
+current test inputs. [GitHub Issues](https://github.com/joshld/garmin-tekutekubeast/issues)
+owns acceptance status. Record physical results there; SDK passes do not establish
+watch save retention, battery life or operating-system behavior.
 
-- Enduro 4 existing Developer Beta: `bin/friend-acceptance/TekuTekuBeast-Dev-Enduro4.prg`.
-- Fenix 6S Pro separate Developer Beta test: `bin/friend-acceptance/TekuTekuBeast-Dev-Fenix6SPro.prg`.
-- Fenix 6S Pro public identity: `bin/friend-acceptance/TekuTekuBeast-Public-Fenix6SPro.prg` (matching approved update only).
-- Enduro 4 existing public app, if preferred: `bin/friend-acceptance/TekuTekuBeast-Public-Enduro4.prg`.
+### Choose and update the matching installation
 
-These are signed device builds from current source, still version 0.6.1 beta,
-not Store IQ packages. Follow [safe USB installation](BUILD.md#installation-and-publication)
-and the [Fenix guide](INSTALL_FENIX_6S_PRO.md). For an existing Store install, do not add a duplicate USB copy: use an approved
-update of that installation. For the first radio test, a separate Developer Beta
-on the Fenix keeps its public pet untouched. Copy only the matching device/app
-`.prg` to `GARMIN/APPS`, safely eject, and retain existing installation/data.
-If unsure which app identity is installed, stop rather than uninstalling it.
+- Verify the signed Enduro 4 build's recorded source includes storage/resource
+  work through [f702d71](https://github.com/joshld/garmin-tekutekubeast/commit/f702d713f2c7d75cb1baad465eed8d24531ea366)
+  and generation/reward recovery through [4d334b0](https://github.com/joshld/garmin-tekutekubeast/commit/4d334b098b23244126f0659333636fa75055f07b).
+  Settings may still say **0.7.0 beta**; version/filename alone does not prove source.
+  The verified IQs from ac49e39 predate these changes; see
+  [package provenance](VALIDATION.md#final-v070-packages---source-ac49e39).
+- Reuse a verified matching device build if available; otherwise request only
+  that device build using [current build instructions](BUILD.md#everyday-enduro-4-development).
+  A new IQ export or Store publication is not required for local acceptance.
+  This guide does not claim a current private artifact has been prepared.
+- Developer Beta uses -Owner and UUID
+  54A4F9D3B6584CA4B01C232D20438E5B; its DEV tools and original pet remain.
+  Public uses the default build and UUID
+  53C660EBC4454BCF9292E5591EEC18DA; DEV is excluded and its pet is separate.
+  Both retain the existing signing key; see the
+  [identity table](BUILD.md#environment-and-safe-inputs).
+- Photograph pet/stage, XP/growth, friendship, inventory, collections, settings
+  and saved sessions before updating. A photograph is not a recoverable backup.
+  Follow [safe installation](BUILD.md#installation-and-publication): update only
+  the positively identified matching installation. Never uninstall, clear
+  Storage, copy saves or create a duplicate USB installation to work around doubt.
+  Do not install isolated QA/test fixtures over either real app.
+- Reopen and compare before testing. Stop on an unexpected new egg, lost progress,
+  duplicate app or changed identity. Care, elapsed growth and genuine new steps
+  may legitimately update values.
 
-1. Photograph both pets, XP, inventory and any saved solo battle. Ensure both
-   beasts are hatched and awake; check the new Battle a friend row is present.
-   On a separate new Beta test pet, Developer Mode can temporarily select a
-   hatched form; do not reset or transfer the existing public pet.
-2. Keep the watches nearby and both apps in the foreground. No phone, GPS, Wi-Fi
-   or internet is required. The build requests ANT permission; no ANT+ sensor or
-   external radio is needed. If firmware disables ANT, enable its normal radio
-   setting; report the exact firmware/error rather than changing sensor pairing.
-3. On one: Play > Wild battles > Battle a friend > Host. On the other choose
-   Join; enter the host's four-digit code with UP/DOWN and SELECT for each digit.
-4. Check the displayed opponent's species, YOU/FRIEND and HP; both press SELECT
-   to Ready. Pick named techniques with UP/DOWN and SELECT. Verify guard, buff,
-   signature cooldown, moves, damage and HP match on both watches. Mash SELECT
-   once to confirm it does not submit an extra turn. Complete victory/defeat,
-   then a guard-heavy draw if convenient. There must be no XP/items/Energy changes.
-5. Test BACK during pairing and mid-match; the other watch should report the
-   cancellation/loss. Briefly separate the watches and return to test retries;
-   longer loss, an alert/app hide or restarting one watch must end safely, never
-   award a result or resume a stale session. Reconnect for a new match.
-6. Swap Host/Join and test Developer Beta against public. Confirm original pet
-   progress, real-step catch-up and saved wild battle/rewards still work. Check
-   radio/timers stop after leaving and note responsiveness/battery concerns.
+### Focused checks for #27 and #29
 
-For diagnostics, create an empty `GARMIN/APPS/LOGS/<installed-program-name>.TXT`
-matching the actual PRG basename before reproducing. Collect that file and
-`GARMIN/APPS/LOGS/CIQ_LOG.YML` if present, plus watch model/firmware, app identity,
-Host/Join, code, time and exact screen/error. `FRIEND_ANT` lines identify radio
-configuration/send/release failures; do not post signing credentials or pet saves.
-Record physical results on [Issue #20](https://github.com/joshld/garmin-tekutekubeast/issues/20).
-All real RF pairing, coexistence with sensors and radio battery impact remain
-unverified until this procedure is performed on both watches.
+| Check | Expected result / failure condition |
+| --- | --- |
+| [Storage/resource efficiency #27](https://github.com/joshld/garmin-tekutekubeast/issues/27): leave Pet idle for several minutes, then close/reopen and restart the watch normally. | Growth continues and elapsed progress recovers without duplication. Glance growth may lag up to one minute during quiet foreground use. Fail on missing/doubled progress, errors or persistent stale needs. All creature, game, battle, launcher and Glance artwork must remain present. |
+| #27: walk with the app open and closed; reopen twice; perform care, save a game, interrupt with an alert and return. | Real XP is credited once; actions, inventory and sessions persist. Fail on lost actions, duplicated rewards or incorrect step credits. Observe responsiveness and compare similar-use battery days; physical testing does not directly measure Storage write counts. |
+| [Generation isolation #29](https://github.com/joshld/garmin-tekutekubeast/issues/29): pause each game and a wild/practice battle, then deliberately Archive/start egg. | Unfinished sessions retire without loot or Energy refunds. Old sessions must not resume or affect the egg. Queued encounters, inventory, collections, lifetime XP, Battle XP/mastery and daily limits carry forward. |
+| #29: leave a completed battle result unclaimed, deliberately archive, then reopen/restart and revisit battles. | Earned XP/mastery and the claim persist exactly once; no old combat snapshot resumes. Fail on missing/repeated rewards, reset daily caps or loss of retained progress. Injected write-failure/retry cases are SDK-tested, not physically proven. |
+
+Try generation interactions first in isolated Developer Mode; never archive the
+real pet just to simplify a test. DEV discard preserves the real pet but cannot
+prove durable generation persistence. For that check use an owner-approved
+separate test installation, or an explicitly intended real-pet archive; do not
+transfer real saves. Keep physical #27/#29 acceptance open until reported.
+
+Record model/firmware, app identity, source/hash, date, steps and observed result.
+The [shared procedure](#physical-acceptance-procedure) covers existing gameplay;
+[validation](VALIDATION.md) separates SDK evidence from pending physical checks.
+
 ## Physical acceptance procedure
 
 [GitHub Issues](https://github.com/joshld/garmin-tekutekubeast/issues) owns
@@ -124,7 +129,69 @@ check into a pass. Physical checks remain open unless explicitly confirmed.
 Outstanding hardware checks belong to their respective features; they are not
 essential unfinished code-cleanup work in Issue #19.
 
-## Current Enduro 4 acceptance build
+## First two-watch friend test (Issue #20)
+
+Use current matching-identity builds from the instructions above and the
+[Fenix guide](INSTALL_FENIX_6S_PRO.md). The old 0.6.1 artifact paths are retained
+below as history, not current installation inputs.
+
+1. Photograph both pets, XP, inventory and any saved solo battle. Ensure both
+   beasts are hatched and awake; check the new Battle a friend row is present.
+   On a separate new Beta test pet, Developer Mode can temporarily select a
+   hatched form; do not reset or transfer the existing public pet.
+2. Keep the watches nearby and both apps in the foreground. No phone, GPS, Wi-Fi
+   or internet is required. The build requests ANT permission; no ANT+ sensor or
+   external radio is needed. If firmware disables ANT, enable its normal radio
+   setting; report the exact firmware/error rather than changing sensor pairing.
+3. On one: Play > Wild battles > Battle a friend > Host. On the other choose
+   Join; enter the host's four-digit code with UP/DOWN and SELECT for each digit.
+4. Check the displayed opponent's species, YOU/FRIEND and HP; both press SELECT
+   to Ready. Pick named techniques with UP/DOWN and SELECT. Verify guard, buff,
+   signature cooldown, moves, damage and HP match on both watches. Mash SELECT
+   once to confirm it does not submit an extra turn. Complete victory/defeat,
+   then a guard-heavy draw if convenient. There must be no XP/items/Energy changes.
+5. Test BACK during pairing and mid-match; the other watch should report the
+   cancellation/loss. Briefly separate the watches and return to test retries;
+   longer loss, an alert/app hide or restarting one watch must end safely, never
+   award a result or resume a stale session. Reconnect for a new match.
+6. Swap Host/Join and test Developer Beta against public. Confirm original pet
+   progress, real-step catch-up and saved wild battle/rewards still work. Check
+   radio/timers stop after leaving and note responsiveness/battery concerns.
+
+For diagnostics, create an empty `GARMIN/APPS/LOGS/<installed-program-name>.TXT`
+matching the actual PRG basename before reproducing. Collect that file and
+`GARMIN/APPS/LOGS/CIQ_LOG.YML` if present, plus watch model/firmware, app identity,
+Host/Join, code, time and exact screen/error. `FRIEND_ANT` lines identify radio
+configuration/send/release failures; do not post signing credentials or pet saves.
+Record physical results on [Issue #20](https://github.com/joshld/garmin-tekutekubeast/issues/20).
+All real RF pairing, coexistence with sensors and radio battery impact remain
+unverified until this procedure is performed on both watches.
+## Historical v0.6.1 friend-battle test artifacts
+
+Retained preparation/installation record, not current build guidance or evidence
+of physical acceptance. Do not upload/install these old artifacts for current
+v0.7.0 acceptance; use the matching-source instructions above.
+
+Use the matching identity; never uninstall, reset Storage or install the public
+build over the Developer Beta. No watch has been installed automatically.
+
+- Enduro 4 existing Developer Beta: `bin/friend-acceptance/TekuTekuBeast-Dev-Enduro4.prg`.
+- Fenix 6S Pro separate Developer Beta test: `bin/friend-acceptance/TekuTekuBeast-Dev-Fenix6SPro.prg`.
+- Fenix 6S Pro public identity: `bin/friend-acceptance/TekuTekuBeast-Public-Fenix6SPro.prg` (matching approved update only).
+- Enduro 4 existing public app, if preferred: `bin/friend-acceptance/TekuTekuBeast-Public-Enduro4.prg`.
+
+These were signed device builds from the then-current source, version 0.6.1 beta,
+not Store IQ packages. Follow [safe USB installation](BUILD.md#installation-and-publication)
+and the [Fenix guide](INSTALL_FENIX_6S_PRO.md). For an existing Store install, do not add a duplicate USB copy: use an approved
+update of that installation. For the first radio test, a separate Developer Beta
+on the Fenix keeps its public pet untouched. Copy only the matching device/app
+`.prg` to `GARMIN/APPS`, safely eject, and retain existing installation/data.
+If unsure which app identity is installed, stop rather than uninstalling it.
+
+## Historical Enduro 4 acceptance build - v0.5.2 source 118bdff
+
+Retained milestone record only; the artifact and owner-operated instructions
+below are superseded by current v0.7.0 guidance above.
 
 Source `118bdff64a389efff41b9c2276a5236111751d96`, including the Nimble,
 walk-facing and crescent fixes plus earlier offline battles/sleep/lighting.
