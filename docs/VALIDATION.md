@@ -1,6 +1,120 @@
 # Current source validation checkpoint
 
-## Snapshot and callback ownership - 2026-11-02 (current local candidate, #14)
+## Configurable inactivity auto-exit - 2026-11-06 (local, #31)
+
+### Post-review deadline correction
+
+- Protection now defers exit without moving the last-input baseline. Duration
+  changes only reschedule; real input still resets the deadline. Ending feedback
+  preserves remaining time, or schedules overdue exit at the existing 50 ms minimum.
+  Friend RESULT stays protected through its existing eight-second radio ACK grace.
+- **32 affected SDK cases pass per target**: corrected deadline/pause assertions,
+  production refresh/syncIdle poop and evolution reactions before/after the deadline,
+  input during protection, Off, delayed callbacks/replacement/duplicate exits, final
+  friend ACK grace, save recovery and unchanged #27 counts (**30/15 min, 120/hour**).
+  Enduro: bin/inactivity-deadline-{focused,controls,friend}*enduro4*.log;
+  Fenix: bin/inactivity-deadline-final-fenix6spro-*.log. Unchanged earlier coverage reused.
+- Normal-memory SDK smoke crosses the real 60-second deadline during automatic
+  evolution feedback, then exits with full saved/live equality: **62,156 ms Enduro;
+  61,438 ms Fenix**. Four necessary writes including evolution/checkpoint; no passive
+  write-policy change. Logs: bin/inactivity-protected-{build,run}-*.log. Enduro's
+  identical scenario is reused after QA entry-point consolidation; Fenix rebuilt
+  with the reused InactivitySmokeApp entry to stay within legacy global-symbol limits.
+- Allocation sample remains 152 bytes; sampled headroom **576,608 bytes Enduro /
+  928,520 Fenix**, not whole-app/serializer peaks. No production fields, persistent
+  state, polling or resource changes added. Existing recovery/ownership guards retained.
+- Structural/link/diff checks pass; physical-watch acceptance and independent review
+  remain pending. No commit, push, release export or publication.
+
+### Pre-review evidence (feedback reset expectation superseded above)
+
+- Settings choices: 1/5/15/60 minutes and Off. Additive v4 `autoExit` preference:
+  fresh installation 300 seconds, existing/legacy save 0; existing values retained.
+  One monotonic one-shot timer, no polling/IO/redraws. Real input resets it;
+  automatic navigation does not. Active gameplay suspends it; paused sessions
+  and menus can exit. Inactive/hidden/recovery stop it; late callbacks cannot rearm.
+- **83 unique focused cases covered per device**: 19 inactivity cases plus the
+  previous 64 recovery/persistence/generation cases. After the final lifecycle
+  guard, 28 affected cases rerun/pass on each target; 55 unchanged earlier passes
+  reused. Logs: bin/inactivity-final-*-*.log and inactivity-acceptance-*-*.log.
+  Covers all deadlines, Off, settings/reload, upgrade defaults, input, readiness,
+  paused games/battles, friend setup, failed save/read, explicit recovery, timer
+  wrap, late hidden callbacks and automatic navigation. QA symbols are module-
+  scoped to fit the legacy SDK global-member limit; production unchanged by that.
+- #27 counts remain **30 writes/15 minutes, 120/hour** in focused SDK fixtures.
+  No periodic writes added; timeout uses existing checkpoints/dirty comparisons.
+  Normal-budget one-minute SDK smokes pass: Enduro **60,047 ms**, Fenix **60,063 ms**;
+  full live/durable document equality at exit, two flush writes, 11 existing
+  refreshes, all setting choices rendered, minimum Timer interval guarded at 50 ms.
+  Logs: bin/inactivity-smoke-{build,run}-{enduro4,fenix6spro}.log.
+- Sampled idle/menu RAM: Enduro **202,568/781,976** bytes (**579,408** free),
+  Fenix **323,120/1,306,136** (**983,016** free). Scheduler allocation sample
+  **152 bytes** on both, including measurement overhead. Samples are not whole-
+  application/serializer peaks; background stress was not rerun. Scheduler is
+  foreground-only; background/Glance algorithms and cache fields unchanged.
+- Signed public production builds pass, DEV excluded, original identities/key
+  retained: Enduro **5,034,268** bytes; Fenix **4,137,372** bytes (local .prg only).
+  Initial smoke fixture incorrectly required lastGrowth==now; corrected to full
+  saved/live equality, retaining timestamp-based catch-up rather than changing
+  gameplay. Historical first-run log retained locally.
+- Structural preflight, 45 guide links and diff checks pass. No IQ export,
+  version/identity change, install, commit or publication. Existing recovery work
+  preserved. Independent review and physical-watch timeout/input, paused-session,
+  notification/OS exit and battery acceptance remain pending in Issue #31.
+
+## Foreground storage recovery integration - 2026-11-02 (local, #14/#20)
+
+- Baseline 89eab1a normal-budget SDK reproduction drove the actual input delegate
+  without a test exception catcher. Failed session creation escaped onSelect;
+  the SDK reported **Encountered an app crash**, before AFTER_INPUT. Evidence:
+  bin/foreground-red-{build,run}.log. RAM retry could not survive that VM exit.
+- View.perform now owns foreground input, lifecycle, timer and paint recovery
+  for documented storage-full/access exceptions. It stops timers/radio, revokes
+  game controllers and displays an explicit Retry/Back-to-pet/Exit screen.
+  Drawing, passive refresh, storage notices and reopening do not retry. One
+  explicit SELECT replays pending game intent against latest durable state;
+  failed unjournaled actions are not blindly repeated. Other errors propagate.
+- Removed automatic pending replay from start/commit. Normal game restoration
+  reuses the just-loaded session (one v4 read rather than duplicate reloads).
+  External restore still reloads and rejects obsolete supplied snapshots.
+- World-preview uses the existing current native-size Pip bitmap, fixing its
+  removed V4Pip0 reference without restoring unused production declarations.
+- The previous 55 core regressions remain selected. Throwing fault tests call
+  hideCore/showCore explicitly and retry explicitly; separate production-event
+  cases verify public entry points contain expected storage failures. No test
+  was removed; persistence, claim, generation and ownership assertions retained.
+- New fixtures: tests/persistence/source/ForegroundRecoveryQA.mc. No real pet
+  storage, release package, app identity, save schema, artwork or balance change.
+- **64 focused cases pass on each target**: original 55 plus nine production
+  recovery cases, including post-v4/failed-Glance acknowledgement, battle retry,
+  navigation, read failure, no hidden retries, nonstorage-error propagation and
+  Friend/solo-journal isolation. The final nullable-Friend guard and existing
+  solo battle recovery case pass on both profiles (bin/foreground-friend-*.log);
+  the other 63 results are reused for unchanged paths.
+  Logs: bin/foreground-final-{enduro4,fenix6spro}-*.log. One Fenix runner stalled;
+  only its process tree was stopped and unfinished batches rerun with a timeout
+  after compilation ended. Control passed; cause unproven, no source workaround.
+- Normal-budget recovery apps pass on both profiles: real timer/input/paint
+  callbacks continue after two failed writes, then explicitly recover 4000 XP
+  in the same VM. BEFORE_INPUT, AFTER_INPUT and RECOVERY_OK are recorded in
+  bin/foreground-recovery-run-*.log; no QA exception catcher surrounds input.
+- Sampled recovery-path memory including UI/sprites: Enduro **200,536/781,976**
+  bytes (581,440 free), Fenix **284,848/1,306,136** (1,021,288 free). Not an A/B
+  allocation measurement or whole-app/serializer peak. These Game/Pet samples
+  remain valid after the Friend-only nullable-controller guard; final public
+  binaries were rebuilt. Background core unchanged;
+  historical max-shape background samples below are not new measurements.
+- Signed public device builds pass, identity/DEV guards retained: Enduro
+  **5,032,060 bytes**, Fenix **4,134,668 bytes** (+2,016/+2,432 vs 89eab1a).
+  Corrected Enduro world-preview build passes. Logs: bin/foreground-public-build-*,
+  bin/foreground-world-build.log. No IQ export or version bump.
+- Rendered idle smokes pass on both profiles: **30 writes/15 minutes, 120/hour**,
+  unchanged growth 5125/5500, forced hide 2 writes. #27 remains unchanged.
+  Evidence: bin/foreground-smoke-*.log. Structural preflight, 45 current-guide
+  local links/anchors and diff checks pass. Physical storage/OS/power-loss
+  acceptance and independent review remain pending; changes uncommitted.
+
+## Snapshot and callback ownership (committed as 89eab1a) - 2026-11-02 (current local candidate, #14)
 
 - Two SDK red reproductions: restoring an old supplied snapshot let the next
   checkpoint regress durable elapsed **12 -> 1**; an old completion method after

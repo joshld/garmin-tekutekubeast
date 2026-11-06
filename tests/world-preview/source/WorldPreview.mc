@@ -19,7 +19,7 @@ class WorldPreview extends TekuTekuBeastView {
         if(example<16){TekuTekuBeastView.onUpdate(dc);}
         else{
             sceneInk=INK;dc.setColor(BG,BG);dc.clear();
-            var bitmap=example==16?WatchUi.loadResource(Rez.Drawables.V4Pip0):WatchUi.loadResource(Rez.Drawables.HistoricalV050Pip);
+            var bitmap=example==16?WatchUi.loadResource(Rez.Drawables.V5Pip0):WatchUi.loadResource(Rez.Drawables.HistoricalV050Pip);
             dc.drawBitmap(dc.getWidth()/2-bitmap.getWidth()/2,dc.getHeight()*0.70-bitmap.getHeight(),bitmap);
             label(dc,y(dc,0.83),example==16?"v0.4 PIXELS":"v0.5 PIXELS",Toybox.Graphics.FONT_XTINY);
         }

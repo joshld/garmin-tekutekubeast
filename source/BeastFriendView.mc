@@ -11,22 +11,23 @@ class BeastFriendView extends BeastBattleView {
     var pairCode=0;var visible=false;var seenChange=-1;var shownTurn=-1;var effectAt=0;
     var lastSleepCheck=0;var resultAt=0;var setupNotice="";var wasHidden=false;var leaveRequested=false;
     function initialize(model){TekuTekuBeastView.initialize();beast=model;digits=[1,0,0,0];radio=new BeastFriendAnt(method(:receiveFriend));}
+    function autoExitProtected(){return link!=null && !link.phase.equals("CLOSED") && (!link.phase.equals("RESULT") || radio.opened);}
     function fighterLabelPosition(index){return index==0?0.30:(compactGrid?0.67:0.64);}
     function nativePhaseHeader(){return false;}
     function opponentLabel(){return "FRIEND";}
     function moveHint(){return moveChoice==3?BeastBattleView.moveHint():["Hit your opponent","Soften next hit","Boost next 2 hits"][moveChoice];}
-    function onShow(){
+    function showCore(){
         visible=true;Application.getApp().activeView=self;
         if(wasHidden && link!=null && !link.phase.equals("CLOSED")){link.fail("INTERRUPTED - RECONNECT",battleClock());}
         wasHidden=false;tuneFriendTimer();WatchUi.requestUpdate();
     }
-    function onHide(){
+    function hideCore(){
         visible=false;wasHidden=true;stopBattleTimer();radio.close();battlePictures=null;battleForms=null;
         if(link!=null && !link.phase.equals("CLOSED") && !link.phase.equals("RESULT")){link.fail("INTERRUPTED - RECONNECT",battleClock());}
     }
     function tuneFriendTimer(){
         stopBattleTimer();if(!visible || link==null || link.phase.equals("CLOSED")){return;}
-        battleTimer=new Timer.Timer();battleTimer.start(method(:refresh),250,true);
+        battleTimer=new Timer.Timer();battleTimer.start(method(:safeRefresh),250,true);
     }
     function connectFriend(){
         if(!radio.supported()){setupNotice="ANT NOT SUPPORTED";return;}
@@ -42,7 +43,7 @@ class BeastFriendView extends BeastBattleView {
             if(!radio.open(role==0,pairCode)){link.fail(radio.status,now);}
             seenChange=-1;shownTurn=-1;resultAt=0;lastSleepCheck=now;
             entering=false;syncFriend(now);pumpFriend(now);tuneFriendTimer();
-        }catch(e instanceof Toybox.Lang.Exception){radio.close();setupNotice="CANNOT START ANT";System.println("FRIEND start: "+e.toString());link=null;}
+        }catch(e instanceof Toybox.Lang.Exception){radio.close();if(e instanceof Toybox.Lang.StorageFullException || e instanceof Toybox.Application.ObjectStoreAccessException){throw e;}setupNotice="CANNOT START ANT";System.println("FRIEND start: "+e.toString());link=null;}
     }
     function pumpFriend(now){var packet=link.next(now);if(packet!=null && radio.opened){radio.send(packet);}}
     function receiveFriend(packet){
@@ -125,7 +126,7 @@ class BeastFriendView extends BeastBattleView {
         }
         if(compactGrid){battleText(dc,dc.getWidth()/2,y(dc,0.88),dc.getWidth()*0.42,"BACK: CANCEL");}
     }
-    function onUpdate(dc){
+    function drawCore(dc){
         prepareMoveFont();battleWidth=dc.getWidth();battleHeight=dc.getHeight();sceneInk=INK;
         if(link==null){
             dc.setColor(BG,BG);dc.clear();label(dc,y(dc,0.16),"BATTLE A FRIEND",Graphics.FONT_XTINY);
@@ -156,6 +157,6 @@ class BeastFriendView extends BeastBattleView {
             }return;
         }
         battleNotice=(link.phase.equals("READY") || (link.phase.equals("PLAY") && link.choice>=0) || link.phase.equals("TURN") || link.phase.equals("COMMIT") || (link.phase.equals("PRESENT") && burst==0))?"FRIEND":"";
-        BeastBattleView.onUpdate(dc);
+        BeastBattleView.drawCore(dc);
     }
 }

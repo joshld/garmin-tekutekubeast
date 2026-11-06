@@ -7,9 +7,10 @@ class TekuTekuBeastApp extends Application.AppBase {
     var gameView = null;
     var activeView = null;
     var launchedFromGlance=false;
-    function onInactive(state) { if(activeView!=null){activeView.onHide();} }
+    var inactivity=null;
+    function onInactive(state) { if(inactivity!=null){inactivity.stop();}if(activeView!=null){activeView.onHide();} }
     function onActive(state) { if(activeView!=null && activeView.refresher==null){activeView.onShow();} }
-    function onStop(state) { if(activeView!=null){activeView.onHide();} }
+    function onStop(state) { if(inactivity!=null){inactivity.stop();}if(activeView!=null){activeView.onHide();} }
     function initialize() { AppBase.initialize(); }
     function onStart(state) {
         if(state!=null && state.hasKey(:launchedFromGlance)){launchedFromGlance=state[:launchedFromGlance];}
@@ -33,8 +34,7 @@ class TekuTekuBeastApp extends Application.AppBase {
     }
     function onStorageChanged() {
         if(activeView != null && !activeView.beast.dev){
-            activeView.beast.data=null;
-            activeView.beast.syncHistory();
+            activeView.perform("storage",null);
         }
         // Glance has no active game view; let its read-only summary refresh too.
         WatchUi.requestUpdate();

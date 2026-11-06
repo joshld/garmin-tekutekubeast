@@ -59,8 +59,8 @@ function auditHiddenGameCheckpointFailureTest(logger){
  var all=true;var app=Toybox.Application.getApp();var prior=app.activeView;
  for(var kind=0;kind<3;kind++){
   var s=ReliabilityAuditSupport.pet();var game=new BeastGameView(s,kind);game.begin();game.elapsed=7;var timer=new AuditHideTimer();game.refresher=timer;app.activeView=game;
-  ReliabilityAuditSupport.failPet(s);var caught=false;try{app.onInactive(null);}catch(e instanceof Toybox.Lang.Exception){caught=true;}Test.assert(caught);
-  ReliabilityAuditSupport.restorePet(s);app.onActive(null);
+  ReliabilityAuditSupport.failPet(s);var caught=false;try{game.hideCore();}catch(e instanceof Toybox.Lang.Exception){caught=true;}Test.assert(caught);
+  ReliabilityAuditSupport.restorePet(s);s.retrySession();s.storagePaused=false;app.onActive(null);
   var ok=timer.stopped && !game.gameHidden;logger.debug("AUDIT hide kind="+kind+" stopped="+timer.stopped+" hiddenAfterActive="+game.gameHidden);all=all && ok;
   // Dispose the audit sentinel without allowing a real callback to leak.
   game.refresher=null;game.gameHidden=false;game.onHide();app.activeView=null;
@@ -109,10 +109,10 @@ function reliabilityInactiveRepeatedFailureTest(logger){
  for(var kind=0;kind<3;kind++){
   var s=ReliabilityAuditSupport.pet();var game=new ReliabilityGame(s,kind);game.begin();game.elapsed=7;
   var timer=new AuditHideTimer();game.refresher=timer;app.activeView=game;ReliabilityAuditSupport.failPet(s);
-  var caught=false;try{app.onInactive(null);}catch(e instanceof Toybox.Lang.Exception){caught=true;}Test.assert(caught);
+  var caught=false;try{game.hideCore();}catch(e instanceof Toybox.Lang.Exception){caught=true;}Test.assert(caught);
   var calls=game.checkpoints;app.onStop(null);Test.assertEqual(game.checkpoints,calls);Test.assertEqual(timer.stops,1);Test.assert(game.refresher==null);
-  caught=false;try{app.onActive(null);}catch(e instanceof Toybox.Lang.Exception){caught=true;}Test.assert(caught);Test.assert(game.refresher==null);
-  ReliabilityAuditSupport.restorePet(s);app.onActive(null);Test.assert(!game.gameHidden);Test.assert(game.paused);
+  caught=false;try{game.showCore();}catch(e instanceof Toybox.Lang.Exception){caught=true;}Test.assert(caught);Test.assert(game.refresher==null);
+  ReliabilityAuditSupport.restorePet(s);s.retrySession();s.storagePaused=false;app.onActive(null);Test.assert(!game.gameHidden);Test.assert(game.paused);
   Test.assertEqual(Storage.getValue("v4")["sessions"][kind]["elapsed"],7);Test.assertEqual(game.checkpoints,calls);
   game.resumeInput();Test.assertEqual(game.resumeTicks,3);Test.assert(game.refresher!=null);game.onHide();Test.assert(game.refresher==null);app.activeView=null;
   var r=GenerationSupport.reload(s);Test.assertEqual(r.data["sessions"][kind]["elapsed"],7);
@@ -126,7 +126,7 @@ function reliabilityCompletionControllerRecoveryTest(logger){
    var s=ReliabilityAuditSupport.pet();var game=new BeastGameView(s,kind);game.begin();var session=s.store.copy(game.session);
    ReliabilityAuditSupport.failPet(s);var caught=false;try{s.completeSession(session,true);}catch(e instanceof Toybox.Lang.Exception){caught=true;}Test.assert(caught);
    var expected=s.store.copy(s.data);game.gameHidden=true;if(fresh==1){game=new BeastGameView(s,kind);}
-   ReliabilityAuditSupport.restorePet(s);game.onShow();Test.assert(game.session==null);Test.assertEqual(game.phase,0);Test.assert(!game.gameHidden);
+   ReliabilityAuditSupport.restorePet(s);s.retrySession();game.onShow();Test.assert(game.session==null);Test.assertEqual(game.phase,0);Test.assert(!game.gameHidden);
    Test.assert(s.store.same(expected,Storage.getValue("v4")));var writes=s.store.writes;s.completeSession(session,true);Test.assertEqual(s.store.writes,writes);game.onHide();
    var r=GenerationSupport.reload(s);Test.assert(s.store.same(expected,r.data));
   }

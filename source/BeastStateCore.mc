@@ -53,7 +53,7 @@ class BeastStateCore {
             "poop"=>0,"poopDue"=>0l,"lastPoop"=>0l,"sleepUntil"=>0l,
             "day"=>today(),"meals"=>2,"games"=>0,"careToday"=>0,"rested"=>0,
             "activityMilestone"=>0,"adventure"=>0,"encounters"=>0,"target"=>2000,
-            "minutesBase"=>-1,"pushBase"=>-1,"sound"=>0,"haptics"=>1,"motion"=>2,
+            "autoExit"=>exists?0:300,"minutesBase"=>-1,"pushBase"=>-1,"sound"=>0,"haptics"=>1,"motion"=>2,
             "passiveRate"=>12000,"careCap"=>300,"hatchHours"=>24,"hatchMinimum"=>8,"legendDays"=>21,
             "forcedStage"=>-1,"forcedFamily"=>0,"personality"=>[0,0,0,0],
             "collection"=>0,"rareCollection"=>0,"charms"=>0,"rare"=>0,"petSerial"=>0,
@@ -67,7 +67,7 @@ class BeastStateCore {
     function migrateV5(){
         // Additive migration: canonical key/version and all existing values stay
         // intact. A single atomic document also owns resumable game transactions.
-        var defaults={"sleepMode"=>0,"bedMinute"=>1320,"wakeMinute"=>420,"watchBed"=>1320,"watchWake"=>420,
+        var defaults={"autoExit"=>0,"sleepMode"=>0,"bedMinute"=>1320,"wakeMinute"=>420,"watchBed"=>1320,"watchWake"=>420,
             "nextBed"=>0l,"nextWake"=>0l,"scheduleAt"=>0l,"sleepSource"=>"FALLBACK","autoLights"=>1,"lights"=>0,"lightsUntil"=>0l,"vibeStyle"=>0,
             "gameSerial"=>0,"gameDone"=>0,"session"=>null,"sessions"=>[null,null,null],"gameClaims"=>[0,0,0],"easy"=>0,"v5"=>1,"profileZone"=>null,
             "awakeAt"=>0l,"awakeUntil"=>0l,"awakeZone"=>null,"grumpAt"=>0l,"grumpLevel"=>0,

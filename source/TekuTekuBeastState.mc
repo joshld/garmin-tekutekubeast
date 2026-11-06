@@ -2,13 +2,13 @@
 class TekuTekuBeastState extends BeastStateCore {
     var battleData=null;
     var idleSync=false;
-    var pendingSession=null;var savingSession=false;
+    var pendingSession=null;var savingSession=false;var storagePaused=false;
     // RAM-only controller invalidation, not another authoritative session copy.
     var sessionOwners=[null,null,null];
     var virtualNow=0l; var anchor=0l; var speed=1;
     function initialize(){BeastStateCore.initialize();}
     function start(){
-        if(pendingSession!=null && !savingSession){retrySession();}
+        if(pendingSession!=null && !savingSession){throw new Toybox.Lang.StorageFullException("Retry pending save first");}
         BeastStateCore.start();
     }
     // RAM-only intent: operation, owner, kind, detached session, outcome, prior slot.
@@ -104,7 +104,7 @@ class TekuTekuBeastState extends BeastStateCore {
         idleSync=false;
     }
     function commit(){
-        if(pendingSession!=null && !savingSession){retrySession();}
+        if(pendingSession!=null && !savingSession){throw new Toybox.Lang.StorageFullException("Retry pending save first");}
         if(idleSync && !dev && deferPassiveCheckpoint()){return;}
         BeastStateCore.commit();
     }

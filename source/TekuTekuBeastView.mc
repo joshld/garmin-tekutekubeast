@@ -20,24 +20,117 @@ class TekuTekuBeastView extends WatchUi.View {
     var lastVisual=null;var redrawRequests=0;var displayedSteps=null;
     var lightingStamp=null;
     var updates=null;var updatePrompt=null;var updateVisible=false;
+    var recoveryChoice=0;var recoveryHeight=280;
     var nightTint={:tintColor=>0xAAAAAA};
     var roamTicks=0.0;var petX=0.5;var petFoot=0.70;var roamOriginX=0.0;var roamOriginY=0.70;var wasSleeping=false;
     var creatureHeaderBottom=0;var petBounds=[0,0,0,0];var petFrame=0;var darkScene=false;
     var poopRows=[8,28,30,62,127,127];var poopFill=[0,8,12,28,62,0];var poopShine=[0,8,8,0,0,0];
     const BG=0xAAFFAA;const INK=0x005500;const LIGHT=0x55AA55;
     function initialize(){View.initialize();beast=new TekuTekuBeastState();}
-    function onShow(){
+    function onShow(){return perform("show",null);}
+    function onHide(){return perform("hide",null);}
+    function onUpdate(dc){perform("draw",dc);}
+    function safeRefresh(){perform("refresh",null);}
+    function freezeStorage(){
+        if(refresher!=null){refresher.stop();refresher=null;}
+        if(self has :callbacks){
+            self.callbacks=null;beast.sessionOwners[self.kind]=null;
+            self.session=null;self.ownership=null;self.checkpointBase=null;
+            self.phase=0;self.paused=false;self.resumeTicks=0;self.memoryReplay=false;
+        }
+        if(self has :stopBattleTimer){self.stopBattleTimer();}
+        if((self has :radio) && self.radio!=null){self.radio.close();}
+    }
+    function storageFailed(error){
+        beast.storagePaused=true;recoveryChoice=0;freezeStorage();
+        Toybox.System.println("FOREGROUND_STORAGE: "+error.toString());WatchUi.requestUpdate();
+    }
+    function drawRecovery(dc){
+        recoveryHeight=dc.getHeight();dc.setColor(BG,BG);dc.clear();
+        label(dc,y(dc,0.25),"SAVE UNAVAILABLE",Graphics.FONT_XTINY);
+        label(dc,y(dc,0.39),"Progress not confirmed",Graphics.FONT_XTINY);
+        label(dc,y(dc,0.57),(recoveryChoice==0?"> ":"  ")+"Retry save",Graphics.FONT_XTINY);
+        label(dc,y(dc,0.70),(recoveryChoice==1?"> ":"  ")+(petView==null?"Exit":"Back to pet"),Graphics.FONT_XTINY);
+    }
+    function retryRecovery(){
+        // Exactly one explicit replay. If v4 already succeeded, existing IDs
+        // and claims recognize it. Unjournaled failed actions are not repeated.
+        if(beast.pendingSession!=null){beast.retrySession();}
+        beast.data=null;beast.store.canonical=null;beast.battleData=null;
+        beast.start();world=null;
+        if((self has :fight) && self.fight!=null){self.fight=new BeastBattle(beast);}
+        beast.storagePaused=false;showCore();
+    }
+    // Only physical input resets inactivity. The scheduler never queries or
+    // writes storage, and all timeout saves use the foreground recovery boundary.
+    function perform(action,value){
+        var app=Application.getApp();var idle=app.inactivity;
+        var input=action.equals("select") || action.equals("switch") || action.equals("back") || action.equals("touch") || action.equals("activity");
+        if(action.equals("show") && idle==null){idle=new BeastInactivity();app.inactivity=idle;}
+        if(idle!=null){
+            if(input){idle.input();if(app.activeView==self){idle.view=self;}}
+            if(action.equals("show")){idle.view=self;}
+            if(action.equals("hide")){idle.hide(self);}
+        }
+        var result=performCore(action,value);
+        if(beast.storagePaused){if(app.inactivity!=null){app.inactivity.stop();}}
+        else if(!action.equals("hide") && !action.equals("timeout") && app.activeView==self && beast.data!=null && app.inactivity!=null && app.inactivity.view==self){
+            app.inactivity.update(self);
+        }
+        return result;
+    }
+    function autoExitProtected(){return noticeTicks>0 || animationTicks>0;}
+    function exitApplication(){Toybox.System.exit();}
+    function performCore(action,value){
+        try{
+            if(beast.storagePaused || beast.pendingSession!=null){
+                beast.storagePaused=true;freezeStorage();
+                if(action.equals("touch")){recoveryChoice=value[1]<recoveryHeight*0.64?0:1;action="select";}
+                if(action.equals("draw")){drawRecovery(value);return true;}
+                if(action.equals("hide")){freezeStorage();return true;}
+                if(action.equals("show")){Application.getApp().activeView=self;freezeStorage();WatchUi.requestUpdate();return true;}
+                if(action.equals("switch")){recoveryChoice=1-recoveryChoice;WatchUi.requestUpdate();return true;}
+                if(action.equals("select") && recoveryChoice==0){retryRecovery();return true;}
+                if(action.equals("back") || (action.equals("select") && recoveryChoice==1)){
+                    freezeStorage();if(petView!=null){returnToPet();}else{WatchUi.popView(WatchUi.SLIDE_RIGHT);}return true;
+                }
+                return true; // No retries from timers, drawing or notifications.
+            }
+            if(action.equals("timeout")){
+                // hideCore checkpoints paused games and battles before exiting.
+                // Any storage exception stops here in the normal recovery UI.
+                hideCore();beast.commit();exitApplication();
+            }
+            else if(action.equals("show")){showCore();}
+            else if(action.equals("hide")){hideCore();}
+            else if(action.equals("draw")){drawCore(value);}
+            else if(action.equals("refresh")){refresh();}
+            else if(action.equals("finish")){self.finish(value[0],value[1]);}
+            else if(action.equals("select")){selectAction();}
+            else if(action.equals("switch")){switchPage(value);}
+            else if(action.equals("back")){return back();}
+            else if(action.equals("touch")){touch(value);}
+            else if(action.equals("storage")){beast.data=null;beast.syncHistory();WatchUi.requestUpdate();}
+            return true;
+        }catch(e instanceof Lang.Exception){
+            // Catch only documented recoverable storage failures. Programming,
+            // type and memory failures must not be disguised as a save error.
+            if(!(e instanceof Lang.StorageFullException) && !(e instanceof Application.ObjectStoreAccessException)){throw e;}
+            storageFailed(e);if(action.equals("draw")){drawRecovery(value);}return true;
+        }
+    }
+    function showCore(){
         updateVisible=true;
         if(refresher!=null){refresher.stop();refresher=null;}
         Application.getApp().activeView=self;if(!beast.dev){beast.data=null;}
-        beast.syncHistory();new BeastBattle(beast);loadSprite();ensureWorld();world.beginVisit(beast.today());world.readWatch(beast.realNow(),beast.skipWatch);refresher=new Timer.Timer();timerPeriod=desiredPeriod();refresher.start(method(:refresh),timerPeriod,true);consumeEvolution();
+        beast.syncHistory();new BeastBattle(beast);loadSprite();ensureWorld();world.beginVisit(beast.today());world.readWatch(beast.realNow(),beast.skipWatch);refresher=new Timer.Timer();timerPeriod=desiredPeriod();refresher.start(method(:safeRefresh),timerPeriod,true);consumeEvolution();
         if(menu!=null && menu.equals("Wild battles")){updateRows();}
         if(Application.getApp().gameView==self){
             if(updates==null){updates=new BeastUpdates(new BeastStore(),BeastBuild.VERSION,BeastBuild.CHANNEL,method(:updateReady));}
             updates.start(updateNow());considerUpdate();
         }
     }
-    function onHide(){updateVisible=false;if(refresher!=null){refresher.stop();refresher=null;}if(scenery!=null){scenery.release();}beast.commit();}
+    function hideCore(){updateVisible=false;if(refresher!=null){refresher.stop();refresher=null;}if(scenery!=null){scenery.release();}beast.commit();}
     function ensureWorld(){if(world==null || world.dev!=beast.dev){world=new BeastWorld(beast);}if(scenery==null){scenery=new BeastScenery();}}
     function updateNow(){return Toybox.Time.now().value().toLong();}
     function updateEligible(){return updateVisible && Application.getApp().gameView==self && Application.getApp().activeView==self && menu==null && page==0 && notice==null && animationTicks==0;}
@@ -72,7 +165,7 @@ class TekuTekuBeastView extends WatchUi.View {
     function tunePetTimer(){
         // Navigation must leave the 5s still-screen cadence immediately. Never
         // create/restart a hidden view's timer; lifecycle remains onShow/onHide.
-        var wanted=desiredPeriod();if(refresher!=null && wanted!=timerPeriod){timerPeriod=wanted;refresher.stop();refresher.start(method(:refresh),timerPeriod,true);}
+        var wanted=desiredPeriod();if(refresher!=null && wanted!=timerPeriod){timerPeriod=wanted;refresher.stop();refresher.start(method(:safeRefresh),timerPeriod,true);}
     }
     function desiredPeriod(){
         if(updatePrompt!=null){return 5000;}
@@ -100,8 +193,8 @@ class TekuTekuBeastView extends WatchUi.View {
     function consumeEvolution(){
         if(beast.number("evolutionPending")>0){beast.data["evolutionPending"]=0;beast.commit();toast("EVOLVED!","evolve");}
     }
-    function toast(text,action){page=0;notice=text;noticeTicks=12;animation=action;animationTicks=12;loadSprite();if(!action.equals("idle")){new FeedbackManager().cue(beast,action);}if(refresher!=null){timerPeriod=desiredPeriod();refresher.stop();refresher.start(method(:refresh),timerPeriod,true);}WatchUi.requestUpdate();}
-    function openMenu(name){menu=name;selection=0;updateRows();WatchUi.requestUpdate();}
+    function toast(text,action){page=0;notice=text;noticeTicks=12;animation=action;animationTicks=12;loadSprite();if(!action.equals("idle")){new FeedbackManager().cue(beast,action);}if(refresher!=null){timerPeriod=desiredPeriod();refresher.stop();refresher.start(method(:safeRefresh),timerPeriod,true);}WatchUi.requestUpdate();}
+    function openMenu(name){menu=name;selection=name.equals("Auto-exit")?BeastInactivity.choice(beast.number("autoExit")):0;updateRows();WatchUi.requestUpdate();}
     function returnToPet(){
         if(petView!=null){petView.menu=null;petView.page=0;petView.selection=0;petView.notice=null;}
         leaveGameMenu();
@@ -116,7 +209,8 @@ class TekuTekuBeastView extends WatchUi.View {
         }
         else if(menu.equals("Feed")){rows=["Meal: "+beast.number("meals"),"Snack: "+beast.snacks()];}
         else if(menu.equals("Care Difficulty")){rows=["Low Maintenance","Normal","High Maintenance"];selection=beast.number("careDifficulty");}
-        else if(menu.equals("Settings")){rows=["Developer: "+(beast.dev?"ON":"OFF"),"Sound: "+(beast.number("sound")==0?"OFF":"ON"),"Vibration: "+(beast.number("haptics")==0?"OFF":"ON"),"Motion: "+["OFF","LOW","NORMAL"][beast.number("motion")],"Activity target: "+beast.number("target"),"Bedtime","Feedback test",BeastBuild.LABEL,"Vibe: "+(beast.number("vibeStyle")==0?"GENTLE":"EXPRESSIVE"),"Outdoor world","Care Difficulty"];}
+        else if(menu.equals("Auto-exit")){rows=["1 minute","5 minutes","15 minutes","60 minutes","Off"];}
+        else if(menu.equals("Settings")){rows=["Developer: "+(beast.dev?"ON":"OFF"),"Sound: "+(beast.number("sound")==0?"OFF":"ON"),"Vibration: "+(beast.number("haptics")==0?"OFF":"ON"),"Motion: "+["OFF","LOW","NORMAL"][beast.number("motion")],"Activity target: "+beast.number("target"),"Bedtime","Feedback test",BeastBuild.LABEL,"Vibe: "+(beast.number("vibeStyle")==0?"GENTLE":"EXPRESSIVE"),"Outdoor world","Care Difficulty","Auto-exit"];}
         else if(menu.equals("Bedtime")){rows=["Schedule: "+["WATCH","MANUAL","OFF"][beast.number("sleepMode")],"Bed: "+clockText(beast.number("bedMinute")),"Wake: "+clockText(beast.number("wakeMinute")),"Bedtime dim: "+(beast.number("autoLights")==1?"ON":"OFF"),beast.number("sleepMode")==0?beast.data["sleepSource"]:"LOCAL SCHEDULE"];}
         else if(menu.equals("Feedback test")){rows=["Tone test","Vibration test",FeedbackManager.lastStatus,"Watch Alert Tones","must be ON for sound"];}
         else if(menu.equals("Set time")){rows=[];for(var hour=0;hour<48;hour++){rows.add(clockText(hour*30));}}
@@ -173,12 +267,13 @@ class TekuTekuBeastView extends WatchUi.View {
             return;
         }
         if(context.equals("Feed")){var fed=beast.feedFood(n==0);menu=null;toast(fed?"YUM!":"FULL / NONE",fed?"eat":"look");return;}
+        if(context.equals("Auto-exit")){beast.data["autoExit"]=[60,300,900,3600,0][n];beast.commit();openMenu("Settings");return;}
         if(context.equals("Care Difficulty")){beast.setCareDifficulty(n);openMenu("Settings");return;}
         if(context.equals("Settings")){
             if(n==0){openMenu(beast.dev?"Discard DEV?":"Developer");return;}
             if(n==5){openMenu("Bedtime");return;}if(n==6){openMenu("Feedback test");return;}if(n==7){return;}
             if(n==8){beast.data["vibeStyle"]=1-beast.number("vibeStyle");beast.commit();updateRows();WatchUi.requestUpdate();return;}
-            if(n==9){openMenu("Outdoor world");return;}if(n==10){openMenu("Care Difficulty");return;}
+            if(n==9){openMenu("Outdoor world");return;}if(n==10){openMenu("Care Difficulty");return;}if(n==11){openMenu("Auto-exit");return;}
             var keys=["","sound","haptics","motion","target"];var key=keys[n];
             if(n<3){beast.data[key]=1-beast.number(key);}else if(n==3){beast.data[key]=(beast.number(key)+1)%3;}
             else{beast.data[key]=beast.number(key)==2000?4000:(beast.number(key)==4000?8000:2000);}
@@ -304,7 +399,7 @@ class TekuTekuBeastView extends WatchUi.View {
         if(updatePrompt!=null){dismissUpdate(0);return true;}
         if(menu!=null){
             if(menu.equals("Lighting")){openMenu("Actions");return true;}
-            if(menu.equals("Outdoor world") || menu.equals("Care Difficulty")){openMenu("Settings");return true;}
+            if(menu.equals("Outdoor world") || menu.equals("Care Difficulty") || menu.equals("Auto-exit")){openMenu("Settings");return true;}
             if(menu.equals("Environment") || menu.equals("Sun / location") || menu.equals("Sky preview")){openMenu("Outdoor world");return true;}
             if(menu.equals("Approx latitude") || menu.equals("Approx longitude")){openMenu("Sun / location");return true;}
             if(menu.equals("Set time")){openMenu("Bedtime");return true;}
@@ -497,6 +592,6 @@ class TekuTekuBeastView extends WatchUi.View {
         label(dc,y(dc,0.79),(selection+1)+" / "+rows.size(),Graphics.FONT_XTINY);
     }
     function pageDots(dc){for(var i=0;i<3;i++){dc.setColor(i==page?(page==0?sceneInk:INK):LIGHT,Graphics.COLOR_TRANSPARENT);dc.fillCircle(dc.getWidth()/2+(i-1)*14,y(dc,0.92),3);}}
-    function onUpdate(dc){considerUpdate();if(updatePrompt!=null){updatePrompt.draw(self,dc);return;}darkScene=menu==null && page==0 && beast.isDark();dc.setColor(darkScene?0x000000:BG,darkScene?0x000000:BG);dc.clear();
+    function drawCore(dc){considerUpdate();if(updatePrompt!=null){updatePrompt.draw(self,dc);return;}darkScene=menu==null && page==0 && beast.isDark();dc.setColor(darkScene?0x000000:BG,darkScene?0x000000:BG);dc.clear();
         if(menu!=null){drawMenu(dc);}else{if(page==0){drawPet(dc);}else if(page==1){drawCare(dc);}else{drawStats(dc);}pageDots(dc);}}
 }

@@ -35,6 +35,31 @@ Normal Bounce stages use 4 / 3 / 2.25 seconds per star; Easy Mode is slower.
 Memory demonstrations include a neutral 250 ms gap between all cues, including
 repeated moves. Rounds do not consume separate daily rewarded-session slots.
 
+### Inactivity auto-exit
+
+Settings > Auto-exit offers **1 minute, 5 minutes, 15 minutes, 60 minutes, Off**.
+New installations default to 5 minutes; existing/legacy saves default to Off.
+The preference survives restarts and new pet generations. Only real button or
+touch input resets the foreground idle interval; redraws and background work do not.
+
+Active games, readiness countdowns, battle turns, friend pairing/play and Pet
+feedback defer exit without moving the last-input deadline. When protection ends,
+only the remaining interval applies; an overdue exit proceeds safely without a
+fresh interval. Real input during protection resets the deadline. Paused sessions,
+menus and finished results can time out. Returning from a hidden app begins a
+new foreground interval. Exiting checkpoints resumable sessions without abandoning them,
+refunding Energy or granting rewards. Storage failure leaves the recovery screen
+open for explicit Retry instead of exiting or repeatedly attempting a save.
+
+### Storage interruptions
+
+A foreground storage-full/access failure displays SAVE UNAVAILABLE with Retry
+save (default) and Back to pet, or Exit on the root screen. Games/timers pause;
+no write is acknowledged until persistence succeeds. Drawing, passive refresh,
+storage notifications and reopening never retry. SELECT explicitly retries the
+pending session against latest durable progress. Failed unjournaled actions are
+not blindly repeated; exiting recovers the last durable checkpoint on reopening.
+
 ### Alerts and mini-game resume
 
 All three games checkpoint and stop their timer when hidden/inactive or stopped.

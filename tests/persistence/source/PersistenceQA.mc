@@ -3,7 +3,7 @@ using Toybox.Test;using Toybox.Application;using Toybox.Application.Storage;usin
 class PersistenceStore extends BeastStore {
  var pets=0;var glances=0;var failWrite=false;var failCopy=false;
  function initialize(){BeastStore.initialize();}
- function write(key,value){if(failWrite && key.equals("v4")){throw new Toybox.Lang.InvalidValueException("QA write failure");}var result=BeastStore.write(key,value);if(result){if(key.equals("v4")){pets++;}if(key.equals("glance.v1")){glances++;}}return result;}
+ function write(key,value){if(failWrite && key.equals("v4")){throw new Toybox.Lang.StorageFullException("QA write failure");}var result=BeastStore.write(key,value);if(result){if(key.equals("v4")){pets++;}if(key.equals("glance.v1")){glances++;}}return result;}
  function copy(value){if(failCopy){throw new Toybox.Lang.InvalidValueException("QA post-write copy failure");}return BeastStore.copy(value);}
  function reset(){pets=0;glances=0;writes=0;skipped=0;}
 }

@@ -114,8 +114,9 @@ matches its prior or desired value; a different newer checkpoint wins, rejects
 the stale view/result, and can be resumed normally. A pending start resumes an
 already saved slot or uses the latest Energy/serial; it never debits twice.
 
-Foreground start/commit and game re-show resolve pending intents before other
-mutations/reload. Exceptions retain the intent and clear the replay guard.
+Foreground start/commit refuse unresolved intents; they never replay from a
+query, passive timer or unrelated action. Explicit recovery replays once against
+latest storage. Exceptions retain the intent and clear the replay guard.
 A successful write followed by interrupted acknowledgement is recognized by
 existing IDs/claims on reload. Hard termination before a successful save still
 recovers only the last durable checkpoint; the intent is intentionally not a
@@ -142,6 +143,41 @@ without retaining a hidden timer. Battle turns already produce a detached next
 state; failed commit restores the prior shared active-state reference. #29's
 reward snapshot and generation policy remain unchanged. No new save field,
 background dependency, artwork, transaction framework or full-pet cache.
+
+## Foreground inactivity
+
+`BeastInactivity` owns one app-wide one-shot timer using `System.getTimer()`;
+`View.perform` routes real input and lifecycle/scene eligibility into it. There
+is no polling timer, redraw or storage access in the scheduler. Active play and
+storage recovery stop its timer; hidden views release its reference. Subclasses
+define protected gameplay locally, including the existing friend-result radio ACK
+grace. Protection cancels scheduling but preserves
+the last-input baseline; ending protection arms only the remaining delay (50 ms
+minimum for overdue exit), never a fresh full interval. Timeout checkpoints through the same guarded
+foreground boundary before `System.exit()` (SDK System API 1.0, clean app exit).
+The additive `autoExit` integer stores seconds in the unchanged v4 document:
+new installations 300, existing/legacy saves 0; no new journal or migration
+version. Background/Glance never instantiate the scheduler.
+
+## Foreground storage recovery
+
+Input, lifecycle, timer and paint entry points share View.perform(). It catches
+only documented StorageFullException/ObjectStoreAccessException failures, stops
+foreground timers/radio, revokes game controllers and shows a static recovery
+screen. Programming/type/memory errors are not disguised as storage failures.
+No automatic retry occurs while blocked, including drawing or storage notices.
+SELECT retries once; Back to pet retains the RAM intent. Exiting before recovery
+retains only the last durable checkpoint. Failed unjournaled actions are not
+blindly reapplied; recovery reloads durable pet/battle/preferences first. Only
+existing solo-battle controllers are rebuilt; Friend recovery never creates a
+solo battle journal.
+
+Core persistence methods still throw and never acknowledge failed writes. The
+unit fault tests exercise that lower boundary explicitly; separate production
+input/lifecycle/callback tests and a normal-budget app probe test the event
+boundary. Normal game show reloads v4 once, then restores the already-loaded
+session; explicit external restore still reloads and distrusts its argument.
+No schema, background-service, identity or game-rule change.
 
 ## Rule contracts
 

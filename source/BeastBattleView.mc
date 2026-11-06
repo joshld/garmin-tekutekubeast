@@ -14,7 +14,8 @@ class BeastBattleView extends TekuTekuBeastView {
     var battleVisible=false;var replaying=false;
     var paused=false;var pauseOptions;var resumeTicks=0;var freshBattle=false;
     function initialize(model){TekuTekuBeastView.initialize();beast=model;fight=new BeastBattle(beast);pauseOptions=new BeastPauseOptions();}
-    function onShow(){
+    function autoExitProtected(){return !paused && ((battle!=null && battle["status"]==0) || burst>0 || resumeTicks>0);}
+    function showCore(){
         var retained=paused && battle!=null && fight.hasUnfinishedBattle() && battle["id"]==fight.data["active"]["id"];
         battleVisible=true;resumeTicks=0;pauseOptions.reset();
         Application.getApp().activeView=self;
@@ -32,7 +33,7 @@ class BeastBattleView extends TekuTekuBeastView {
         paused=!freshBattle && fight.hasUnfinishedBattle();freshBattle=false;
         loadBattleArt();tuneBattleTimer();
     }
-    function onHide(){
+    function hideCore(){
         battleVisible=false;
         paused=fight.hasUnfinishedBattle();pauseOptions.reset();resumeTicks=0;
         stopBattleTimer();fight.postponeBattle();
@@ -45,7 +46,7 @@ class BeastBattleView extends TekuTekuBeastView {
         // Four bounded callbacks for a two-action exchange. Timing is readable
         // even with Motion OFF; no continuous animation loop during a turn.
         var period=resumeTicks>0?1000:(burst>0?(burst%2==0?800:1200):5000);
-        battleTimer.start(method(:refresh),period,resumeTicks==0 && burst==0);
+        battleTimer.start(method(:safeRefresh),period,resumeTicks==0 && burst==0);
     }
     function refresh() as Void {
         if(!battleVisible || paused){return;}
@@ -294,7 +295,7 @@ class BeastBattleView extends TekuTekuBeastView {
             pixelIcon(dc,cx+12,ground-bitmap.getHeight()/2,[8,42,28,127,28,42,8],INK,2);
         }
     }
-    function onUpdate(dc){
+    function drawCore(dc){
         prepareMoveFont();
         battleWidth=dc.getWidth();battleHeight=dc.getHeight();sceneInk=INK;
         dc.setColor(BG,BG);dc.clear();

@@ -191,9 +191,9 @@ function interleaveNewerCheckpointWinsTest(logger){
 function interleaveLifecycleRetryTest(logger){
  for(var kind=0;kind<3;kind++){
   var s=ReliabilityAuditSupport.pet();var game=new BeastGameView(s,kind);game.begin();game.elapsed=13;s.store.failWrite=true;
-  var caught=false;try{game.onHide();}catch(e instanceof Toybox.Lang.Exception){caught=true;}Test.assert(caught);Test.assert(game.refresher==null);
+  var caught=false;try{game.hideCore();}catch(e instanceof Toybox.Lang.Exception){caught=true;}Test.assert(caught);Test.assert(game.refresher==null);
   var bg=SessionInterleaveSupport.background(s,14000,3600);var expected=bg.store.copy(bg.data);s.store.failWrite=false;
-  if(kind==1){s.data=null;s.syncHistory();} // Same state boundary as onStorageChanged.
+  s.retrySession();if(kind==1){s.data=null;s.syncHistory();} // Same state boundary as onStorageChanged.
   game.onShow();Test.assert(!game.gameHidden);Test.assertEqual(game.elapsed,13);SessionInterleaveSupport.assertProgress(s,expected);
   var r=GenerationSupport.reload(s);SessionInterleaveSupport.assertProgress(r,expected);Test.assertEqual(r.data["sessions"][kind]["elapsed"],13);game.onHide();
  }
@@ -248,7 +248,7 @@ function interleaveNotificationCompletionTest(logger){
    if(callback==0){game.finish(true,game.callbacks);}else{game.restartGame();}
    Test.assert(game.session==null);Test.assert(s.store.same(expected,Storage.getValue("v4")));
    for(var i=0;i<3;i++){game.finish(true,game.callbacks);game.checkpoint();Test.assert(s.store.same(expected,Storage.getValue("v4")));}
-   game.onShow();Test.assert(game.paused);Test.assertEqual(game.elapsed,12);game.onHide();
+   game.retryRecovery();Test.assert(game.paused);Test.assertEqual(game.elapsed,12);game.onHide();
   }
  }
  return true;
@@ -301,7 +301,7 @@ function sessionCallbackReconstructionTest(logger){
   var s=ReliabilityAuditSupport.pet();var game=new BeastGameView(s,kind);game.begin();var old=SessionOwnershipSupport.completion(game);var timer=game.callbacks.method(:refresh);game.elapsed=9;s.store.failWrite=true;
   try{game.checkpoint();}catch(e instanceof Toybox.Lang.Exception){}
   SessionInterleaveSupport.background(s,4000,3600);s.store.failWrite=false;
-  var fresh=new BeastGameView(s,kind);fresh.onShow();var expected=s.store.copy(Storage.getValue("v4"));Test.assertEqual(fresh.elapsed,9);
+  s.retrySession();var fresh=new BeastGameView(s,kind);fresh.onShow();var expected=s.store.copy(Storage.getValue("v4"));Test.assertEqual(fresh.elapsed,9);
   for(var i=0;i<3;i++){old.invoke(true);timer.invoke();Test.assert(s.store.same(expected,Storage.getValue("v4")));}
   Test.assert(game.session==null);var writes=s.store.writes;game.checkpoint();Test.assertEqual(s.store.writes,writes);fresh.onHide();var r=GenerationSupport.reload(s);Test.assertEqual(r.data["sessions"][kind]["elapsed"],9);Test.assertEqual(r.xp(),4000l);Test.assertEqual(r.number("adventure"),kind==2?2:3);
  }
